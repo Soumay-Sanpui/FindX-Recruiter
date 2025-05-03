@@ -4,6 +4,7 @@ import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import Pricing from "./pages/Pricing.jsx";
+import EmployerSignup from "./pages/EmployerSignup.jsx";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,18 @@ const router = createBrowserRouter([
       </div>
     ),
   },
+  {
+    path: "/employer-signup",
+    element: (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1">
+          <EmployerSignup />
+        </main>
+        <Footer />
+      </div>
+    ),
+  }
 ]);
 
 const App = () => {
