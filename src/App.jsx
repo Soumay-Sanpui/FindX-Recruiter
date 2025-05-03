@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx";
 import Pricing from "./pages/Pricing.jsx";
 import EmployerSignup from "./pages/EmployerSignup.jsx";
 import EmployerLogin from "./pages/EmployerLogin.jsx";
+import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
         <Footer />
       </div>
     ),
+  },
+  {
+    path: "/employer-dashboard",
+    element: <EmployerDashboard />,
   }
 
 ]);

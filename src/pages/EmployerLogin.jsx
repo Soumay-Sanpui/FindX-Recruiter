@@ -1,9 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import axios from 'axios';
 import CONFIG from '../../config/config';
 import ToastBanner from '../components/ToastBanner';
+import { useEmployerStore } from '../store/employer.store';
 
 const EmployerLogin = () => {
+    const navigate = useNavigate();
+    const { setEmployer } = useEmployerStore();
     const [formData, setFormData] = useState({
         companyEmployerId: '',
         EmployerEmail: '',
@@ -20,7 +24,8 @@ const EmployerLogin = () => {
         axios.post(`${CONFIG.apiUrl}/employer/login`, formData)
             .then((response) => {
                 console.log('Login successful:', response.data);
-                // navigate('/employer-dashboard');
+                setEmployer(response.data);
+                navigate('/employer-dashboard');
             })
             .catch((error) => {
                 console.log('Login failed:', error);
