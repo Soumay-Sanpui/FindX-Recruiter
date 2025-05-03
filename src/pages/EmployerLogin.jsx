@@ -33,8 +33,8 @@ const EmployerLogin = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl animate-fade-in">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-blue-300 via-blue-50 to-white border-2 border-blue-500">
+            <div className="w-full max-w-md p-8 bg-white shadow-xl animate-fade-in">
                 <h1 className="text-2xl font-bold mb-6 text-center text-blue-700">Employer Login</h1>
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
@@ -44,7 +44,7 @@ const EmployerLogin = () => {
                             name="companyEmployerId"
                             value={formData.companyEmployerId}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             placeholder="Enter Employer ID"
                             required
                         />
@@ -56,7 +56,7 @@ const EmployerLogin = () => {
                             name="EmployerEmail"
                             value={formData.EmployerEmail}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             placeholder="Enter Email Address"
                             required
                         />
@@ -68,14 +68,14 @@ const EmployerLogin = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             placeholder="Enter Password"
                             required
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 transition"
                     >
                         Log In
                     </button>

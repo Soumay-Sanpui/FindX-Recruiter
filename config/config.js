@@ -1,5 +1,5 @@
 const config = {
-    apiUrl: 'http://localhost:5000/api'
+    apiUrl: 'https://findxserver-cqstechsolutions.vercel.app/api'
 }
 
 const CONFIG = Object.freeze(config);
