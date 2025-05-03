@@ -28,10 +28,10 @@ const Header = () => {
                     </nav>
 
                     <div className="flex items-center space-x-4">
-                        <Link to="/login" className="text-gray hover:text-primary transition-colors duration-200">
+                        <Link to="/employer-login" className="text-gray hover:text-primary transition-colors duration-200">
                             Log in
                         </Link>
-                        <Link to="/signup" className="px-4 py-2 rounded-md bg-primary text-white hover:bg-secondary transition-colors duration-200">
+                        <Link to="/employer-signup" className="px-4 py-2 rounded-md bg-primary text-white hover:bg-secondary transition-colors duration-200">
                             Start free trial
                         </Link>
                     </div>

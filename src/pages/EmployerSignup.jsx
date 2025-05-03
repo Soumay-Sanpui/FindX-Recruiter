@@ -283,14 +283,14 @@ const EmployerSignup = () => {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 type="submit"
-                                className="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg hover:bg-secondary transition-colors shadow-md hover:shadow-lg"
+                                className="w-full py-3 px-4 bg-primary text-white font-semibold hover:bg-secondary transition-colors shadow-md hover:shadow-lg"
                             >
                                 Create Account
                             </motion.button>
 
                             <p className="text-center text-sm text-gray-600">
                                 Already have an account?{' '}
-                                <Link to="/login" className="text-primary hover:text-secondary font-medium">
+                                <Link to="/employer-login" className="text-primary hover:text-secondary font-medium">
                                     Log in
                                 </Link>
                             </p>

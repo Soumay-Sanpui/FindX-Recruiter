@@ -101,7 +101,7 @@ const Home = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        <Link to="/signup" className="inline-block px-8 py-3 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition-all shadow-md hover:shadow-lg">
+                        <Link to="/employer-signup" className="inline-block px-8 py-3 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition-all shadow-md hover:shadow-lg">
                             Post Your First Job Today
                         </Link>
                     </motion.div>
