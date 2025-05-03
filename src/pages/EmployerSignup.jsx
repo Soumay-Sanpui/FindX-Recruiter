@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import CONFIG from '../../config/config';
 import ToastBanner from '../components/ToastBanner';
+import { useEmployerStore } from '../store/employer.store';
 
 const EmployerSignup = () => {
     const [formData, setFormData] = useState({
@@ -27,6 +28,7 @@ const EmployerSignup = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [registerdName, setRegisterdName] = useState('');
+    const { setEmployer } = useEmployerStore();
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -36,12 +38,13 @@ const EmployerSignup = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
-        axios.post(`${CONFIG.apiUrl}/employer/createAccount`, formData)
+        await axios.post(`${CONFIG.apiUrl}/employer/createAccount`, formData)
             .then((response) => {
                 setSuccess(true);
                 setRegisterdName(response.data.companyName);
+                setEmployer(response.data);
             })
             .catch((error) => {
                 setSuccess(false);
