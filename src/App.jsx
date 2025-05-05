@@ -8,6 +8,7 @@ import EmployerSignup from "./pages/EmployerSignup.jsx";
 import EmployerLogin from "./pages/EmployerLogin.jsx";
 import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 import JobPosting from "./pages/JobPosting.jsx";
+import MyJobs from "./pages/MyJobs.jsx";
 
 const router = createBrowserRouter([
   {
@@ -65,11 +66,19 @@ const router = createBrowserRouter([
   {
     path: "/post-job",
     element: <JobPosting />,
+  },
+  {
+    path: "/my-jobs",
+    element: <MyJobs />,
   }
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
 };
 
 export default App;

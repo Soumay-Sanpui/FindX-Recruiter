@@ -1,9 +1,78 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
+import { jobAPI } from '../services/api';
 import DHeader from '../components/dashboard/DHeader';
-import { StickyNote, Eraser, X, Plus } from 'lucide-react';
+import { Eraser, X, Plus } from 'lucide-react';
 
 const JobPosting = () => {
     const { employer } = useEmployerStore();
+    const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        jobTitle: '',
+        jobLocation: '',
+        jobType: '',
+        jobSalary: '',
+        jobIndustry: '',
+        jobExperience: '',
+        jobSkills: '',
+        jobKeywords: '',
+        jobDescription: '',
+        postedBy: employer?._id || ''
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleClear = () => {
+        setFormData({
+            jobTitle: '',
+            jobLocation: '',
+            jobType: '',
+            jobSalary: '',
+            jobIndustry: '',
+            jobExperience: '',
+            jobSkills: '',
+            jobKeywords: '',
+            jobDescription: '',
+            postedBy: employer?._id || ''
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!employer?._id) {
+            toast.error('You must be logged in to post a job');
+            return;
+        }
+        
+        try {
+            setIsSubmitting(true);
+            
+            // Format the data for API
+            const jobData = {
+                ...formData,
+                jobSalary: Number(formData.jobSalary),
+                jobSkills: formData.jobSkills.split(',').map(skill => skill.trim()),
+                jobKeywords: formData.jobKeywords.split(',').map(keyword => keyword.trim()),
+                postedBy: employer._id
+            };
+            
+            const response = await jobAPI.createJob(jobData);
+            navigate('/my-jobs');
+        } catch (error) {
+            console.error('Error posting job:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-bl from-blue-200 via-blue-50 to-white pb-[10vh]">
             <DHeader employer={employer} />
@@ -13,7 +82,7 @@ const JobPosting = () => {
                     <p className='text-gray-500'>Fill in the details below to post a new job.</p>
                 </div>
                 <div className="bg-white p-8 shadow-lg border-2 border-blue-800">
-                    <form className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
@@ -21,6 +90,8 @@ const JobPosting = () => {
                                     type="text"
                                     id="jobTitle"
                                     name="jobTitle"
+                                    value={formData.jobTitle}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Enter Job Title"
                                     required
@@ -32,6 +103,8 @@ const JobPosting = () => {
                                     type="text"
                                     id="jobLocation"
                                     name="jobLocation"
+                                    value={formData.jobLocation}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Enter Job Location"
                                     required
@@ -42,6 +115,8 @@ const JobPosting = () => {
                                 <select
                                     id="jobType"
                                     name="jobType"
+                                    value={formData.jobType}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required
                                 >
@@ -60,6 +135,8 @@ const JobPosting = () => {
                                     type="number"
                                     id="jobSalary"
                                     name="jobSalary"
+                                    value={formData.jobSalary}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Enter Job Salary"
                                     required
@@ -71,6 +148,8 @@ const JobPosting = () => {
                                     type="text"
                                     id="jobIndustry"
                                     name="jobIndustry"
+                                    value={formData.jobIndustry}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Enter Job Industry"
                                     required
@@ -81,6 +160,8 @@ const JobPosting = () => {
                                 <select
                                     id="jobExperience"
                                     name="jobExperience"
+                                    value={formData.jobExperience}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required
                                 >
@@ -97,6 +178,8 @@ const JobPosting = () => {
                                     type="text"
                                     id="jobSkills"
                                     name="jobSkills"
+                                    value={formData.jobSkills}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Enter Job Skills (comma separated)"
                                     required
@@ -108,6 +191,8 @@ const JobPosting = () => {
                                     type="text"
                                     id="jobKeywords"
                                     name="jobKeywords"
+                                    value={formData.jobKeywords}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Enter Job Keywords (comma separated)"
                                     required
@@ -119,6 +204,8 @@ const JobPosting = () => {
                             <textarea
                                 id="jobDescription"
                                 name="jobDescription"
+                                value={formData.jobDescription}
+                                onChange={handleChange}
                                 rows="6"
                                 className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="Enter detailed job description"
@@ -128,27 +215,24 @@ const JobPosting = () => {
                         <div className="flex justify-end gap-4">
                             <button
                                 type="submit"
-                                className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                disabled={isSubmitting}
+                                className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
                             >
-                                <Plus className="mr-2" /> Post Job
+                                <Plus className="mr-2" /> {isSubmitting ? 'Posting...' : 'Post Job'}
                             </button>
                             <button
                                 type="button"
-                                className="w-full flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                            >
-                                <StickyNote className="mr-2" /> Save Draft
-                            </button>
-                            <button
-                                type="button"
+                                onClick={handleClear}
                                 className="w-full flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                             >
                                 <Eraser className="mr-2" /> Clear
                             </button>
                             <button
                                 type="button"
+                                onClick={() => navigate('/my-jobs')}
                                 className="w-full flex items-center justify-center bg-gray-100 hover:bg-red-700 hover:text-white text-gray-700 font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 border border-red-500"
                             >
-                                <X className="mr-2" /> Clear
+                                <X className="mr-2" /> Cancel
                             </button>
                         </div>
                     </form>

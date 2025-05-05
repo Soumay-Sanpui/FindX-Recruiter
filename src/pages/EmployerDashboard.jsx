@@ -30,8 +30,8 @@ const EmployerDashboard = () => {
                     <div className="bg-white p-6 shadow-md">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Company Information</h2>
                         <div className="space-y-3 text-gray-700">
-                            <p><span className="font-medium">Industry:</span> {employer.companyIndustry}</p>
-                            <p><span className="font-medium">Size:</span> {employer.companySize} employees</p>
+                            <p><span className="font-medium">Industry:</span> <span className='uppercase'>{employer.companyIndustry}</span></p>
+                            <p><span className="font-medium">Size:</span> <span className='uppercase'>{employer.companySize} employees</span></p>
                             <p><span className="font-medium">Location:</span> {employer.companyLocation}</p>
                             <p><span className="font-medium">Website:</span> <a href={employer.companyWebsite} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{employer.companyWebsite}</a></p>
                         </div>
