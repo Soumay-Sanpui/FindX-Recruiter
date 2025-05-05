@@ -93,7 +93,7 @@ const MyJobs = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
                         {jobs.map(job => (
-                            <div key={job._id} className="bg-white hover:bg-gradient-to-r from-blue-50 to-blue-100 p-6 shadow-lg border border-gray-200 hover:border-blue-500 transition-all">
+                            <div key={job._id} className="bg-white p-6 shadow-lg border border-gray-200 hover:border-blue-500 transition-all">
                                 <div className="flex flex-col md:flex-row justify-between">
                                     <div className="flex-1">
                                         <h2 className="text-xl font-bold text-gray-800 mb-2">{job.jobTitle}</h2>
