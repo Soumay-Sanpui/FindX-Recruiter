@@ -40,7 +40,7 @@ const EmployerLogin = () => {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-blue-300 via-blue-50 to-white font-poppins">
-            <div className="w-full max-w-md p-8 bg-gradient-to-bl from-gray-50 to-white shadow-xl animate-fade-in border-2 border-blue-800">
+            <div className="w-full max-w-md mt-10 p-8 bg-gradient-to-bl from-gray-50 to-white shadow-xl animate-fade-in border-2 border-blue-800">
                 <div className='mb-10'>
                     <h1 className="text-2xl font-bold text-center text-blue-700">Employer Login</h1>
                     <p className='text-center text-gray-500 font-poppins'>Welcome back! Please enter your details to login.</p>
