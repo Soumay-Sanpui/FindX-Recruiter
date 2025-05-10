@@ -1,14 +1,15 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { Plus, Users, SquarePen, ChartBar, Briefcase } from 'lucide-react';
 import DHeader from '../components/dashboard/DHeader';
+
 const EmployerDashboard = () => {
     const { employer } = useEmployerStore();
     const navigate = useNavigate();
 
     // Redirect to login if no employer data
-    React.useEffect(() => {
+    useEffect(() => {
         if (!employer) {
             navigate('/employer-login');
         }

@@ -62,7 +62,7 @@ const FeatureSection = () => {
                     onClick={() => setActiveFeature(idx === activeFeature ? null : idx)}
                     className="bg-white p-8 rounded-xl shadow cursor-pointer transform transition-all duration-300"
                 >
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-3">
                         <motion.div
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 0.5 }}
@@ -81,7 +81,7 @@ const FeatureSection = () => {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                             >
-                                <p className="text-gray-600">{feature.desc}</p>
+                                <p className="text-gray-600 mt-3">{feature.desc}</p>
                             </motion.div>
                         )}
                     </AnimatePresence>

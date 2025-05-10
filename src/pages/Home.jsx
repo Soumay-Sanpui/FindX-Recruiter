@@ -51,7 +51,7 @@ const Home = () => {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4 }}
-                        className="flex flex-col sm:flex-row gap-4 justify-center"
+                        className="flex flex-row items-center justify-center gap-4"
                     >
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             <Link to="/post-job" className="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-secondary transition-all shadow-md hover:shadow-lg inline-flex items-center">
@@ -60,8 +60,8 @@ const Home = () => {
                             </Link>
                         </motion.div>
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Link to="/employer-signup" className="px-8 py-3 bg-white text-primary border border-primary text-lg font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-md hover:shadow-lg">
-                                Create Employer Account
+                            <Link to="/employer-signup" className="px-8 py-4 bg-white text-primary border border-primary text-lg font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-md hover:shadow-lg">
+                                Create Account
                             </Link>
                         </motion.div>
                     </motion.div>
