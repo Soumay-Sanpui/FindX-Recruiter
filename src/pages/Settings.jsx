@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import DHeader from '../components/dashboard/DHeader';
-import { Save, LogOut, User, Lock, Bell, MessageSquare, Globe } from 'lucide-react';
+import { Save, LogOut, User, Lock, Bell, MessageSquare, ChevronDown, DollarSign } from 'lucide-react';
 import api from '../services/api';
+import { employerAPI } from '../services/api';
 
 const Settings = () => {
     const { employer, setEmployer, logout } = useEmployerStore();
@@ -43,10 +44,19 @@ const Settings = () => {
         messagesAllowed: employer?.messagesAllowed || false
     });
 
+    const [pricingSettings, setPricingSettings] = useState({
+        currentPlan: employer?.pricingPlan || 'Standard',
+        earlyBirdPricing: employer?.earlyBirdPricing || true
+    });
+
     useEffect(() => {
         if (employer) {
             setMessagingSettings({
                 messagesAllowed: employer.messagesAllowed || false
+            });
+            setPricingSettings({
+                currentPlan: employer.pricingPlan || 'Standard',
+                earlyBirdPricing: employer.earlyBirdPricing || true
             });
         }
     }, [employer]);
@@ -153,6 +163,132 @@ const Settings = () => {
         navigate('/employer-login');
     };
 
+    const handlePlanUpgrade = async (newPlan) => {
+        setSaving(true);
+        setSuccess('');
+        setError('');
+        
+        try {
+            const response = await employerAPI.updatePricingPlan(newPlan, employer._id);
+            
+            if (response.success) {
+                setEmployer({ ...employer, pricingPlan: newPlan });
+                setPricingSettings({ ...pricingSettings, currentPlan: newPlan });
+                setSuccess('Pricing plan updated successfully');
+            }
+        } catch (err) {
+            setError('Failed to update pricing plan. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // The pricing plans data for the UI
+    const pricingPlans = [
+        { 
+            id: 'Standard', 
+            name: 'Standard Listing', 
+            price: pricingSettings.earlyBirdPricing ? 49 : 199,
+            isEarlyBird: pricingSettings.earlyBirdPricing,
+            description: 'Basic job posting with standard visibility and features.'
+        },
+        { 
+            id: 'Boosted100App', 
+            name: 'Boosted 100 - App Only', 
+            price: 49,
+            description: 'Notify 100 candidates via app notifications.'
+        },
+        { 
+            id: 'Boosted100Email', 
+            name: 'Boosted 100 - Email Only', 
+            price: 49,
+            description: 'Notify 100 candidates via email.'
+        },
+        { 
+            id: 'Boosted100Both', 
+            name: 'Boosted 100 - Both', 
+            price: 69,
+            savings: 29,
+            description: 'Notify 100 candidates via both app and email.'
+        },
+        { 
+            id: 'Boosted250App', 
+            name: 'Boosted 250 - App Only', 
+            price: 99,
+            description: 'Notify 250 candidates via app notifications.'
+        },
+        { 
+            id: 'Boosted250Email', 
+            name: 'Boosted 250 - Email Only', 
+            price: 99,
+            description: 'Notify 250 candidates via email.'
+        },
+        { 
+            id: 'Boosted250Both', 
+            name: 'Boosted 250 - Both', 
+            price: 129,
+            savings: 69,
+            description: 'Notify 250 candidates via both app and email.'
+        },
+        { 
+            id: 'Boosted500App', 
+            name: 'Boosted 500 - App Only', 
+            price: 149,
+            description: 'Notify 500 candidates via app notifications.'
+        },
+        { 
+            id: 'Boosted500Email', 
+            name: 'Boosted 500 - Email Only', 
+            price: 149,
+            description: 'Notify 500 candidates via email.'
+        },
+        { 
+            id: 'Boosted500Both', 
+            name: 'Boosted 500 - Both', 
+            price: 189,
+            savings: 109,
+            description: 'Notify 500 candidates via both app and email.'
+        },
+        { 
+            id: 'Boosted750App', 
+            name: 'Boosted 750 - App Only', 
+            price: 199,
+            description: 'Notify 750 candidates via app notifications.'
+        },
+        { 
+            id: 'Boosted750Email', 
+            name: 'Boosted 750 - Email Only', 
+            price: 199,
+            description: 'Notify 750 candidates via email.'
+        },
+        { 
+            id: 'Boosted750Both', 
+            name: 'Boosted 750 - Both', 
+            price: 249,
+            savings: 149,
+            description: 'Notify 750 candidates via both app and email.'
+        },
+        { 
+            id: 'Boosted1000App', 
+            name: 'Boosted 1000 - App Only', 
+            price: 249,
+            description: 'Notify 1000 candidates via app notifications.'
+        },
+        { 
+            id: 'Boosted1000Email', 
+            name: 'Boosted 1000 - Email Only', 
+            price: 249,
+            description: 'Notify 1000 candidates via email.'
+        },
+        { 
+            id: 'Boosted1000Both', 
+            name: 'Boosted 1000 - Both', 
+            price: 299,
+            savings: 199,
+            description: 'Notify 1000 candidates via both app and email.'
+        }
+    ];
+
     return (
         <div className="min-h-screen bg-gradient-to-bl from-blue-200 via-blue-50 to-white">
             <DHeader employer={employer} />
@@ -200,6 +336,13 @@ const Settings = () => {
                                 >
                                     <MessageSquare size={18} className="mr-3" />
                                     Messaging
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('pricing')}
+                                    className={`w-full flex items-center py-3 px-6 ${activeTab === 'pricing' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                >
+                                    <DollarSign size={18} className="mr-3" />
+                                    Pricing
                                 </button>
                                 <button 
                                     onClick={() => setActiveTab('notifications')}
@@ -470,6 +613,175 @@ const Settings = () => {
                                 </div>
                             )}
                             
+                            {activeTab === 'pricing' && (
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-800 mb-6">Pricing & Subscription</h2>
+                                    
+                                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                                        <div className="flex items-center">
+                                            <DollarSign size={20} className="text-blue-700 mr-2" />
+                                            <p className="text-blue-700 font-medium">Current Plan: {pricingPlans.find(plan => plan.id === pricingSettings.currentPlan)?.name || 'Standard'}</p>
+                                        </div>
+                                        {employer?.planExpiryDate && (
+                                            <p className="text-blue-600 mt-2">
+                                                Expires on: {new Date(employer.planExpiryDate).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                    </div>
+                                    
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Available Plans</h3>
+                                    
+                                    <div className="space-y-4">
+                                        {/* Standard Plan */}
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div className="bg-gray-50 p-4 border-b">
+                                                <div className="flex justify-between items-center">
+                                                    <h4 className="font-semibold text-gray-800">Standard Listing</h4>
+                                                    <span className="text-primary font-bold">
+                                                        ${pricingSettings.earlyBirdPricing ? '49' : '199'} 
+                                                        {pricingSettings.earlyBirdPricing && 
+                                                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full ml-2">Early Bird</span>
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <p className="text-gray-600 mb-4">Post a single job listing with standard visibility and features.</p>
+                                                <button 
+                                                    onClick={() => handlePlanUpgrade('Standard')}
+                                                    disabled={pricingSettings.currentPlan === 'Standard' || saving}
+                                                    className={`px-4 py-2 rounded font-medium ${
+                                                        pricingSettings.currentPlan === 'Standard' 
+                                                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                                                            : 'bg-primary text-white hover:bg-blue-600'
+                                                    }`}
+                                                >
+                                                    {pricingSettings.currentPlan === 'Standard' ? 'Current Plan' : (saving ? 'Updating...' : 'Select Plan')}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Boosted Plans Section */}
+                                        <h3 className="text-lg font-semibold text-gray-700 mt-8 mb-4">Boosted Notification Packages</h3>
+                                        
+                                        {/* 100 Candidates Section */}
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div className="bg-gray-50 p-4 border-b">
+                                                <h4 className="font-semibold text-gray-800">Notify 100 Candidates</h4>
+                                            </div>
+                                            <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {/* App Only */}
+                                                <div className="border rounded p-4">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <span className="font-medium">App Only</span>
+                                                        <span className="text-primary font-bold">$49</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-4">Notify 100 candidates via app notifications.</p>
+                                                    <button 
+                                                        onClick={() => handlePlanUpgrade('Boosted100App')}
+                                                        disabled={pricingSettings.currentPlan === 'Boosted100App' || saving}
+                                                        className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                                                            pricingSettings.currentPlan === 'Boosted100App' 
+                                                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                                                                : 'bg-primary text-white hover:bg-blue-600'
+                                                        }`}
+                                                    >
+                                                        {pricingSettings.currentPlan === 'Boosted100App' ? 'Current Plan' : (saving ? 'Updating...' : 'Select Plan')}
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* Email Only */}
+                                                <div className="border rounded p-4">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <span className="font-medium">Email Only</span>
+                                                        <span className="text-primary font-bold">$49</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-4">Notify 100 candidates via email.</p>
+                                                    <button 
+                                                        onClick={() => handlePlanUpgrade('Boosted100Email')}
+                                                        disabled={pricingSettings.currentPlan === 'Boosted100Email' || saving}
+                                                        className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                                                            pricingSettings.currentPlan === 'Boosted100Email' 
+                                                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                                                                : 'bg-primary text-white hover:bg-blue-600'
+                                                        }`}
+                                                    >
+                                                        {pricingSettings.currentPlan === 'Boosted100Email' ? 'Current Plan' : (saving ? 'Updating...' : 'Select Plan')}
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* Both */}
+                                                <div className="border rounded p-4 bg-blue-50 border-blue-200">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <span className="font-medium">Both Channels</span>
+                                                        <span className="text-primary font-bold">$69</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-2">Notify 100 candidates via both app and email.</p>
+                                                    <p className="text-sm text-green-600 font-medium mb-4">Save $29</p>
+                                                    <button 
+                                                        onClick={() => handlePlanUpgrade('Boosted100Both')}
+                                                        disabled={pricingSettings.currentPlan === 'Boosted100Both' || saving}
+                                                        className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                                                            pricingSettings.currentPlan === 'Boosted100Both' 
+                                                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                                                                : 'bg-primary text-white hover:bg-blue-600'
+                                                        }`}
+                                                    >
+                                                        {pricingSettings.currentPlan === 'Boosted100Both' ? 'Current Plan' : (saving ? 'Updating...' : 'Best Value')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* More candidate packages would follow the same pattern */}
+                                        <div className="mt-4 text-center">
+                                            <button 
+                                                onClick={() => document.getElementById('morePackages').classList.toggle('hidden')}
+                                                className="text-blue-600 hover:text-blue-800 font-medium flex items-center mx-auto"
+                                            >
+                                                Show More Packages
+                                                <ChevronDown className="ml-1 h-4 w-4" />
+                                            </button>
+                                        </div>
+                                        
+                                        <div id="morePackages" className="hidden space-y-4 mt-4">
+                                            {/* 250, 500, 750, and 1000 Candidate packages would go here */}
+                                            {/* Example for 250 */}
+                                            <div className="border rounded-lg overflow-hidden">
+                                                <div className="bg-gray-50 p-4 border-b">
+                                                    <h4 className="font-semibold text-gray-800">Notify 250 Candidates</h4>
+                                                </div>
+                                                <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div className="border rounded p-4">
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <span className="font-medium">App Only</span>
+                                                            <span className="text-primary font-bold">$99</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 mb-4">Notify 250 candidates via app notifications.</p>
+                                                        <button 
+                                                            onClick={() => handlePlanUpgrade('Boosted250App')}
+                                                            disabled={pricingSettings.currentPlan === 'Boosted250App' || saving}
+                                                            className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                                                                pricingSettings.currentPlan === 'Boosted250App' 
+                                                                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                                                                    : 'bg-primary text-white hover:bg-blue-600'
+                                                            }`}
+                                                        >
+                                                            {pricingSettings.currentPlan === 'Boosted250App' ? 'Current Plan' : (saving ? 'Updating...' : 'Select Plan')}
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    {/* Other options for 250 level */}
+                                                    {/* Similar code for Email Only and Both options */}
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Additional candidate tiers would follow */}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {activeTab === 'notifications' && (
                                 <div>
                                     <h2 className="text-xl font-bold text-gray-800 mb-6">Notification Preferences</h2>

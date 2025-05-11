@@ -34,6 +34,21 @@ api.interceptors.response.use(
     }
 );
 
+// Employer API methods
+export const employerAPI = {
+    updatePricingPlan: async (pricingPlan, empId) => {
+        try {
+            const response = await api.patch('/employer/updatePricingPlan', { 
+                pricingPlan, 
+                empId 
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
 export const jobAPI = {
     createJob: async (jobData) => {
         try {

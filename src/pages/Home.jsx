@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import HowItWorksSection from '../components/home/HowItWorks';
 import FeatureSection from '../components/home/FeatureSection';
+import PricingSection from '../components/home/PricingSection';
 
 const Home = () => {
     const [activeFeature, setActiveFeature] = useState(null);
@@ -73,6 +74,9 @@ const Home = () => {
 
             {/* Features Section */}
             <FeatureSection />
+
+            {/* Pricing Section */}
+            <PricingSection />
 
             {/* Final CTA Section */}
             <motion.section 
