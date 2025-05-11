@@ -1,7 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router';
+import React, {useEffect, useState} from 'react';
+import {Link} from 'react-router';
+import {useEmployerStore} from "../store/employer.store.js";
+import config from "../../config/config.js"
 
 const Header = () => {
+    const {employer} = useEmployerStore();
+    const [hasEmployer, setEmployer] = useState(false);
+    const [nameInitials, setNameInitials] = useState('');
+    useEffect(() => {
+        if (employer) {
+            setEmployer(true);
+            setNameInitials(employer.EmployerName.at(0).toUpperCase());
+        }
+    }, [employer]);
     return (
         <header className="fixed w-full bg-white shadow-sm z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,9 +22,10 @@ const Header = () => {
                             FindX
                         </Link>
                     </div>
-                    
+
                     <nav className="hidden md:flex space-x-8">
-                        <Link to="/how-it-works" className="text-gray hover:text-primary transition-colors duration-200">
+                        <Link to="/how-it-works"
+                              className="text-gray hover:text-primary transition-colors duration-200">
                             How It Works
                         </Link>
                         <Link to="/pricing" className="text-gray hover:text-primary transition-colors duration-200">
@@ -27,14 +39,24 @@ const Header = () => {
                         </Link>
                     </nav>
 
-                    <div className="flex items-center space-x-4">
-                        <Link to="/employer-login" className="text-gray hover:text-primary transition-colors duration-200">
-                            Log in
-                        </Link>
-                        <Link to="/employer-signup" className="px-4 py-2 rounded-md bg-primary text-white hover:bg-secondary transition-colors duration-200">
-                            Start free trial
-                        </Link>
-                    </div>
+                    {
+                        !hasEmployer ? (
+                            <div className="flex items-center space-x-4">
+                                <Link to="/employer-login"
+                                      className="text-gray hover:text-primary transition-colors duration-200">
+                                    Log in
+                                </Link>
+                                <Link to="/employer-signup"
+                                      className="px-4 py-2 rounded-md bg-primary text-white hover:bg-secondary transition-colors duration-200">
+                                    Start free trial
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold bg-gradient-to-br ${config.gradients[nameInitials]} p-4 border rounded-full`}>
+                                <p>{nameInitials}</p>
+                            </div>
+                        )
+                    }
                 </div>
             </div>
         </header>
