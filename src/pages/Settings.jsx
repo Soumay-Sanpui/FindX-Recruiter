@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import DHeader from '../components/dashboard/DHeader';
-import { Save, LogOut, User, Lock, Bell, Globe } from 'lucide-react';
+import { Save, LogOut, User, Lock, Bell, MessageSquare, Globe } from 'lucide-react';
 import api from '../services/api';
 
 const Settings = () => {
@@ -39,6 +39,18 @@ const Settings = () => {
         jobStatusUpdates: true
     });
 
+    const [messagingSettings, setMessagingSettings] = useState({
+        messagesAllowed: employer?.messagesAllowed || false
+    });
+
+    useEffect(() => {
+        if (employer) {
+            setMessagingSettings({
+                messagesAllowed: employer.messagesAllowed || false
+            });
+        }
+    }, [employer]);
+
     const handleProfileChange = (e) => {
         const { name, value } = e.target;
         setProfileData(prev => ({ ...prev, [name]: value }));
@@ -52,6 +64,11 @@ const Settings = () => {
     const handleNotificationChange = (e) => {
         const { name, checked } = e.target;
         setNotificationSettings(prev => ({ ...prev, [name]: checked }));
+    };
+
+    const handleMessagingChange = (e) => {
+        const { name, checked } = e.target;
+        setMessagingSettings(prev => ({ ...prev, [name]: checked }));
     };
 
     const saveProfile = async (e) => {
@@ -108,6 +125,28 @@ const Settings = () => {
         }
     };
 
+    const saveMessagingSettings = async () => {
+        setSaving(true);
+        setSuccess('');
+        setError('');
+        
+        try {
+            const response = await api.patch('/employer/updateMessagingStatus', {
+                messagingStatus: messagingSettings.messagesAllowed,
+                empId: employer._id
+            });
+            
+            if (response.data) {
+                setEmployer({ ...employer, messagesAllowed: messagingSettings.messagesAllowed });
+                setSuccess('Messaging settings updated successfully');
+            }
+        } catch (err) {
+            setError('Failed to update messaging settings. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleLogout = () => {
         logout();
         localStorage.removeItem('employerToken');
@@ -154,6 +193,13 @@ const Settings = () => {
                                 >
                                     <Lock size={18} className="mr-3" />
                                     Security
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('messaging')}
+                                    className={`w-full flex items-center py-3 px-6 ${activeTab === 'messaging' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                >
+                                    <MessageSquare size={18} className="mr-3" />
+                                    Messaging
                                 </button>
                                 <button 
                                     onClick={() => setActiveTab('notifications')}
@@ -373,6 +419,55 @@ const Settings = () => {
                                         </button>
                                     </div>
                                 </form>
+                            )}
+
+                            {activeTab === 'messaging' && (
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-800 mb-6">Messaging Settings</h2>
+                                    
+                                    <div className="space-y-4 mb-6">
+                                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                                            <p className="text-blue-700">
+                                                Messaging allows job applicants to contact you directly. Enabling this feature can improve communication with potential candidates.
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between py-3 border-b">
+                                            <div>
+                                                <h3 className="font-medium">Allow Direct Messages</h3>
+                                                <p className="text-sm text-gray-500">
+                                                    Enable or disable direct messaging from job applicants
+                                                </p>
+                                            </div>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input 
+                                                    type="checkbox" 
+                                                    name="messagesAllowed"
+                                                    checked={messagingSettings.messagesAllowed}
+                                                    onChange={handleMessagingChange}
+                                                    className="sr-only peer" 
+                                                />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={saveMessagingSettings}
+                                            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                                            disabled={saving}
+                                        >
+                                            {saving ? 'Saving...' : (
+                                                <>
+                                                    <MessageSquare size={18} className="mr-2" />
+                                                    Save Messaging Settings
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
                             )}
                             
                             {activeTab === 'notifications' && (

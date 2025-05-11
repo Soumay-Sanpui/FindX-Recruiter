@@ -78,6 +78,15 @@ export const jobAPI = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+    
+    updateJobStatus: async (jobId, status) => {
+        try {
+            const response = await api.put(`/jobs/${jobId}`, { status });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
 };
 
