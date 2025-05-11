@@ -21,6 +21,19 @@ api.interceptors.request.use(
     }
 );
 
+// Handle unauthorized responses
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            // Clear local storage and redirect to login
+            localStorage.removeItem('employerToken');
+            window.location.href = '/employer-login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const jobAPI = {
     createJob: async (jobData) => {
         try {
@@ -40,13 +53,10 @@ export const jobAPI = {
         }
     },
     
-    getMyPostedJobs: async (employerId) => {
+    getMyPostedJobs: async () => {
         try {
-            const response = await api.get(`/jobs?postedBy=${employerId}`);
-            return {
-                success: true,
-                jobs: response.data.jobs || []
-            };
+            const response = await api.get('/jobs/my/posted');
+            return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }

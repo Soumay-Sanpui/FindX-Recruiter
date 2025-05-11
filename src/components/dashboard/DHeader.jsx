@@ -1,16 +1,25 @@
 import { Link, useLocation } from 'react-router';
-import { HomeIcon, Briefcase, PlusCircle, User, Settings, LogOut } from 'lucide-react';
+import { Home, Briefcase, PlusCircle, User, Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { useEmployerStore } from '../../store/employer.store';
 
 const DHeader = ({ employer }) => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout } = useEmployerStore();
     
     const navLinks = [
-        { name: 'Dashboard', path: '/employer-dashboard', icon: <HomeIcon size={18} /> },
+        { name: 'Dashboard', path: '/employer-dashboard', icon: <Home size={18} /> },
         { name: 'My Jobs', path: '/my-jobs', icon: <Briefcase size={18} /> },
         { name: 'Post Job', path: '/post-job', icon: <PlusCircle size={18} /> },
-        { name: 'Profile', path: '/profile', icon: <User size={18} /> },
         { name: 'Settings', path: '/settings', icon: <Settings size={18} /> },
     ];
+    
+    const handleLogout = () => {
+        logout();
+        localStorage.removeItem('employerToken');
+        navigate('/employer-login');
+    };
     
     return (
         <header className="bg-white shadow-md py-4 px-8">
@@ -45,6 +54,13 @@ const DHeader = ({ employer }) => {
                             <span>{link.name}</span>
                         </Link>
                     ))}
+                    <button 
+                        onClick={handleLogout}
+                        className="flex items-center space-x-2 text-red-600 hover:text-red-700"
+                    >
+                        <LogOut size={18} />
+                        <span>Logout</span>
+                    </button>
                 </nav>
                 
                 <div className="text-sm text-gray-600">
@@ -69,6 +85,13 @@ const DHeader = ({ employer }) => {
                         <span className="text-xs">{link.name}</span>
                     </Link>
                 ))}
+                <button 
+                    onClick={handleLogout}
+                    className="flex flex-col items-center space-y-1 min-w-fit text-red-600"
+                >
+                    <LogOut size={18} />
+                    <span className="text-xs">Logout</span>
+                </button>
             </div>
         </header>
     )

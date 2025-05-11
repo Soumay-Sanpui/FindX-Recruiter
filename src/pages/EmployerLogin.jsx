@@ -9,12 +9,13 @@ import { motion } from 'framer-motion';
 const EmployerLogin = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);  
-    const { setEmployer } = useEmployerStore();
+    const { setEmployer, setToken } = useEmployerStore();
     const [formData, setFormData] = useState({
         companyEmployerId: '',
         EmployerEmail: '',
         password: '',
     });
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,14 +25,31 @@ const EmployerLogin = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
+        
         axios.post(`${CONFIG.apiUrl}/employer/login`, formData)
             .then((response) => {
                 console.log('Login successful:', response.data);
-                setEmployer(response.data);
-                navigate('/employer-dashboard');
+                
+                if (response.data.success) {
+                    // Save token to localStorage for auth persistence
+                    localStorage.setItem('employerToken', response.data.token);
+                    
+                    // Update store
+                    setToken(response.data.token);
+                    setEmployer(response.data.employer);
+                    
+                    navigate('/employer-dashboard');
+                } else {
+                    setError(response.data.message || 'Login failed');
+                }
             })
             .catch((error) => {
                 console.log('Login failed:', error);
+                setError(
+                    error.response?.data?.message || 
+                    'Login failed. Please check your credentials and try again.'
+                );
             })
             .finally(() => {
                 setIsLoading(false);
@@ -45,6 +63,13 @@ const EmployerLogin = () => {
                     <h1 className="text-2xl font-bold text-center text-blue-700">Employer Login</h1>
                     <p className='text-center text-gray-500 font-poppins'>Welcome back! Please enter your details to login.</p>
                 </div>
+                
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {error}
+                    </div>
+                )}
+                
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
                         <label className="block mb-1 text-sm font-medium text-gray-700">Employer ID</label>

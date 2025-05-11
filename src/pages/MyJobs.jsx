@@ -6,29 +6,27 @@ import DHeader from '../components/dashboard/DHeader';
 import { Plus, Briefcase, MapPin, DollarSign, Clock, Award, Users } from 'lucide-react';
 
 const MyJobs = () => {
-    const { employer } = useEmployerStore();
+    const { employer, isAuthenticated } = useEmployerStore();
     const navigate = useNavigate();
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        // Redirect to login if not authenticated
+        if (!isAuthenticated) {
+            navigate('/employer-login');
+            return;
+        }
+        
         const fetchJobs = async () => {
-            if (!employer || !employer._id) {
-                setLoading(false);
-                setError('Please log in to view your posted jobs');
-                return;
-            }
-
             try {
                 setLoading(true);
-                console.log("Fetching jobs for employer ID:", employer._id);
                 
-                const response = await jobAPI.getMyPostedJobs(employer._id);
-                console.log("API response:", response);
+                const response = await jobAPI.getMyPostedJobs();
                 
-                if (response && response.jobs) {
-                    setJobs(response.jobs);
+                if (response && response.success) {
+                    setJobs(response.jobs || []);
                 } else {
                     setJobs([]);
                     console.warn("No jobs data in response:", response);
@@ -42,7 +40,7 @@ const MyJobs = () => {
         };
 
         fetchJobs();
-    }, [employer]);
+    }, [isAuthenticated, navigate]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

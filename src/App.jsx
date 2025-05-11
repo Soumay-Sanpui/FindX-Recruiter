@@ -9,6 +9,7 @@ import EmployerLogin from "./pages/EmployerLogin.jsx";
 import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 import JobPosting from "./pages/JobPosting.jsx";
 import MyJobs from "./pages/MyJobs.jsx";
+import Settings from "./pages/Settings.jsx";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
   {
     path: "/my-jobs",
     element: <MyJobs />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
   }
 ]);
 
