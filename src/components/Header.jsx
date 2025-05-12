@@ -10,7 +10,9 @@ const Header = () => {
     useEffect(() => {
         if (employer) {
             setEmployer(true);
-            setNameInitials(employer.EmployerName.at(0).toUpperCase());
+            if (employer.EmployerName && employer.EmployerName.length > 0) {
+                setNameInitials(employer.EmployerName.at(0).toUpperCase());
+            }
         }
     }, [employer]);
     return (
