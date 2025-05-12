@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import CONFIG from '../../config/config';
@@ -7,7 +7,8 @@ import ToastBanner from '../components/ToastBanner';
 import { useEmployerStore } from '../store/employer.store';
 
 const EmployerSignup = () => {
-    const [formData, setFormData] = useState({
+    const navigate = useNavigate();
+    const initialFormState = {
         password: '',
         confirmPassword: '',
         companyName: '',
@@ -24,12 +25,25 @@ const EmployerSignup = () => {
         EmployerPhone: '',
         agreeToTerms: false,
         companyEmployerId: '',
-    });
+    };
+    
+    const [formData, setFormData] = useState(initialFormState);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [registerdName, setRegisterdName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { setEmployer } = useEmployerStore();
+
+    // Effect to navigate to dashboard after successful registration
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => {
+                navigate('/employer-dashboard');
+            }, 2000); // Navigate after 2 seconds to allow user to see success message
+            
+            return () => clearTimeout(timer);
+        }
+    }, [success, navigate]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -37,6 +51,10 @@ const EmployerSignup = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
         }));
+    };
+
+    const resetForm = () => {
+        setFormData(initialFormState);
     };
 
     const handleSubmit = async(e) => {
@@ -47,6 +65,7 @@ const EmployerSignup = () => {
                 setSuccess(true);
                 setRegisterdName(response.data.companyName);
                 setEmployer(response.data);
+                resetForm(); // Clear form after successful registration
             })
             .catch((error) => {
                 setSuccess(false);
