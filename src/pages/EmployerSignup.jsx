@@ -38,7 +38,7 @@ const EmployerSignup = () => {
     useEffect(() => {
         if (success) {
             const timer = setTimeout(() => {
-                navigate('/employer-dashboard');
+                navigate('/employer-login');
             }, 2000); // Navigate after 2 seconds to allow user to see success message
             
             return () => clearTimeout(timer);
@@ -63,16 +63,16 @@ const EmployerSignup = () => {
         await axios.post(`${CONFIG.apiUrl}/employer/createAccount`, formData)
             .then((response) => {
                 setSuccess(true);
-                setRegisterdName(response.data.companyName);
-                setEmployer(response.data);
-                resetForm(); // Clear form after successful registration
+                setRegisterdName(response.data.employer?.companyName || formData.companyName);
+                setEmployer(response.data.employer || response.data);
             })
             .catch((error) => {
                 setSuccess(false);
-                setError(error.response.data.message);
+                setError(error.response?.data?.message || "Registration failed");
             })
             .finally(() => {
                 setIsLoading(false);
+                resetForm(); // Clear form after successful registration
             });
     };
 

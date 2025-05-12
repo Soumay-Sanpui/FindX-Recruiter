@@ -31,10 +31,14 @@ const EmployerDashboard = () => {
                     <div className="bg-white p-6 shadow-md">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Company Information</h2>
                         <div className="space-y-3 text-gray-700">
-                            <p><span className="font-medium">Industry:</span> <span className='uppercase'>{employer.companyIndustry}</span></p>
-                            <p><span className="font-medium">Size:</span> <span className='uppercase'>{employer.companySize} employees</span></p>
-                            <p><span className="font-medium">Location:</span> {employer.companyLocation}</p>
-                            <p><span className="font-medium">Website:</span> <a href={employer.companyWebsite} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{employer.companyWebsite}</a></p>
+                            <p><span className="font-medium">Industry:</span> <span className='uppercase'>{employer.companyIndustry || 'Not specified'}</span></p>
+                            <p><span className="font-medium">Size:</span> <span className='uppercase'>{employer.companySize || 0} employees</span></p>
+                            <p><span className="font-medium">Location:</span> {employer.companyLocation || 'Not specified'}</p>
+                            <p><span className="font-medium">Website:</span> {employer.companyWebsite ? (
+                                <a href={employer.companyWebsite} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                    {employer.companyWebsite}
+                                </a>
+                            ) : 'Not specified'}</p>
                         </div>
                     </div>
 
@@ -42,9 +46,9 @@ const EmployerDashboard = () => {
                     <div className="bg-white p-6 shadow-md">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Contact Information</h2>
                         <div className="space-y-3 text-gray-700">
-                            <p><span className="font-medium">Email:</span> {employer.EmployerEmail}</p>
-                            <p><span className="font-medium">Phone:</span> {employer.EmployerPhone}</p>
-                            <p><span className="font-medium">Employer ID:</span> {employer.companyEmployerId}</p>
+                            <p><span className="font-medium">Email:</span> {employer.EmployerEmail || 'Not specified'}</p>
+                            <p><span className="font-medium">Phone:</span> {employer.EmployerPhone || 'Not specified'}</p>
+                            <p><span className="font-medium">Employer ID:</span> {employer.companyEmployerId || 'Not specified'}</p>
                         </div>
                     </div>
 
