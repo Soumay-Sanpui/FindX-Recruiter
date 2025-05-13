@@ -10,6 +10,7 @@ import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 import JobPosting from "./pages/JobPosting.jsx";
 import MyJobs from "./pages/MyJobs.jsx";
 import Settings from "./pages/Settings.jsx";
+import ChatPage from './pages/ChatPage.jsx'
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
       </div>
     ),
   },
+  
   {
     path: "/pricing",
     element: (
@@ -55,6 +57,19 @@ const router = createBrowserRouter([
         <Header />
         <main className="flex-1">
           <EmployerLogin />
+        </main>
+        <Footer />
+      </div>
+    ),
+  },
+  
+  {
+    path: "/chat/:jobId",  // New route for the chat page
+    element: (
+      <div className="min-h-screen flex flex-col">
+        
+        <main className="flex-1">
+          <ChatPage /> {/* ChatPage component will be rendered here */}
         </main>
         <Footer />
       </div>
