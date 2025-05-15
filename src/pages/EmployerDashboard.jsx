@@ -83,16 +83,16 @@ const EmployerDashboard = () => {
                         <button onClick={() => navigate('/post-job')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Plus className="mr-2" /> Post New Job
                         </button>
-                        <button className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
+                        {/* <button onClick={() => navigate('/my-jobs')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Users className="mr-2" /> View Applicants
-                        </button>
+                        </button> */}
                         <button className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <SquarePen className="mr-2" /> Edit Profile
                         </button>
                         <button className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <ChartBar className="mr-2" /> View Analytics
                         </button>
-                        <button className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
+                        <button onClick={() => navigate('/my-jobs')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Briefcase className="mr-2" />  View Posted Jobs
                         </button>
                     </div>

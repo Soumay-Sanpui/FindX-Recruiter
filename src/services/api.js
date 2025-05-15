@@ -86,9 +86,14 @@ export const jobAPI = {
         }
     },
     
-    updateApplicationStatus: async (jobId, applicationId, status) => {
+    updateApplicationStatus: async (jobId, applicationId, status, additionalData = {}) => {
         try {
-            const response = await api.put(`/jobs/${jobId}/applications/${applicationId}`, { status });
+            const requestData = { 
+                status,
+                ...additionalData
+            };
+            
+            const response = await api.put(`/jobs/${jobId}/applications/${applicationId}`, requestData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -98,6 +103,24 @@ export const jobAPI = {
     updateJobStatus: async (jobId, status) => {
         try {
             const response = await api.put(`/jobs/${jobId}`, { status });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    applyForJob: async (jobId) => {
+        try {
+            const response = await api.post(`/jobs/${jobId}/apply`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getMyApplications: async () => {
+        try {
+            const response = await api.get('/jobs/my/applications');
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
