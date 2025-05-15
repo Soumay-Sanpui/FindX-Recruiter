@@ -669,13 +669,18 @@ const MyJobs = () => {
                                             </div>
                                             <div className="flex items-center text-gray-600">
                                                 <DollarSign size={16} className="mr-2 text-blue-600" />
-                                                <span>${job.jobSalary.toLocaleString()}</span>
+                                                <span>${job.jobSalary.toLocaleString()} {job.jobSalaryType || 'Per Month'}</span>
                                             </div>
                                             <div className="flex items-center text-gray-600">
                                                 <Award size={16} className="mr-2 text-blue-600" />
                                                 <span>{job.jobExperience} Level</span>
                                             </div>
                                         </div>
+                                        {job.jobBanner && (
+                                            <div className="mb-4 mt-2">
+                                                <img src={job.jobBanner} alt={job.jobTitle} className="w-full h-32 object-cover border border-gray-200" />
+                                            </div>
+                                        )}
                                         <div className="mb-4">
                                             <p className="text-gray-600 line-clamp-2">{job.jobDescription}</p>
                                         </div>

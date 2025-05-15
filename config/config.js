@@ -1,4 +1,5 @@
 const config = {
+    // apiUrl: 'https://findx-backend.onrender.com/api',
     apiUrl: 'https://findxserver-cqstechsolutions.vercel.app/api',
 
     gradients: {

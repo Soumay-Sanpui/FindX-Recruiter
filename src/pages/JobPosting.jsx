@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { jobAPI } from '../services/api';
 import DHeader from '../components/dashboard/DHeader';
-import { Eraser, X, Plus } from 'lucide-react';
+import { Eraser, X, Plus, Upload } from 'lucide-react';
 
 const JobPosting = () => {
     const { employer } = useEmployerStore();
@@ -14,6 +14,8 @@ const JobPosting = () => {
         jobLocation: '',
         jobType: '',
         jobSalary: '',
+        jobSalaryType: 'Per Month',
+        jobBanner: '',
         jobIndustry: '',
         jobExperience: '',
         jobSkills: '',
@@ -30,12 +32,22 @@ const JobPosting = () => {
         }));
     };
 
+    const handleBannerChange = (e) => {
+        const { value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            jobBanner: value
+        }));
+    };
+
     const handleClear = () => {
         setFormData({
             jobTitle: '',
             jobLocation: '',
             jobType: '',
             jobSalary: '',
+            jobSalaryType: 'Per Month',
+            jobBanner: '',
             jobIndustry: '',
             jobExperience: '',
             jobSkills: '',
@@ -51,11 +63,10 @@ const JobPosting = () => {
             toast.error('You must be logged in to post a job');
             return;
         }
-        
+
         try {
             setIsSubmitting(true);
-            
-            // Format the data for API
+
             const jobData = {
                 ...formData,
                 jobSalary: Number(formData.jobSalary),
@@ -63,7 +74,7 @@ const JobPosting = () => {
                 jobKeywords: formData.jobKeywords.split(',').map(keyword => keyword.trim()),
                 postedBy: employer._id
             };
-            
+
             const response = await jobAPI.createJob(jobData);
             navigate('/my-jobs');
         } catch (error) {
@@ -143,6 +154,23 @@ const JobPosting = () => {
                                 />
                             </div>
                             <div>
+                                <label htmlFor="jobSalaryType" className="block text-sm font-medium text-gray-700 mb-2">Salary Type</label>
+                                <select
+                                    id="jobSalaryType"
+                                    name="jobSalaryType"
+                                    value={formData.jobSalaryType}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                >
+                                    <option value="Per Month">Per Month</option>
+                                    <option value="Per Annum">Per Annum</option>
+                                    <option value="Per Week">Per Week</option>
+                                    <option value="Per Hour">Per Hour</option>
+                                    <option value="Per Contract">Per Contract</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label htmlFor="jobIndustry" className="block text-sm font-medium text-gray-700 mb-2">Job Industry</label>
                                 <input
                                     type="text"
@@ -185,6 +213,8 @@ const JobPosting = () => {
                                     required
                                 />
                             </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label htmlFor="jobKeywords" className="block text-sm font-medium text-gray-700 mb-2">Job Keywords</label>
                                 <input
@@ -197,6 +227,24 @@ const JobPosting = () => {
                                     placeholder="Enter Job Keywords (comma separated)"
                                     required
                                 />
+                            </div>
+                            <div>
+                                <label htmlFor="jobBanner" className="block text-sm font-medium text-gray-700 mb-2">Job Banner URL (Optional)</label>
+                                <div className="flex">
+                                    <input
+                                        type="text"
+                                        id="jobBanner"
+                                        name="jobBanner"
+                                        value={formData.jobBanner}
+                                        onChange={handleBannerChange}
+                                        className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter banner image URL"
+                                    />
+                                    <div className="ml-2 flex items-center justify-center bg-gray-100 p-2 text-gray-500">
+                                        <Upload size={20} />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Add an image URL for your job banner (recommended size: 1200x630px)</p>
                             </div>
                         </div>
                         <div>
