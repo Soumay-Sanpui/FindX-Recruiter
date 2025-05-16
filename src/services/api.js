@@ -34,6 +34,27 @@ api.interceptors.response.use(
     }
 );
 
+// Messaging API methods
+export const messageAPI = {
+    sendMessage: async (messageData) => {
+        try {
+            const response = await api.post('/messages/send', messageData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getMessagesBetweenUsers: async (employerId, userId) => {
+        try {
+            const response = await api.get(`/messages/${employerId}/${userId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
 // Employer API methods
 export const employerAPI = {
     updatePricingPlan: async (pricingPlan, empId) => {

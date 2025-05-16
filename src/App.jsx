@@ -10,6 +10,8 @@ import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 import JobPosting from "./pages/JobPosting.jsx";
 import MyJobs from "./pages/MyJobs.jsx";
 import Settings from "./pages/Settings.jsx";
+import Messages from "./pages/Messages.jsx";
+
 
 const router = createBrowserRouter([
   {
@@ -71,6 +73,10 @@ const router = createBrowserRouter([
   {
     path: "/my-jobs",
     element: <MyJobs />,
+  },
+  {
+    path: "/messages",
+    element: <Messages />,
   },
   {
     path: "/settings",

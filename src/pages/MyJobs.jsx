@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { jobAPI } from '../services/api';
 import DHeader from '../components/dashboard/DHeader';
-import { Plus, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, Send } from 'lucide-react';
+import { Plus, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, Send, MessageCircle } from 'lucide-react';
 
 const MyJobs = () => {
     const { employer, isAuthenticated } = useEmployerStore();
@@ -717,6 +717,17 @@ const MyJobs = () => {
                                                 <Users className="mr-1" size={16} /> 
                                                 View Applicants {job.applicants?.length > 0 && `(${job.applicants.length})`}
                                             </button>
+                                            
+                                            {/* View Messages button - only show if messaging is allowed */}
+                                            {employer?.messagesAllowed && (
+                                                <button
+                                                    onClick={() => navigate(`/messages`)}
+                                                    className="bg-blue-700 text-white rounded-sm text-sm font-medium py-1 px-4 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center"
+                                                >
+                                                    <MessageCircle className="mr-1" size={16} /> 
+                                                    View Messages
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
