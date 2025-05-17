@@ -1,12 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import {Link} from 'react-router';
+import React, {useEffect, useState, useRef} from 'react';
+import {Link, useNavigate} from 'react-router';
 import {useEmployerStore} from "../store/employer.store.js";
 import config from "../../config/config.js"
 
 const Header = () => {
-    const {employer} = useEmployerStore();
+    const {employer, logout} = useEmployerStore();
     const [hasEmployer, setEmployer] = useState(false);
     const [nameInitials, setNameInitials] = useState('');
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef(null);
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (employer) {
             setEmployer(true);
@@ -15,6 +19,27 @@ const Header = () => {
             }
         }
     }, [employer]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/employer-login');
+        setShowDropdown(false);
+    };
+
     return (
         <header className="fixed w-full bg-white shadow-sm z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,8 +75,33 @@ const Header = () => {
                                 </Link>
                             </div>
                         ) : (
-                            <div className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold bg-gradient-to-br ${config.gradients[nameInitials]} p-4 border rounded-full`}>
-                                <p>{nameInitials}</p>
+                            <div className="relative" ref={dropdownRef}>
+                                <div 
+                                    className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold bg-gradient-to-br ${config.gradients[nameInitials]} p-4 border rounded-full cursor-pointer hover:opacity-90 transition-opacity duration-200`}
+                                    onClick={() => setShowDropdown(!showDropdown)}
+                                >
+                                    <p>{nameInitials}</p>
+                                </div>
+                                
+                                {showDropdown && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
+                                        <Link to="/employer-dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Dashboard
+                                        </Link>
+                                        <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Settings
+                                        </Link>
+                                        <Link to="/messages" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Messages
+                                        </Link>
+                                        <button 
+                                            onClick={handleLogout}
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )
                     }
