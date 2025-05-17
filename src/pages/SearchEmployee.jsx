@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AiOutlineSearch, AiOutlineUser, AiOutlineLink, AiOutlinePhone, AiOutlineMail } from 'react-icons/ai';
-import { FaBriefcase, FaGraduationCap, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaBriefcase, FaGraduationCap, FaMapMarkerAlt, FaLanguage } from 'react-icons/fa';
 import { MdOutlineMessage, MdFilterList } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import Loader from '../components/Loader.jsx';
 import { toast } from 'react-toastify';
-import { BASE_URL } from '../config/config';
+import CONFIG from '../../config/config.js';
 
 const SearchEmployee = () => {
     const navigate = useNavigate();
@@ -15,6 +15,7 @@ const SearchEmployee = () => {
     const [keyword, setKeyword] = useState('');
     const [skills, setSkills] = useState('');
     const [location, setLocation] = useState('');
+    const [languages, setLanguages] = useState([]);
     const [qualifications, setQualifications] = useState([]);
     const [jobTypes, setJobTypes] = useState([]);
     const [workEnv, setWorkEnv] = useState([]);
@@ -35,7 +36,7 @@ const SearchEmployee = () => {
     
     useEffect(() => {
         if (!token) {
-            navigate('/employerLogin');
+            navigate('/employer-login');
             return;
         }
         
@@ -46,7 +47,7 @@ const SearchEmployee = () => {
     const loadSuggestedUsers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${BASE_URL}/api/usersearch/suggested`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch/suggested`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -56,6 +57,28 @@ const SearchEmployee = () => {
         } catch (error) {
             console.error('Error loading suggested users:', error);
             toast.error('Failed to load suggested candidates');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleShowAllCandidates = async () => {
+        try {
+            setLoading(true);
+            setViewingProfile(false);
+            
+            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch?page=${currentPage}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (response.data.success) {
+                setUsers(response.data.users);
+                setTotalPages(response.data.totalPages);
+                setCurrentPage(response.data.currentPage);
+            }
+        } catch (error) {
+            console.error('Error loading all candidates:', error);
+            toast.error('Failed to load all candidates');
         } finally {
             setLoading(false);
         }
@@ -73,12 +96,13 @@ const SearchEmployee = () => {
             if (keyword) params.append('keyword', keyword);
             if (skills) params.append('skills', skills);
             if (location) params.append('location', location);
+            if (languages.length > 0) params.append('languages', languages.join(','));
             if (qualifications.length > 0) params.append('qualifications', qualifications.join(','));
             if (jobTypes.length > 0) params.append('jobTypes', jobTypes.join(','));
             if (workEnv.length > 0) params.append('workEnv', workEnv.join(','));
             params.append('page', currentPage);
             
-            const response = await axios.get(`${BASE_URL}/api/usersearch?${params.toString()}`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -99,7 +123,7 @@ const SearchEmployee = () => {
         try {
             setLoading(true);
             
-            const response = await axios.get(`${BASE_URL}/api/usersearch/${userId}`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -140,6 +164,12 @@ const SearchEmployee = () => {
             );
         } else if (filter === 'workEnv') {
             setWorkEnv(prev => 
+                prev.includes(value) 
+                    ? prev.filter(item => item !== value) 
+                    : [...prev, value]
+            );
+        } else if (filter === 'languages') {
+            setLanguages(prev => 
                 prev.includes(value) 
                     ? prev.filter(item => item !== value) 
                     : [...prev, value]
@@ -222,6 +252,13 @@ const SearchEmployee = () => {
                 </div>
             )}
             
+            {user.known_language && user.known_language.length > 0 && (
+                <div className="flex items-center mt-2 text-gray-600 text-sm">
+                    <FaLanguage className="mr-2" />
+                    <span>{user.known_language.slice(0, 3).join(", ")}{user.known_language.length > 3 ? ` +${user.known_language.length - 3} more` : ""}</span>
+                </div>
+            )}
+            
             {user.skills_and_capabilities && user.skills_and_capabilities.length > 0 && (
                 <div className="mt-3">
                     <p className="text-sm text-gray-500 mb-1">Skills:</p>
@@ -296,6 +333,13 @@ const SearchEmployee = () => {
                             <div className="flex items-center mb-3">
                                 <FaGraduationCap className="text-gray-500 mr-3" />
                                 <span>Education: {userProfile.highest_qualification}</span>
+                            </div>
+                        )}
+                        
+                        {userProfile.known_language && userProfile.known_language.length > 0 && (
+                            <div className="flex items-center mb-3">
+                                <FaLanguage className="text-gray-500 mr-3" />
+                                <span>Languages: {userProfile.known_language.join(", ")}</span>
                             </div>
                         )}
                         
@@ -476,9 +520,18 @@ const SearchEmployee = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-2xl font-bold mb-6">Find Candidates</h1>
+            {/* Show All Candidates Button */}
+            <div className="mb-4">
+                <button
+                    onClick={handleShowAllCandidates}
+                    className="bg-gray-300 px-4 py-2 hover:bg-blue-800 hover:text-white w-max"
+                >
+                    Show All Candidates
+                </button>
+            </div>
             
             {/* Search Form */}
-            <div className="bg-white p-5 rounded-lg shadow-md mb-6">
+            <div className="bg-white p-5 border border-blue-800 shadow-md mb-6">
                 <form onSubmit={handleSearch} className="mb-4">
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
@@ -488,7 +541,7 @@ const SearchEmployee = () => {
                                     placeholder="Search by name, skills, or job title"
                                     value={keyword}
                                     onChange={(e) => setKeyword(e.target.value)}
-                                    className="w-full border rounded-lg p-3 pl-10"
+                                    className="w-full border p-3 pl-10"
                                 />
                                 <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             </div>
@@ -496,9 +549,9 @@ const SearchEmployee = () => {
                         
                         <div className="flex gap-2">
                             <button
-                                type="button"
+                                type="buttonrounded-lg "
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200"
+                                className="bg-gray-100 text-gray-700 px-4 py-2 flex items-center hover:bg-gray-200"
                             >
                                 <MdFilterList className="mr-2" />
                                 Filters
@@ -506,7 +559,7 @@ const SearchEmployee = () => {
                             
                             <button
                                 type="submit"
-                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                                className="bg-blue-600 text-white px-6 py-2 hover:bg-blue-700"
                             >
                                 Search
                             </button>
@@ -538,6 +591,24 @@ const SearchEmployee = () => {
                                     onChange={(e) => setLocation(e.target.value)}
                                     className="w-full border rounded-md p-2 text-sm"
                                 />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Languages</label>
+                                <div className="space-y-2">
+                                    {['English', 'Spanish', 'French', 'German', 'Chinese', 'Hindi', 'Arabic'].map((lang) => (
+                                        <div key={lang} className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id={`lang-${lang}`}
+                                                checked={languages.includes(lang)}
+                                                onChange={() => toggleFilterSelection('languages', lang)}
+                                                className="mr-2"
+                                            />
+                                            <label htmlFor={`lang-${lang}`} className="text-sm">{lang}</label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             
                             <div>
