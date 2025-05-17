@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { AiOutlineSearch, AiOutlineUser, AiOutlineLink, AiOutlinePhone, AiOutlineMail } from 'react-icons/ai';
-import { FaBriefcase, FaGraduationCap, FaMapMarkerAlt, FaLanguage } from 'react-icons/fa';
+import { AiOutlineSearch, AiOutlineUser, AiOutlineLink} from 'react-icons/ai';
+import { FaGraduationCap, FaMapMarkerAlt, FaLanguage } from 'react-icons/fa';
 import { MdOutlineMessage, MdFilterList } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import Loader from '../components/Loader.jsx';
@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import CONFIG from '../../config/config.js';
 
 const SearchEmployee = () => {
+    // FIXME: No candidates found while searching for candidates...
     const navigate = useNavigate();
     
     // State for search and filters
@@ -67,14 +68,15 @@ const SearchEmployee = () => {
             setLoading(true);
             setViewingProfile(false);
             
-            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch?page=${currentPage}`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/api/auth/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            if (response.data.success) {
+            if (response.data && response.data.success) {
                 setUsers(response.data.users);
-                setTotalPages(response.data.totalPages);
-                setCurrentPage(response.data.currentPage);
+                // If the response doesn't include pagination info, set reasonable defaults
+                setTotalPages(Math.ceil(response.data.users.length / 10));
+                setCurrentPage(1);
             }
         } catch (error) {
             console.error('Error loading all candidates:', error);
@@ -549,7 +551,7 @@ const SearchEmployee = () => {
                         
                         <div className="flex gap-2">
                             <button
-                                type="buttonrounded-lg "
+                                type="button"
                                 onClick={() => setShowFilters(!showFilters)}
                                 className="bg-gray-100 text-gray-700 px-4 py-2 flex items-center hover:bg-gray-200"
                             >

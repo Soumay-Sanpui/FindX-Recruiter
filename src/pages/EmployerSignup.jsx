@@ -24,7 +24,6 @@ const EmployerSignup = () => {
         EmployerDesignation: '',
         EmployerPhone: '',
         agreeToTerms: false,
-        companyEmployerId: '',
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -187,6 +186,7 @@ const EmployerSignup = () => {
                                         value={formData.companySize}
                                         onChange={handleChange}
                                         className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none"
+                                        placeholder="Number of employees"
                                         required
                                     />
                                 </div>
@@ -229,21 +229,6 @@ const EmployerSignup = () => {
                                 {/* Employer ID */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="companyEmployerId" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Employer ID
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="companyEmployerId"
-                                            name="companyEmployerId"
-                                            value={formData.companyEmployerId}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
                                         <label htmlFor="EmployerEmail" className="block text-sm font-medium text-gray-700 mb-1">
                                             Work Email
                                         </label>
@@ -257,7 +242,6 @@ const EmployerSignup = () => {
                                             required
                                         />
                                     </div>
-                                </div>
 
 
                                 <div>
@@ -272,7 +256,8 @@ const EmployerSignup = () => {
                                         onChange={handleChange}
                                         className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none"
                                         required
-                                    />
+                                        />
+                                </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
