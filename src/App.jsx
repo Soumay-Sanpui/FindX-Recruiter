@@ -11,7 +11,7 @@ import JobPosting from "./pages/JobPosting.jsx";
 import MyJobs from "./pages/MyJobs.jsx";
 import Settings from "./pages/Settings.jsx";
 import Messages from "./pages/Messages.jsx";
-
+import SearchEmployee from "./pages/SearchEmployee.jsx";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +81,10 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <Settings />,
+  },
+  {
+    path: "/search-employee",
+    element: <SearchEmployee />,
   }
 ]);
 

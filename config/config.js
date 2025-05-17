@@ -1,6 +1,6 @@
 const config = {
-    // apiUrl: 'https://findx-backend.onrender.com/api',
-    apiUrl: 'https://findxserver-cqstechsolutions.vercel.app/api',
+    apiUrl: 'https://findx-backend.onrender.com/api',
+    // apiUrl: 'https://findxserver-cqstechsolutions.vercel.app/api',
 
     gradients: {
         A: 'from-red-500 to-yellow-500',

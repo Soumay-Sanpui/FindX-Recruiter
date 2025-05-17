@@ -51,9 +51,9 @@ const Header = () => {
                     </div>
 
                     <nav className="hidden md:flex space-x-8">
-                        <Link to="/how-it-works"
+                        <Link to="/search-employee"
                               className="text-gray hover:text-primary transition-colors duration-200">
-                            How It Works
+                            Search Employee
                         </Link>
                         <Link to="/pricing" className="text-gray hover:text-primary transition-colors duration-200">
                             Pricing
