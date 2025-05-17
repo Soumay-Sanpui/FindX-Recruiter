@@ -26,7 +26,7 @@ const EmployerSignup = () => {
         agreeToTerms: false,
         companyEmployerId: '',
     };
-    
+
     const [formData, setFormData] = useState(initialFormState);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -40,7 +40,7 @@ const EmployerSignup = () => {
             const timer = setTimeout(() => {
                 navigate('/employer-login');
             }, 2000); // Navigate after 2 seconds to allow user to see success message
-            
+
             return () => clearTimeout(timer);
         }
     }, [success, navigate]);
@@ -133,13 +133,46 @@ const EmployerSignup = () => {
                                         className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none"
                                         required
                                     >
-                                        <option value="">Select Industry</option>
-                                        <option value="tech">Technology</option>
-                                        <option value="finance">Finance</option>
-                                        <option value="healthcare">Healthcare</option>
-                                        <option value="education">Education</option>
-                                        <option value="retail">Retail</option>
-                                        <option value="other">Other</option>
+                                    <option value="">Select Industry</option>
+                                    <option> Accounting & Finance</option>
+                                    <option> Administration & Office Support</option>
+                                    <option> Advertising, Arts & Media</option>
+                                    <option> Agriculture, Nature & Animal</option>
+                                    <option> Architecture & Interior Design</option>
+                                    <option> Banking & Financial Services</option>
+                                    <option> Call Centre & Customer Service</option>
+                                    <option> CEO & General Management</option>
+                                    <option> Community Services & Development</option>
+                                    <option> Construction</option>
+                                    <option> Consulting & Strategy</option>
+                                    <option> Design & Creative</option>
+                                    <option> Education & Training</option>
+                                    <option> Engineering</option>
+                                    <option> Farming, Animals & Conservation</option>
+                                    <option> Government & Defence</option>
+                                    <option> Healthcare & Medical</option>
+                                    <option> Hospitality & Tourism</option>
+                                    <option> Human Resources & Recruitment</option>
+                                    <option> Information & Communication Technology (ICT)</option>
+                                    <option> Insurance & Superannuation</option>
+                                    <option> Legal</option>
+                                    <option> Logistics, Transport & Supply Chain</option>
+                                    <option> Manufacturing, Production & Operations</option>
+                                    <option> Marketing & Communications</option>
+                                    <option> Media, Digital & Entertainment</option>
+                                    <option> Mining, Resources & Energy</option>
+                                    <option> Non-Profit & Volunteering</option>
+                                    <option> Real Estate & Property</option>
+                                    <option> Retail & Consumer Products</option>
+                                    <option> Sales</option>
+                                    <option> Science & Technology</option>
+                                    <option> Security & Protective Services</option>
+                                    <option> Sport & Recreation</option>
+                                    <option> Trades & Services</option>
+                                    <option> Transport & Rail</option>
+                                    <option> Utilities & Energy</option>
+                                    <option> Warehousing, Storage & Distribution</option>
+                                    <option> Other / Miscellaneous</option>
                                     </select>
                                 </div>
 
