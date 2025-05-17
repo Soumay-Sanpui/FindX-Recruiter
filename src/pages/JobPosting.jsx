@@ -4,6 +4,7 @@ import { useEmployerStore } from '../store/employer.store';
 import { jobAPI } from '../services/api';
 import DHeader from '../components/dashboard/DHeader';
 import { Eraser, X, Plus, Upload } from 'lucide-react';
+import Timeline from '../components/jobPosting/Timeline';
 
 const JobPosting = () => {
     const { employer } = useEmployerStore();
@@ -92,6 +93,7 @@ const JobPosting = () => {
     return (
         <div className="min-h-screen bg-gradient-to-bl from-blue-200 via-blue-50 to-white pb-[10vh]">
             <DHeader employer={employer} />
+            <Timeline currentStage={'Classify'} />
             <div className="container mx-auto px-8 py-8">
                 <div className="flex flex-col justify-between items-center mb-16">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">Post a New Job</h1>
