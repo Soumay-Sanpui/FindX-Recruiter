@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { jobAPI } from '../services/api';
@@ -23,6 +23,11 @@ const JobPosting = () => {
         jobDescription: '',
         postedBy: employer?._id || ''
     });
+
+
+    useEffect(() => {
+        if(!employer) navigate("/employer-login");
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -172,16 +177,49 @@ const JobPosting = () => {
                             </div>
                             <div>
                                 <label htmlFor="jobIndustry" className="block text-sm font-medium text-gray-700 mb-2">Job Industry</label>
-                                <input
-                                    type="text"
-                                    id="jobIndustry"
-                                    name="jobIndustry"
-                                    value={formData.jobIndustry}
-                                    onChange={handleChange}
+                                <select
                                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter Job Industry"
-                                    required
-                                />
+                                    onChange={handleChange} id={'jobIndustry'} value={formData.jobIndustry} name={'jobIndustry'}>
+                                    <option> Accounting & Finance</option>
+                                    <option> Administration & Office Support</option>
+                                    <option> Advertising, Arts & Media</option>
+                                    <option> Agriculture, Nature & Animal</option>
+                                    <option> Architecture & Interior Design</option>
+                                    <option> Banking & Financial Services</option>
+                                    <option> Call Centre & Customer Service</option>
+                                    <option> CEO & General Management</option>
+                                    <option> Community Services & Development</option>
+                                    <option> Construction</option>
+                                    <option> Consulting & Strategy</option>
+                                    <option> Design & Creative</option>
+                                    <option> Education & Training</option>
+                                    <option> Engineering</option>
+                                    <option> Farming, Animals & Conservation</option>
+                                    <option> Government & Defence</option>
+                                    <option> Healthcare & Medical</option>
+                                    <option> Hospitality & Tourism</option>
+                                    <option> Human Resources & Recruitment</option>
+                                    <option> Information & Communication Technology (ICT)</option>
+                                    <option> Insurance & Superannuation</option>
+                                    <option> Legal</option>
+                                    <option> Logistics, Transport & Supply Chain</option>
+                                    <option> Manufacturing, Production & Operations</option>
+                                    <option> Marketing & Communications</option>
+                                    <option> Media, Digital & Entertainment</option>
+                                    <option> Mining, Resources & Energy</option>
+                                    <option> Non-Profit & Volunteering</option>
+                                    <option> Real Estate & Property</option>
+                                    <option> Retail & Consumer Products</option>
+                                    <option> Sales</option>
+                                    <option> Science & Technology</option>
+                                    <option> Security & Protective Services</option>
+                                    <option> Sport & Recreation</option>
+                                    <option> Trades & Services</option>
+                                    <option> Transport & Rail</option>
+                                    <option> Utilities & Energy</option>
+                                    <option> Warehousing, Storage & Distribution</option>
+                                    <option> Other / Miscellaneous</option>
+                                </select>
                             </div>
                             <div>
                                 <label htmlFor="jobExperience" className="block text-sm font-medium text-gray-700 mb-2">Job Experience</label>
@@ -284,7 +322,7 @@ const JobPosting = () => {
                             </button>
                         </div>
                     </form>
-                    <p className='text-gray-500 text-secondary underline font-semibold mt-4'>*(Please note that after posting a job, you will not be able to edit it's details.)</p>
+                    <p className='text-secondary underline font-semibold mt-4'>*(Please note that after posting a job, you will not be able to edit it's details.)</p>
                 </div>
             </div>
         </div>

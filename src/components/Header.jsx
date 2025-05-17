@@ -48,10 +48,6 @@ const Header = () => {
                                       className="text-gray hover:text-primary transition-colors duration-200">
                                     Log in
                                 </Link>
-                                <Link to="/employer-signup"
-                                      className="px-4 py-2 rounded-md bg-primary text-white hover:bg-secondary transition-colors duration-200">
-                                    Start free trial
-                                </Link>
                             </div>
                         ) : (
                             <div className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold bg-gradient-to-br ${config.gradients[nameInitials]} p-4 border rounded-full`}>

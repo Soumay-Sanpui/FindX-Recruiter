@@ -5,9 +5,11 @@ import { ChevronDown } from "lucide-react";
 import HowItWorksSection from '../components/home/HowItWorks';
 import FeatureSection from '../components/home/FeatureSection';
 import PricingSection from '../components/home/PricingSection';
+import {useEmployerStore} from "../store/employer.store.js";
 
 const Home = () => {
     const [activeFeature, setActiveFeature] = useState(null);
+    const {employer, token} = useEmployerStore();
 
     return (
         <div className="pt-20">
@@ -55,7 +57,7 @@ const Home = () => {
                         className="flex flex-row items-center justify-center gap-4"
                     >
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Link to="/post-job" className="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-secondary transition-all shadow-md hover:shadow-lg inline-flex items-center">
+                           <Link to={(employer && token) ? "/post-job" : "/employer-signup"} className="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-secondary transition-all shadow-md hover:shadow-lg inline-flex items-center">
                                 <span>Post a Job</span>
                                 <ChevronDown className="ml-2 h-5 w-5" />
                             </Link>
