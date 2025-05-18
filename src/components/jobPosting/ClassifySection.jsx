@@ -1,13 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eraser, X } from 'lucide-react';
+import CONFIG from '../../../config/config.js';
 
 const ClassifySection = ({ formData, formErrors, handleChange, handleClear, handleStageChange, navigate }) => {
+    const [subcategories, setSubcategories] = useState([]);
+
+    // Work type options
+    const workTypeOptions = [
+        { value: 'Full-time', label: 'Full-time' },
+        { value: 'Part-time', label: 'Part-time' },
+        { value: 'Contract', label: 'Contract' },
+        { value: 'Casual', label: 'Casual' }
+    ];
+
+    // Pay type options
+    const payTypeOptions = [
+        { value: 'Hourly rate', label: 'Hourly rate' },
+        { value: 'Monthly salary', label: 'Monthly salary' },
+        { value: 'Annual salary', label: 'Annual salary' },
+        { value: 'Annual plus commission', label: 'Annual plus commission' }
+    ];
+
+    // Get categories from config
+    const categories = Object.keys(CONFIG.jobAdIndustries);
+
+    // Update subcategories when main category changes
+    useEffect(() => {
+        if (formData.category) {
+            const selectedSubcategories = CONFIG.jobAdIndustries[formData.category] || [];
+            setSubcategories(selectedSubcategories);
+            
+            // Reset subcategory if current selection is not in the new list
+            if (selectedSubcategories.length > 0 && !selectedSubcategories.includes(formData.subcategory)) {
+                handleChange({
+                    target: {
+                        name: 'subcategory',
+                        value: ''
+                    }
+                });
+            }
+        } else {
+            setSubcategories([]);
+        }
+    }, [formData.category]);
+
     return (
         <div className="bg-white p-8 shadow-lg border-2 border-blue-800">
             <form className="space-y-6">
                 <div className="space-y-6">
                     <div>
-                        <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+                        <label htmlFor="jobTitle" className="block text-lg font-semibold text-gray-700 mb-2">Job Title</label>
                         <input
                             type="text"
                             id="jobTitle"
@@ -22,7 +64,7 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
                     </div>
                     
                     <div>
-                        <label htmlFor="jobLocation" className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <label htmlFor="jobLocation" className="block text-lg font-semibold text-gray-700 mb-2">Location</label>
                         <input
                             type="text"
                             id="jobLocation"
@@ -37,7 +79,7 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
                     </div>
                     
                     <div>
-                        <label htmlFor="workspaceOption" className="block text-sm font-medium text-gray-700 mb-2">Workspace Option</label>
+                        <label htmlFor="workspaceOption" className="block text-lg font-semibold text-gray-700 mb-2">Workspace Option</label>
                         <select
                             id="workspaceOption"
                             name="workspaceOption"
@@ -55,75 +97,95 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
                     </div>
                     
                     <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">Main Category</label>
-                        <input
-                            type="text"
+                        <label htmlFor="category" className="block text-lg font-semibold text-gray-700 mb-2">Main Category</label>
+                        <select
                             id="category"
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
                             className={`w-full px-4 py-2 border ${formErrors.category ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                            placeholder="Enter Main Category"
                             required
-                        />
+                        >
+                            <option value="">Select Main Category</option>
+                            {categories.map((category) => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
                         {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
                     </div>
                     
                     <div>
-                        <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">Subcategory</label>
-                        <input
-                            type="text"
+                        <label htmlFor="subcategory" className="block text-lg font-semibold text-gray-700 mb-2">Subcategory</label>
+                        <select
                             id="subcategory"
                             name="subcategory"
                             value={formData.subcategory}
                             onChange={handleChange}
                             className={`w-full px-4 py-2 border ${formErrors.subcategory ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                            placeholder="Enter Subcategory"
                             required
-                        />
+                            disabled={!formData.category}
+                        >
+                            <option value="">Select Subcategory</option>
+                            {subcategories.map((subcategory) => (
+                                <option key={subcategory} value={subcategory}>
+                                    {subcategory}
+                                </option>
+                            ))}
+                        </select>
                         {formErrors.subcategory && <p className="text-red-500 text-xs mt-1">{formErrors.subcategory}</p>}
+                        {!formData.category && <p className="text-gray-500 text-xs mt-1">Please select a main category first</p>}
                     </div>
                     
                     <div>
-                        <label htmlFor="workType" className="block text-sm font-medium text-gray-700 mb-2">Work Type</label>
-                        <select
-                            id="workType"
-                            name="workType"
-                            value={formData.workType}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${formErrors.workType ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                            required
-                        >
-                            <option value="">Select Work Type</option>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Casual">Casual</option>
-                        </select>
+                        <label className="block text-lg font-semibold text-gray-700 mb-2">Work Type</label>
+                        <div className={`grid grid-cols-2 gap-2 ${formErrors.workType ? 'border border-red-500 p-2 rounded' : ''}`}>
+                            {workTypeOptions.map((option) => (
+                                <div key={option.value} className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        id={option.value}
+                                        name="workType"
+                                        value={option.value}
+                                        checked={formData.workType === option.value}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <label htmlFor={option.value} className="ml-2 block text-sm text-gray-700">
+                                        {option.label}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                         {formErrors.workType && <p className="text-red-500 text-xs mt-1">{formErrors.workType}</p>}
                     </div>
                     
                     <div>
-                        <label htmlFor="payType" className="block text-sm font-medium text-gray-700 mb-2">Pay Type</label>
-                        <select
-                            id="payType"
-                            name="payType"
-                            value={formData.payType}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${formErrors.payType ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                            required
-                        >
-                            <option value="">Select Pay Type</option>
-                            <option value="Hourly rate">Hourly rate</option>
-                            <option value="Monthly salary">Monthly salary</option>
-                            <option value="Annual salary">Annual salary</option>
-                            <option value="Annual plus commission">Annual plus commission</option>
-                        </select>
+                        <label className="block text-lg font-semibold text-gray-700 mb-2">Pay Type</label>
+                        <div className={`grid grid-cols-2 gap-2 ${formErrors.payType ? 'border border-red-500 p-2 rounded' : ''}`}>
+                            {payTypeOptions.map((option) => (
+                                <div key={option.value} className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        id={option.value}
+                                        name="payType"
+                                        value={option.value}
+                                        checked={formData.payType === option.value}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <label htmlFor={option.value} className="ml-2 block text-sm text-gray-700">
+                                        {option.label}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                         {formErrors.payType && <p className="text-red-500 text-xs mt-1">{formErrors.payType}</p>}
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pay Range</label>
+                        <label className="block text-lg font-semibold text-gray-700 mb-2">Pay Range</label>
                         <div className="grid grid-cols-3 gap-2">
                             <select
                                 id="currency"
@@ -178,7 +240,7 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pay Show on Ad</label>
+                        <label className="block text-lg font-semibold text-gray-700 mb-2">Pay Show on Ad</label>
                         <div className="space-y-2">
                             <div className="flex items-center">
                                 <input

@@ -12,7 +12,7 @@ const Home = () => {
     const {employer, token} = useEmployerStore();
 
     return (
-        <div className="pt-20">
+        <div>
             {/* Hero Section */}
             <motion.section 
                 initial={{ opacity: 0 }}
@@ -27,7 +27,7 @@ const Home = () => {
                     }}
                     className="absolute top-0 left-0 w-full h-full bg-[url('/pattern.svg')] opacity-5 z-0"
                 />
-                <div className="max-w-4xl mx-auto relative z-10">
+                <div className="max-w-4xl py-16 mx-auto relative z-10">
                     <motion.h1 
                         initial={{ y: -20 }}
                         animate={{ y: 0 }}
