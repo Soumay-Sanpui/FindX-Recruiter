@@ -3,25 +3,37 @@ import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { jobAPI } from '../services/api';
 import DHeader from '../components/dashboard/DHeader';
-import { Eraser, X, Plus, Upload } from 'lucide-react';
 import Timeline from '../components/jobPosting/Timeline';
+import ClassifySection from '../components/jobPosting/ClassifySection';
+import AdTypesSection from '../components/jobPosting/AdTypesSection';
+import WriteSection from '../components/jobPosting/WriteSection';
+import ManageSection from '../components/jobPosting/ManageSection';
 
 const JobPosting = () => {
     const { employer } = useEmployerStore();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentStage, setCurrentStage] = useState('Classify');
+    const [formErrors, setFormErrors] = useState({});
     const [formData, setFormData] = useState({
         jobTitle: '',
         jobLocation: '',
-        jobType: '',
-        jobSalary: '',
-        jobSalaryType: 'Per Month',
-        jobBanner: '',
-        jobIndustry: '',
-        jobExperience: '',
+        workspaceOption: '',
+        category: '',
+        subcategory: '',
+        workType: '',
+        payType: '',
+        currency: '',
+        from: '',
+        to: '',
+        showSalaryOnAd: true,
+        // Keeping other fields for later stages
         jobSkills: '',
         jobKeywords: '',
         jobDescription: '',
+        jobBanner: '',
+        jobIndustry: '',
+        jobExperience: '',
         postedBy: employer?._id || ''
     });
 
@@ -31,11 +43,19 @@ const JobPosting = () => {
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prevState => ({
             ...prevState,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
+        
+        // Clear error for this field when user makes a change
+        if (formErrors[name]) {
+            setFormErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
     };
 
     const handleBannerChange = (e) => {
@@ -46,27 +66,71 @@ const JobPosting = () => {
         }));
     };
 
+    const validateClassifySection = () => {
+        const errors = {};
+        
+        if (!formData.jobTitle.trim()) errors.jobTitle = 'Job title is required';
+        if (!formData.jobLocation.trim()) errors.jobLocation = 'Location is required';
+        if (!formData.workspaceOption) errors.workspaceOption = 'Workspace option is required';
+        if (!formData.category.trim()) errors.category = 'Category is required';
+        if (!formData.subcategory.trim()) errors.subcategory = 'Subcategory is required';
+        if (!formData.workType) errors.workType = 'Work type is required';
+        if (!formData.payType) errors.payType = 'Pay type is required';
+        if (!formData.currency) errors.currency = 'Currency is required';
+        if (!formData.from) errors.from = 'From amount is required';
+        if (!formData.to) errors.to = 'To amount is required';
+        
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+    
+    const handleStageChange = (stage) => {
+        // If moving away from Classify, validate that section first
+        if (currentStage === 'Classify' && stage !== 'Classify') {
+            if (!validateClassifySection()) {
+                alert('Please complete all required fields in the Classify section before proceeding.');
+                return;
+            }
+        }
+        
+        // If validation passes or moving to a previous section, update the stage
+        setCurrentStage(stage);
+    };
+
     const handleClear = () => {
         setFormData({
             jobTitle: '',
             jobLocation: '',
-            jobType: '',
-            jobSalary: '',
-            jobSalaryType: 'Per Month',
-            jobBanner: '',
-            jobIndustry: '',
-            jobExperience: '',
+            workspaceOption: '',
+            category: '',
+            subcategory: '',
+            workType: '',
+            payType: '',
+            currency: '',
+            from: '',
+            to: '',
+            showSalaryOnAd: true,
             jobSkills: '',
             jobKeywords: '',
             jobDescription: '',
+            jobBanner: '',
+            jobIndustry: '',
+            jobExperience: '',
             postedBy: employer?._id || ''
         });
+        setFormErrors({});
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        
+        // Validate the current section
+        if (currentStage === 'Classify' && !validateClassifySection()) {
+            return;
+        }
+        
         if (!employer?._id) {
-            toast.error('You must be logged in to post a job');
+            alert('You must be logged in to post a job');
             return;
         }
 
@@ -75,7 +139,8 @@ const JobPosting = () => {
 
             const jobData = {
                 ...formData,
-                jobSalary: Number(formData.jobSalary),
+                from: Number(formData.from),
+                to: Number(formData.to),
                 jobSkills: formData.jobSkills.split(',').map(skill => skill.trim()),
                 jobKeywords: formData.jobKeywords.split(',').map(keyword => keyword.trim()),
                 postedBy: employer._id
@@ -85,209 +150,69 @@ const JobPosting = () => {
             navigate('/my-jobs');
         } catch (error) {
             console.error('Error posting job:', error);
+            alert('Error posting job. Please try again.');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const renderContent = () => {
+        switch (currentStage) {
+            case 'Classify':
+                return (
+                    <ClassifySection 
+                        formData={formData}
+                        formErrors={formErrors}
+                        handleChange={handleChange}
+                        handleClear={handleClear}
+                        handleStageChange={handleStageChange}
+                        navigate={navigate}
+                    />
+                );
+            case 'Ad Types':
+                return (
+                    <AdTypesSection 
+                        handleStageChange={handleStageChange}
+                    />
+                );
+            case 'Write':
+                return (
+                    <WriteSection 
+                        handleStageChange={handleStageChange}
+                    />
+                );
+            case 'Manage':
+                return (
+                    <ManageSection 
+                        handleStageChange={handleStageChange}
+                        handleSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                    />
+                );
+            default:
+                return (
+                    <ClassifySection 
+                        formData={formData}
+                        formErrors={formErrors}
+                        handleChange={handleChange}
+                        handleClear={handleClear}
+                        handleStageChange={handleStageChange}
+                        navigate={navigate}
+                    />
+                );
         }
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-bl from-blue-200 via-blue-50 to-white pb-[10vh]">
             <DHeader employer={employer} />
-            <Timeline currentStage={'Classify'} />
+            <Timeline currentStage={currentStage} onStageChange={handleStageChange} />
             <div className="container mx-auto px-8 py-8">
                 <div className="flex flex-col justify-between items-center mb-16">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">Post a New Job</h1>
                     <p className='text-gray-500'>Fill in the details below to post a new job.</p>
                 </div>
-                <div className="bg-white p-8 shadow-lg border-2 border-blue-800">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
-                                <input
-                                    type="text"
-                                    id="jobTitle"
-                                    name="jobTitle"
-                                    value={formData.jobTitle}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter Job Title"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="jobLocation" className="block text-sm font-medium text-gray-700 mb-2">Job Location</label>
-                                <input
-                                    type="text"
-                                    id="jobLocation"
-                                    name="jobLocation"
-                                    value={formData.jobLocation}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter Job Location"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="jobType" className="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
-                                <select
-                                    id="jobType"
-                                    name="jobType"
-                                    value={formData.jobType}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
-                                >
-                                    <option value="">Select Job Type</option>
-                                    <option value="Full-Time">Full-Time</option>
-                                    <option value="Part-Time">Part-Time</option>
-                                    <option value="Contract">Contract</option>
-                                    <option value="Temporary">Temporary</option>
-                                    <option value="Volunteer">Volunteer</option>
-                                    <option value="Internship">Internship</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="jobSalary" className="block text-sm font-medium text-gray-700 mb-2">Job Salary</label>
-                                <input
-                                    type="number"
-                                    id="jobSalary"
-                                    name="jobSalary"
-                                    value={formData.jobSalary}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter Job Salary"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="jobSalaryType" className="block text-sm font-medium text-gray-700 mb-2">Salary Type</label>
-                                <select
-                                    id="jobSalaryType"
-                                    name="jobSalaryType"
-                                    value={formData.jobSalaryType}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
-                                >
-                                    <option value="Per Month">Per Month</option>
-                                    <option value="Per Annum">Per Annum</option>
-                                    <option value="Per Week">Per Week</option>
-                                    <option value="Per Hour">Per Hour</option>
-                                    <option value="Per Contract">Per Contract</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="jobIndustry" className="block text-sm font-medium text-gray-700 mb-2">Job Industry</label>
-                                <select
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    onChange={handleChange} id={'jobIndustry'} value={formData.jobIndustry} name={'jobIndustry'}>
-
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="jobExperience" className="block text-sm font-medium text-gray-700 mb-2">Job Experience</label>
-                                <select
-                                    id="jobExperience"
-                                    name="jobExperience"
-                                    value={formData.jobExperience}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
-                                >
-                                    <option value="">Select Job Experience</option>
-                                    <option value="Entry">Entry</option>
-                                    <option value="Mid">Mid</option>
-                                    <option value="Senior">Senior</option>
-                                    <option value="Lead">Lead</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="jobSkills" className="block text-sm font-medium text-gray-700 mb-2">Job Skills</label>
-                                <input
-                                    type="text"
-                                    id="jobSkills"
-                                    name="jobSkills"
-                                    value={formData.jobSkills}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter Job Skills (comma separated)"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label htmlFor="jobKeywords" className="block text-sm font-medium text-gray-700 mb-2">Job Keywords</label>
-                                <input
-                                    type="text"
-                                    id="jobKeywords"
-                                    name="jobKeywords"
-                                    value={formData.jobKeywords}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter Job Keywords (comma separated)"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="jobBanner" className="block text-sm font-medium text-gray-700 mb-2">Job Banner URL (Optional)</label>
-                                <div className="flex">
-                                    <input
-                                        type="text"
-                                        id="jobBanner"
-                                        name="jobBanner"
-                                        value={formData.jobBanner}
-                                        onChange={handleBannerChange}
-                                        className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Enter banner image URL"
-                                    />
-                                    <div className="ml-2 flex items-center justify-center bg-gray-100 p-2 text-gray-500">
-                                        <Upload size={20} />
-                                    </div>
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">Add an image URL for your job banner (recommended size: 1200x630px)</p>
-                            </div>
-                        </div>
-                        <div>
-                            <label htmlFor="jobDescription" className="block text-sm font-medium text-gray-700 mb-2">Job Description</label>
-                            <textarea
-                                id="jobDescription"
-                                name="jobDescription"
-                                value={formData.jobDescription}
-                                onChange={handleChange}
-                                rows="6"
-                                className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter detailed job description"
-                                required
-                            ></textarea>
-                        </div>
-                        <div className="flex justify-end gap-4">
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
-                            >
-                                <Plus className="mr-2" /> {isSubmitting ? 'Posting...' : 'Post Job'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleClear}
-                                className="w-full flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                            >
-                                <Eraser className="mr-2" /> Clear
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => navigate('/my-jobs')}
-                                className="w-full flex items-center justify-center bg-gray-100 hover:bg-red-700 hover:text-white text-gray-700 font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 border border-red-500"
-                            >
-                                <X className="mr-2" /> Cancel
-                            </button>
-                        </div>
-                    </form>
-                    <p className='text-secondary underline font-semibold mt-4'>*(Please note that after posting a job, you will not be able to edit it's details.)</p>
-                </div>
+                {renderContent()}
             </div>
         </div>
     )
