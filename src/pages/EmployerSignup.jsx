@@ -20,7 +20,7 @@ const EmployerSignup = () => {
         companyLocation: '',
 
         EmployerName: '',
-        EmployerEmail: '',
+        email: '',
         EmployerDesignation: '',
         EmployerPhone: '',
         agreeToTerms: false,
@@ -229,14 +229,14 @@ const EmployerSignup = () => {
                                 {/* Employer ID */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="EmployerEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                             Work Email
                                         </label>
                                         <input
                                             type="email"
-                                            id="EmployerEmail"
-                                            name="EmployerEmail"
-                                            value={formData.EmployerEmail}
+                                            id="email"
+                                            name="email"
+                                            value={formData.email}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none"
                                             required

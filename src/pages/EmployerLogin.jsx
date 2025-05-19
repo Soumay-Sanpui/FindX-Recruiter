@@ -11,7 +11,7 @@ const EmployerLogin = () => {
     const [isLoading, setIsLoading] = useState(false);  
     const { setEmployer, setToken } = useEmployerStore();
     const [formData, setFormData] = useState({
-        EmployerName: '',
+        email: '',
         password: '',
     });
     const [error, setError] = useState('');
@@ -71,14 +71,14 @@ const EmployerLogin = () => {
                 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block mb-1 text-sm font-medium text-gray-700">Full Name</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
                         <input  
-                            type="text"
-                            name="EmployerName"
-                            value={formData.EmployerName}
+                            type="email"
+                            name="email"
+                            value={formData.email}
                             onChange={handleChange}
                             className="w-full px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                            placeholder="Enter your full name"
+                            placeholder="Enter your email"
                             required
                         />
                     </div>
