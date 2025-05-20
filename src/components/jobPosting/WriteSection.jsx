@@ -49,13 +49,6 @@ const WriteSection = ({ handleStageChange }) => {
                 {/* Job Description Section */}
                 <div className="mb-6">
                     <label className="block text-gray-700 font-medium mb-2">Job description</label>
-                    <div className="flex mb-2">
-                        {['R', 'B', 'I', '...'].map((button, index) => (
-                            <button key={index} className="px-3 py-1 border border-gray-300 text-sm mr-1">
-                                {button}
-                            </button>
-                        ))}
-                    </div>
                     <textarea 
                         className="w-full border border-gray-300 p-3 h-32 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="Enter detailed job description here"
