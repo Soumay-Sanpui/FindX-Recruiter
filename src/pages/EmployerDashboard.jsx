@@ -81,7 +81,7 @@ const EmployerDashboard = () => {
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                         <button onClick={() => navigate('/post-job')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
-                            <Plus className="mr-2" /> Post New Job
+                            <Plus className="mr-2" /> Post a New Job
                         </button>
                         <button onClick={() => navigate('/search-employee')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Users className="mr-2" /> Search Candidates

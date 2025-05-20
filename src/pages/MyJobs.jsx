@@ -627,7 +627,7 @@ const MyJobs = () => {
                         onClick={() => navigate('/post-job')}
                         className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
-                        <Plus className="mr-2" size={20} /> Post New Job
+                        <Plus className="mr-2" size={20} /> Post a New Job
                     </button>
                 </div>
 
@@ -648,7 +648,7 @@ const MyJobs = () => {
                             onClick={() => navigate('/post-job')}
                             className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                         >
-                            <Plus className="mr-2" size={20} /> Post a Job
+                            <Plus className="mr-2" size={20} /> Post a New Job
                         </button>
                     </div>
                 ) : (
