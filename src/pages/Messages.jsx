@@ -4,6 +4,7 @@ import { useEmployerStore } from '../store/employer.store';
 import DHeader from '../components/dashboard/DHeader';
 import { Send, ArrowLeft, Search, User, Calendar } from 'lucide-react';
 import api from '../services/api';
+import socketService from '../services/socketService';
 
 const Messages = () => {
     const { employer, isAuthenticated } = useEmployerStore();
@@ -21,31 +22,59 @@ const Messages = () => {
     const messagesEndRef = useRef(null);
     const messageContainerRef = useRef(null);
 
+    // Initialize socket connection
+    useEffect(() => {
+        if (employer && employer._id) {
+            // Initialize socket
+            socketService.init();
+            
+            // Join as employer
+            socketService.joinUser(employer._id, 'Employer');
+            
+            // Set up socket event listeners
+            const onReceiveMessage = (message) => {
+                if (selectedApplicant && 
+                    ((message.from === employer._id && message.to === selectedApplicant.user._id) || 
+                     (message.to === employer._id && message.from === selectedApplicant.user._id))) {
+                    setMessages(prev => [...prev, message]);
+                    // Mark message as read
+                    socketService.markAsRead(message._id);
+                    // Scroll to bottom
+                    setTimeout(scrollToBottom, 100);
+                }
+            };
+            
+            const onConversationHistory = (messagesData) => {
+                setMessages(messagesData);
+                setLoading(false);
+                // Scroll to bottom after loading messages
+                setTimeout(scrollToBottom, 100);
+            };
+            
+            // Register socket event listeners
+            const unsubscribeReceiveMessage = socketService.onReceiveMessage(onReceiveMessage);
+            const unsubscribeConversationHistory = socketService.onConversationHistory(onConversationHistory);
+            const unsubscribeMessageSent = socketService.onMessageSent((message) => {
+                if (!selectedApplicant) return;
+                
+                if (message.from === employer._id && message.to === selectedApplicant.user._id) {
+                    setMessages(prev => [...prev, message]);
+                    setTimeout(scrollToBottom, 100);
+                }
+            });
+            
+            // Clean up on unmount
+            return () => {
+                unsubscribeReceiveMessage();
+                unsubscribeConversationHistory();
+                unsubscribeMessageSent();
+            };
+        }
+    }, [employer, selectedApplicant]);
+
     // Scroll to bottom of messages
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    // Load messages from local storage
-    const loadMessagesFromStorage = (employerId, userId) => {
-        try {
-            const key = `messages_${employerId}_${userId}`;
-            const storedMessages = localStorage.getItem(key);
-            return storedMessages ? JSON.parse(storedMessages) : [];
-        } catch (err) {
-            console.error('Error loading messages from storage:', err);
-            return [];
-        }
-    };
-
-    // Save messages to local storage
-    const saveMessagesToStorage = (employerId, userId, messagesList) => {
-        try {
-            const key = `messages_${employerId}_${userId}`;
-            localStorage.setItem(key, JSON.stringify(messagesList));
-        } catch (err) {
-            console.error('Error saving messages to storage:', err);
-        }
     };
 
     useEffect(() => {
@@ -113,29 +142,14 @@ const Messages = () => {
 
     useEffect(() => {
         // Fetch messages when an applicant is selected
-        const fetchMessages = async () => {
-            if (!selectedApplicant) return;
-            
-            try {
-                // Load messages from local storage instead of API
-                const storedMessages = loadMessagesFromStorage(employer._id, selectedApplicant.user._id);
-                setMessages(storedMessages);
-                
-                // Scroll to bottom after messages load
-                setTimeout(scrollToBottom, 100);
-            } catch (err) {
-                console.error('Error fetching messages:', err);
-                setMessages([]);
-            }
-        };
-
-        fetchMessages();
+        if (!selectedApplicant || !employer) return;
         
-        // Set up polling for new messages (not really needed with local storage)
-        const intervalId = setInterval(fetchMessages, 10000);
+        setLoading(true);
         
-        return () => clearInterval(intervalId);
-    }, [selectedApplicant, employer._id]);
+        // Request conversation history from socket
+        socketService.getConversation(employer._id, selectedApplicant.user._id);
+        
+    }, [selectedApplicant, employer]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -143,34 +157,28 @@ const Messages = () => {
     }, [messages]);
 
     const handleSendMessage = async () => {
-        if (!newMessage.trim() || !selectedApplicant) return;
+        if (!newMessage.trim() || !selectedApplicant || !employer) return;
         
         setSendingMessage(true);
         
         try {
-            // Create a new message object
-            const newMessageObj = {
-                _id: Date.now().toString(),
+            // Create message data
+            const messageData = {
                 from: employer._id,
                 to: selectedApplicant.user._id,
                 content: newMessage,
-                jobId: selectedApplicant.jobId || jobId,
                 fromModel: 'Employer',
                 toModel: 'User',
-                createdAt: new Date().toISOString()
+                jobId: selectedApplicant.jobId || jobId
             };
             
-            // Add the new message to the messages list
-            const updatedMessages = [...messages, newMessageObj];
-            setMessages(updatedMessages);
-            
-            // Save to local storage
-            saveMessagesToStorage(employer._id, selectedApplicant.user._id, updatedMessages);
+            // Send via socket
+            socketService.sendMessage(messageData);
             
             // Clear the input
             setNewMessage('');
-            // Scroll to bottom
-            scrollToBottom();
+            
+            // We'll get the message back from the socket
         } catch (err) {
             console.error('Error sending message:', err);
             alert('Failed to send message');
