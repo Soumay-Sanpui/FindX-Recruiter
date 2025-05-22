@@ -318,23 +318,23 @@ const MyJobs = () => {
                                                 
                                                 {!applicant.isBlocked && (
                                                     <div className="flex flex-wrap gap-2 mt-2">
-                                                        {applicant.status !== 'Shortlisted' && (
-                                                            <button
-                                                                onClick={() => updateApplicationStatus(applicant._id, 'Shortlisted')}
+                                                    {applicant.status !== 'Shortlisted' && (
+                                                        <button
+                                                            onClick={() => updateApplicationStatus(applicant._id, 'Shortlisted')}
                                                                 className="bg-gray-400 hover:bg-blue-500 text-white px-3 py-1 text-xs flex items-center"
-                                                            >
-                                                                <CheckCircle size={12} className="mr-1" /> Shortlist
-                                                            </button>
-                                                        )}
-                                                        
-                                                        {applicant.status !== 'Reviewed' && applicant.status !== 'Shortlisted' && (
-                                                            <button
-                                                                onClick={() => updateApplicationStatus(applicant._id, 'Reviewed')}
+                                                        >
+                                                            <CheckCircle size={12} className="mr-1" /> Shortlist
+                                                        </button>
+                                                    )}
+                                                    
+                                                    {applicant.status !== 'Reviewed' && applicant.status !== 'Shortlisted' && (
+                                                        <button
+                                                            onClick={() => updateApplicationStatus(applicant._id, 'Reviewed')}
                                                                 className="bg-gray-400 hover:bg-blue-500 text-white px-3 py-1 text-xs flex items-center"
-                                                            >
-                                                                <AlertCircle size={12} className="mr-1" /> Mark as Reviewed
-                                                            </button>
-                                                        )}
+                                                        >
+                                                            <AlertCircle size={12} className="mr-1" /> Mark as Reviewed
+                                                        </button>
+                                                    )}
                                                         
                                                         {applicant.status !== 'Interview' && (
                                                             <button
@@ -344,8 +344,8 @@ const MyJobs = () => {
                                                                 <Calendar size={12} className="mr-1" /> Schedule Interview
                                                             </button>
                                                         )}
-                                                        
-                                                        {applicant.status !== 'Rejected' && (
+                                                    
+                                                    {applicant.status !== 'Rejected' && (
                                                             <button
                                                                 onClick={() => handleOpenRejectModal(applicant)}
                                                                 className="bg-gray-400 hover:bg-blue-500 text-white px-3 py-1 text-xs flex items-center"
@@ -361,7 +361,7 @@ const MyJobs = () => {
                                                             <Ban size={12} className="mr-1" /> Block
                                                         </button>
                                                     </div>
-                                                )}
+                                                    )}
                                             </div>
                                         </div>
                                     </div>

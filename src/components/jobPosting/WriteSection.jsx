@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import PricingSummary from './PricingSummary';
 
-const WriteSection = ({ handleStageChange }) => {
+const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [logoFile, setLogoFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     
     // Add state variables for pricing elements
-    const [premiumSelected, setPremiumSelected] = useState(true);
-    const [immediateStartSelected, setImmediateStartSelected] = useState(false);
-    const [referencesSelected, setReferencesSelected] = useState(false);
-    const [notificationOption, setNotificationOption] = useState('both');
+    const [premiumSelected, setPremiumSelected] = useState(formData.premiumListing || true);
+    const [immediateStartSelected, setImmediateStartSelected] = useState(formData.immediateStart || false);
+    const [referencesSelected, setReferencesSelected] = useState(formData.referencesRequired || false);
+    const [notificationOption, setNotificationOption] = useState(formData.notificationOption || 'both');
     
     // Calculate total cost
     const premiumCost = 750;
@@ -21,6 +21,74 @@ const WriteSection = ({ handleStageChange }) => {
     const handleLogoUpload = (e) => {
         if (e.target.files && e.target.files[0]) {
             setLogoFile(e.target.files[0]);
+            
+            // Update the formData with the logo file
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                handleChange({
+                    target: {
+                        name: 'companyLogo',
+                        value: event.target.result
+                    }
+                });
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    };
+    
+    // Helper function to handle textarea and input changes
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        handleChange({ target: { name, value } });
+    };
+    
+    // Handle pricing option changes
+    const handlePricingChange = (option, value) => {
+        switch(option) {
+            case 'premium':
+                setPremiumSelected(value);
+                handleChange({ 
+                    target: { 
+                        name: 'premiumListing', 
+                        value, 
+                        type: 'checkbox', 
+                        checked: value 
+                    } 
+                });
+                break;
+            case 'immediate':
+                setImmediateStartSelected(value);
+                handleChange({ 
+                    target: { 
+                        name: 'immediateStart', 
+                        value, 
+                        type: 'checkbox', 
+                        checked: value 
+                    } 
+                });
+                break;
+            case 'references':
+                setReferencesSelected(value);
+                handleChange({ 
+                    target: { 
+                        name: 'referencesRequired', 
+                        value, 
+                        type: 'checkbox', 
+                        checked: value 
+                    } 
+                });
+                break;
+            case 'notification':
+                setNotificationOption(value);
+                handleChange({ 
+                    target: { 
+                        name: 'notificationOption', 
+                        value 
+                    } 
+                });
+                break;
+            default:
+                break;
         }
     };
 
@@ -36,6 +104,25 @@ const WriteSection = ({ handleStageChange }) => {
         "Do you own or have regular access to a car?",
         "Are you available to work outside holidays?"
     ];
+    
+    // Handle question selection
+    const handleQuestionSelect = (e, question) => {
+        const isChecked = e.target.checked;
+        let updatedQuestions = [...(formData.jobQuestions || [])];
+        
+        if (isChecked) {
+            updatedQuestions.push(question);
+        } else {
+            updatedQuestions = updatedQuestions.filter(q => q !== question);
+        }
+        
+        handleChange({
+            target: {
+                name: 'jobQuestions',
+                value: updatedQuestions
+            }
+        });
+    };
 
     return (
         <div className="flex flex-col lg:flex-row bg-white shadow-lg border-2 border-blue-800">
@@ -52,6 +139,9 @@ const WriteSection = ({ handleStageChange }) => {
                     <textarea 
                         className="w-full border border-gray-300 p-3 h-32 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="Enter detailed job description here"
+                        name="jobDescription"
+                        value={formData.jobDescription || ''}
+                        onChange={handleInputChange}
                     />
                 </div>
                 
@@ -62,6 +152,9 @@ const WriteSection = ({ handleStageChange }) => {
                     <textarea 
                         className="w-full border border-gray-300 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="Enter job summary here"
+                        name="jobSummary"
+                        value={formData.jobSummary || ''}
+                        onChange={handleInputChange}
                     />
                 </div>
                 
@@ -70,12 +163,23 @@ const WriteSection = ({ handleStageChange }) => {
                     <label className="block text-gray-700 font-medium mb-2">Key selling points <span className="text-gray-500">(optional)</span></label>
                     <p className="text-gray-500 text-sm mb-2">Enter 3 key selling points to attract candidates to view your role.</p>
                     <div className="space-y-2">
-                        {[1, 2, 3].map((item) => (
+                        {[0, 1, 2].map((index) => (
                             <input 
-                                key={item}
+                                key={index}
                                 type="text" 
                                 className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                 placeholder="Enter a key selling point"
+                                value={formData.sellingPoints && formData.sellingPoints[index] ? formData.sellingPoints[index] : ''}
+                                onChange={(e) => {
+                                    const updatedPoints = [...(formData.sellingPoints || [])];
+                                    updatedPoints[index] = e.target.value;
+                                    handleChange({
+                                        target: {
+                                            name: 'sellingPoints',
+                                            value: updatedPoints
+                                        }
+                                    });
+                                }}
                             />
                         ))}
                     </div>
@@ -86,12 +190,28 @@ const WriteSection = ({ handleStageChange }) => {
                     <label className="block text-gray-700 font-medium mb-2">Company brand <span className="text-gray-500">(optional)</span></label>
                     <p className="text-gray-500 text-sm mb-2">Create your first brand by uploading your company logo.</p>
                     <div className="border border-gray-300 p-4 flex items-center justify-center h-32 bg-gray-100">
-                        {logoFile ? (
+                        {logoFile || formData.companyLogo ? (
                             <div className="text-center">
+                                {logoFile ? (
                                 <p>{logoFile.name}</p>
+                                ) : (
+                                    <img 
+                                        src={formData.companyLogo} 
+                                        alt="Company Logo" 
+                                        className="h-24 object-contain" 
+                                    />
+                                )}
                                 <button 
                                     className="text-blue-600 hover:text-blue-800 text-sm mt-2"
-                                    onClick={() => setLogoFile(null)}
+                                    onClick={() => {
+                                        setLogoFile(null);
+                                        handleChange({
+                                            target: {
+                                                name: 'companyLogo',
+                                                value: ''
+                                            }
+                                        });
+                                    }}
                                 >
                                     Remove
                                 </button>
@@ -108,6 +228,29 @@ const WriteSection = ({ handleStageChange }) => {
                     </div>
                 </div>
                 
+                {/* Job Banner Section */}
+                <div className="mb-6">
+                    <label className="block text-gray-700 font-medium mb-2">Job banner <span className="text-gray-500">(optional)</span></label>
+                    <p className="text-gray-500 text-sm mb-2">Add a banner image URL to make your job post stand out.</p>
+                    <input 
+                        type="text" 
+                        className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Enter banner image URL"
+                        name="jobBanner"
+                        value={formData.jobBanner || ''}
+                        onChange={handleInputChange}
+                    />
+                    {formData.jobBanner && (
+                        <div className="mt-2">
+                            <img 
+                                src={formData.jobBanner} 
+                                alt="Job Banner Preview" 
+                                className="h-24 object-cover border border-gray-200" 
+                            />
+                        </div>
+                    )}
+                </div>
+                
                 {/* Video Section */}
                 <div className="mb-8">
                     <label className="block text-gray-700 font-medium mb-2">Video <span className="text-gray-500">(optional)</span></label>
@@ -116,6 +259,9 @@ const WriteSection = ({ handleStageChange }) => {
                         type="text" 
                         className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="e.g. https://www.youtube.com/watch?v=abc123"
+                        name="videoLink"
+                        value={formData.videoLink || ''}
+                        onChange={handleInputChange}
                     />
                 </div>
 
@@ -136,7 +282,13 @@ const WriteSection = ({ handleStageChange }) => {
                         <div className="space-y-2">
                             {recommendedQuestions.map((question, index) => (
                                 <div key={index} className="flex items-start">
-                                    <input type="checkbox" className="mt-1 mr-3" id={`question-${index}`} />
+                                    <input 
+                                        type="checkbox" 
+                                        className="mt-1 mr-3" 
+                                        id={`question-${index}`} 
+                                        checked={formData.jobQuestions && formData.jobQuestions.includes(question)}
+                                        onChange={(e) => handleQuestionSelect(e, question)}
+                                    />
                                     <label htmlFor={`question-${index}`} className="text-gray-700">{question}</label>
                                 </div>
                             ))}
@@ -193,6 +345,9 @@ const WriteSection = ({ handleStageChange }) => {
                         <input 
                             type="text" 
                             className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            name="internalReference"
+                            value={formData.internalReference || ''}
+                            onChange={handleInputChange}
                         />
                     </div>
                 </div>
@@ -211,16 +366,20 @@ const WriteSection = ({ handleStageChange }) => {
                         Continue to Manage
                     </button>
                 </div>
+            </div>
+            
+            {/* Pricing Summary Sidebar */}
+            <div className="lg:w-1/4 bg-gray-50 p-6 border-l border-gray-200 hidden lg:block">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Your Job Ad Summary</h3>
                 
-                {/* Mobile Job Ad Summary - Only visible on mobile devices */}
-                <div className="block lg:hidden mt-10 border border-gray-300 shadow-md rounded-md bg-white">
-                    <div className="bg-blue-600 text-white py-3 px-4 font-bold">
-                        Your Job Ad Summary
+                <div className="bg-white border border-gray-200 rounded-md overflow-hidden mb-6">
+                    <div className="bg-blue-600 text-white p-3 font-bold">
+                        Premium Job Ad
                     </div>
                     <div className="p-4">
                         <div className="flex justify-between mb-2">
-                            <span className="font-semibold">Standard Job Ad Package:</span>
-                            <span className="font-bold text-xl">$199</span>
+                            <span className="font-semibold">Premium Job Ad:</span>
+                            <span className="font-bold text-lg">${premiumCost}</span>
                         </div>
                         
                         <div className="text-sm space-y-1 mb-4">
@@ -230,7 +389,130 @@ const WriteSection = ({ handleStageChange }) => {
                                 <li>Unlimited applicants</li>
                                 <li>Dashboard & management tools</li>
                                 <li>Free access to candidates profiles</li>
-                                <li>Send & Receive messages with candidates</li>
+                                <li>Complete branding</li>
+                                <li>Priority placement in search results</li>
+                                <li>Featured job badge</li>
+                            </ul>
+                        </div>
+                        
+                        <div className="mt-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        id="immediate-start" 
+                                        className="mr-2 h-4 w-4"
+                                        checked={immediateStartSelected}
+                                        onChange={(e) => handlePricingChange('immediate', e.target.checked)}
+                                    />
+                                    <label htmlFor="immediate-start" className="text-sm font-medium">Immediate Start Badge</label>
+                                </div>
+                                <span className="text-sm font-semibold">${immediateCost}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        id="references" 
+                                        className="mr-2 h-4 w-4"
+                                        checked={referencesSelected}
+                                        onChange={(e) => handlePricingChange('references', e.target.checked)}
+                                    />
+                                    <label htmlFor="references" className="text-sm font-medium">References Required</label>
+                                </div>
+                                <span className="text-sm font-semibold">${referencesCost}</span>
+                            </div>
+                            
+                            <div className="border-t border-gray-200 pt-3 mt-3">
+                                <p className="text-sm font-medium mb-2">Notification Options:</p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center">
+                                        <input 
+                                            type="radio" 
+                                            id="notify-both" 
+                                            name="notification" 
+                                            className="mr-2 h-4 w-4"
+                                            checked={notificationOption === 'both'}
+                                            onChange={() => handlePricingChange('notification', 'both')}
+                                        />
+                                        <label htmlFor="notify-both" className="text-sm">
+                                            Email & SMS ($69)
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input 
+                                            type="radio" 
+                                            id="notify-email" 
+                                            name="notification" 
+                                            className="mr-2 h-4 w-4"
+                                            checked={notificationOption === 'email'}
+                                            onChange={() => handlePricingChange('notification', 'email')}
+                                        />
+                                        <label htmlFor="notify-email" className="text-sm">
+                                            Email only ($49)
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input 
+                                            type="radio" 
+                                            id="notify-sms" 
+                                            name="notification" 
+                                            className="mr-2 h-4 w-4"
+                                            checked={notificationOption === 'sms'}
+                                            onChange={() => handlePricingChange('notification', 'sms')}
+                                        />
+                                        <label htmlFor="notify-sms" className="text-sm">
+                                            SMS only ($49)
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input 
+                                            type="radio" 
+                                            id="notify-none" 
+                                            name="notification" 
+                                            className="mr-2 h-4 w-4"
+                                            checked={notificationOption === 'none'}
+                                            onChange={() => handlePricingChange('notification', 'none')}
+                                        />
+                                        <label htmlFor="notify-none" className="text-sm">
+                                            No notifications
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 border-t border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <span className="font-bold">Total:</span>
+                            <span className="font-bold text-xl text-blue-600">${totalCost}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Plus applicable taxes</p>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Mobile Job Ad Summary - Only visible on mobile devices */}
+            <div className="block lg:hidden mt-10 border border-gray-300 shadow-md rounded-md bg-white">
+                <div className="bg-blue-600 text-white py-3 px-4 font-bold">
+                    Your Job Ad Summary
+                </div>
+                <div className="p-4">
+                    <div className="flex justify-between mb-2">
+                        <span className="font-semibold">Premium Job Ad Package:</span>
+                        <span className="font-bold text-xl">${premiumCost}</span>
+                    </div>
+                    
+                    <div className="text-sm space-y-1 mb-4">
+                        <p className="font-medium">Includes:</p>
+                        <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                            <li>30-day job listing</li>
+                            <li>Unlimited applicants</li>
+                            <li>Dashboard & management tools</li>
+                            <li>Free access to candidates profiles</li>
+                            <li>Send & Receive messages with candidates</li>
                                 <li>Complete branding</li>
                             </ul>
                             <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
@@ -240,7 +522,7 @@ const WriteSection = ({ handleStageChange }) => {
                         {immediateStartSelected && (
                             <div className="flex justify-between mt-4 mb-2">
                                 <span>Immediate Start Badge:</span>
-                                <span className="font-semibold">$19</span>
+                            <span className="font-semibold">${immediateCost}</span>
                             </div>
                         )}
                         
@@ -248,37 +530,12 @@ const WriteSection = ({ handleStageChange }) => {
                             <p className="text-xs text-gray-600 mb-4">Let candidates know you're hiring urgently</p>
                         )}
                         
-                        {referencesSelected && (
-                            <div className="flex justify-between mt-4 mb-2">
-                                <span>Reference Check Access:</span>
-                                <span className="font-semibold">$19</span>
-                            </div>
-                        )}
-                        
-                        {referencesSelected && (
-                            <p className="text-xs text-gray-600 mb-4">Request references from candidates instantly</p>
-                        )}
-                        
-                        <div className="font-medium mt-6">
-                            Just like this email and app package as well
-                        </div>
-                        
-                        <div className="flex justify-between mt-6 text-xl font-bold border-t pt-4">
-                            <span>Total Cost:</span>
-                            <span>${totalCost}</span>
-                        </div>
+                    <div className="flex justify-between mt-4 font-bold">
+                        <span>Total:</span>
+                        <span className="text-blue-600 text-xl">${totalCost}</span>
                     </div>
                 </div>
             </div>
-            
-            {/* Job Ad Summary - Right Side */}
-            <PricingSummary 
-                premiumSelected={premiumSelected}
-                immediateStartSelected={immediateStartSelected}
-                referencesSelected={referencesSelected}
-                notificationOption={notificationOption}
-                totalCost={totalCost}
-            />
         </div>
     );
 };

@@ -33,8 +33,18 @@ const JobPosting = () => {
         jobDescription: '',
         jobBanner: '',
         jobIndustry: '',
-        jobExperience: '',
-        postedBy: employer?._id || ''
+        postedBy: employer?._id || '',
+        jobSummary: '',
+        sellingPoints: [],
+        videoLink: '',
+        jobSalaryType: 'Per Month',
+        companyLogo: '',
+        jobQuestions: [],
+        internalReference: '',
+        premiumListing: false,
+        immediateStart: false,
+        referencesRequired: false,
+        notificationOption: 'both'
     });
 
 
@@ -115,8 +125,18 @@ const JobPosting = () => {
             jobDescription: '',
             jobBanner: '',
             jobIndustry: '',
-            jobExperience: '',
-            postedBy: employer?._id || ''
+            postedBy: employer?._id || '',
+            jobSummary: '',
+            sellingPoints: [],
+            videoLink: '',
+            jobSalaryType: 'Per Month',
+            companyLogo: '',
+            jobQuestions: [],
+            internalReference: '',
+            premiumListing: false,
+            immediateStart: false,
+            referencesRequired: false,
+            notificationOption: 'both'
         });
         setFormErrors({});
     };
@@ -133,10 +153,10 @@ const JobPosting = () => {
             alert('You must be logged in to post a job');
             return;
         }
-
+        
         try {
             setIsSubmitting(true);
-
+            
             const jobData = {
                 ...formData,
                 from: Number(formData.from),
@@ -145,7 +165,7 @@ const JobPosting = () => {
                 jobKeywords: formData.jobKeywords.split(',').map(keyword => keyword.trim()),
                 postedBy: employer._id
             };
-
+            
             const response = await jobAPI.createJob(jobData);
             navigate('/my-jobs');
         } catch (error) {
@@ -178,12 +198,15 @@ const JobPosting = () => {
             case 'Write':
                 return (
                     <WriteSection 
+                        formData={formData}
+                        handleChange={handleChange}
                         handleStageChange={handleStageChange}
                     />
                 );
             case 'Manage':
                 return (
                     <ManageSection 
+                        formData={formData}
                         handleStageChange={handleStageChange}
                         handleSubmit={handleSubmit}
                         isSubmitting={isSubmitting}

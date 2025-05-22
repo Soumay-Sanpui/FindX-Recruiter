@@ -211,12 +211,12 @@ const AdTypesSection = ({ handleStageChange }) => {
                             Best Value
                         </button>
                     </div>
-                </div>
+            </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between gap-4 mt-10">
-                    <button
-                        onClick={() => handleStageChange('Classify')}
+            <div className="flex justify-between gap-4 mt-10">
+                <button
+                    onClick={() => handleStageChange('Classify')}
                         className="flex items-center justify-center border border-gray-300 text-gray-700 font-medium py-3 px-8 transition hover:bg-gray-50"
                     >
                         &lt; BACK
@@ -226,14 +226,14 @@ const AdTypesSection = ({ handleStageChange }) => {
                         className="flex items-center justify-center border border-gray-300 text-gray-700 font-medium py-3 px-8 transition hover:bg-gray-50"
                     >
                         Save draft
-                    </button>
+                </button>
                     
-                    <button
-                        onClick={() => handleStageChange('Write')}
+                <button
+                    onClick={() => handleStageChange('Write')}
                         className="flex items-center justify-center border border-blue-600 bg-white text-blue-600 font-medium py-3 px-8 transition hover:bg-blue-50"
-                    >
+                >
                         PROCEED &gt;
-                    </button>
+                </button>
                 </div>
                 
                 {/* Mobile Job Ad Summary - Only visible on mobile devices */}
@@ -303,7 +303,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                 notificationOption={notificationOption}
                 totalCost={totalCost}
             />
-       </div>
+        </div>
     );
 };
 
