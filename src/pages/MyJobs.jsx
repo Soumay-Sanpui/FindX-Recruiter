@@ -64,6 +64,11 @@ const MyJobs = () => {
             day: 'numeric' 
         });
     };
+    
+    const formatCurrency = (amount) => {
+        if (!amount) return '0';
+        return new Intl.NumberFormat('en-US').format(amount);
+    };
 
     const handleViewApplicants = (job) => {
         setSelectedJob(job);
@@ -665,15 +670,17 @@ const MyJobs = () => {
                                             </div>
                                             <div className="flex items-center text-gray-600">
                                                 <Briefcase size={16} className="mr-2 text-blue-600" />
-                                                <span>{job.jobType}</span>
+                                                <span>{job.workType}</span>
                                             </div>
                                             <div className="flex items-center text-gray-600">
                                                 <DollarSign size={16} className="mr-2 text-blue-600" />
-                                                <span>${job.jobSalary.toLocaleString()} {job.jobSalaryType || 'Per Month'}</span>
+                                                <span>
+                                                    {job.payRange.currency || ''} {formatCurrency(job.payRange.from)} - {formatCurrency(job.payRange.to)} {job.jobSalaryType || 'Per Month'}
+                                                </span>
                                             </div>
                                             <div className="flex items-center text-gray-600">
                                                 <Award size={16} className="mr-2 text-blue-600" />
-                                                <span>{job.jobExperience} Level</span>
+                                                <span>{job.category}</span>
                                             </div>
                                         </div>
                                         {job.jobBanner && (

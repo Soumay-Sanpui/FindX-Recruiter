@@ -12,87 +12,96 @@ import MyJobs from "./pages/MyJobs.jsx";
 import Settings from "./pages/Settings.jsx";
 import Messages from "./pages/Messages.jsx";
 import SearchEmployee from "./pages/SearchEmployee.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <Home />
-        </main>
-        <Footer />
-      </div>
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Home />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
     ),
   },
   {
     path: "/pricing",
     element: (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <Pricing />
-        </main>
-        <Footer />
-      </div>
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Pricing />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
     ),
   },
   {
     path: "/employer-signup",
     element: (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <EmployerSignup />
-        </main>
-        <Footer />
-      </div>
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <EmployerSignup />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
     ),
   },
   {
     path: "/employer-login",
     element: (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <EmployerLogin />
-        </main>
-        <Footer />
-      </div>
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <EmployerLogin />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
     ),
   },
   {
     path: "/employer-dashboard",
-    element: <EmployerDashboard />,
+    element: <ErrorBoundary><EmployerDashboard /></ErrorBoundary>,
   },
   {
     path: "/post-job",
-    element: <JobPosting />,
+    element: <ErrorBoundary><JobPosting /></ErrorBoundary>,
   },
   {
     path: "/my-jobs",
-    element: <MyJobs />,
+    element: <ErrorBoundary><MyJobs /></ErrorBoundary>,
   },
   {
     path: "/messages",
-    element: <Messages />,
+    element: <ErrorBoundary><Messages /></ErrorBoundary>,
   },
   {
     path: "/settings",
-    element: <Settings />,
+    element: <ErrorBoundary><Settings /></ErrorBoundary>,
   },
   {
     path: "/search-employee",
-    element: <SearchEmployee />,
+    element: <ErrorBoundary><SearchEmployee /></ErrorBoundary>,
   }
 ]);
 
 const App = () => {
   return (
-    <>
+    <ErrorBoundary>
       <RouterProvider router={router} />
-    </>
+    </ErrorBoundary>
   );
 };
 
