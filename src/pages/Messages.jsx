@@ -44,16 +44,23 @@ const Messages = () => {
                 }
             };
             
-            const onConversationHistory = (messagesData) => {
-                setMessages(messagesData);
+            const onConversationHistory = (data) => {
+                setMessages(data.messages || data);
                 setLoading(false);
                 // Scroll to bottom after loading messages
                 setTimeout(scrollToBottom, 100);
+            };
+
+            const onMessageError = (error) => {
+                console.error('Message error:', error);
+                alert(error.error || 'Failed to send message');
+                setSendingMessage(false);
             };
             
             // Register socket event listeners
             const unsubscribeReceiveMessage = socketService.onReceiveMessage(onReceiveMessage);
             const unsubscribeConversationHistory = socketService.onConversationHistory(onConversationHistory);
+            const unsubscribeMessageError = socketService.onMessageError(onMessageError);
             const unsubscribeMessageSent = socketService.onMessageSent((message) => {
                 if (!selectedApplicant) return;
                 
@@ -67,6 +74,7 @@ const Messages = () => {
             return () => {
                 unsubscribeReceiveMessage();
                 unsubscribeConversationHistory();
+                unsubscribeMessageError();
                 unsubscribeMessageSent();
             };
         }
@@ -146,8 +154,9 @@ const Messages = () => {
         
         setLoading(true);
         
-        // Request conversation history from socket
-        socketService.getConversation(employer._id, selectedApplicant.user._id);
+        // Request conversation history from socket with job ID
+        const jobIdToUse = selectedApplicant.jobId || jobId;
+        socketService.getConversation(employer._id, selectedApplicant.user._id, jobIdToUse);
         
     }, [selectedApplicant, employer]);
 

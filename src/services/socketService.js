@@ -45,9 +45,9 @@ class SocketService {
     this.socket.emit('sendMessage', messageData);
   }
 
-  getConversation(userId1, userId2) {
+  getConversation(userId1, userId2, jobId) {
     if (!this.socket) this.init();
-    this.socket.emit('getConversation', { userId1, userId2 });
+    this.socket.emit('getConversation', { userId1, userId2, jobId });
   }
 
   getUserConversations(userId, userType) {
@@ -88,6 +88,18 @@ class SocketService {
     if (!this.socket) this.init();
     this.socket.on('userStatus', callback);
     return () => this.socket.off('userStatus', callback);
+  }
+
+  onMessageError(callback) {
+    if (!this.socket) this.init();
+    this.socket.on('messageError', callback);
+    return () => this.socket.off('messageError', callback);
+  }
+
+  onConversationError(callback) {
+    if (!this.socket) this.init();
+    this.socket.on('conversationError', callback);
+    return () => this.socket.off('conversationError', callback);
   }
 
   disconnect() {
