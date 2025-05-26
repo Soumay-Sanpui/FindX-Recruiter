@@ -15,7 +15,7 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
             </div>
 
             {/* Job Summary Card */}
-            <div className="mb-8 bg-blue-50 p-6 rounded-lg">
+            <div className="mb-8 p-6 rounded-lg">
                 <h3 className="text-xl font-bold text-blue-800 mb-4">Job Summary</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div className="flex items-start">
@@ -69,7 +69,7 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
             </div>
 
             {/* Salary Information */}
-            <div className="mb-8 bg-green-50 p-6 rounded-lg">
+            <div className="mb-8 p-6 rounded-lg">
                 <h3 className="text-xl font-bold text-green-800 mb-4">Salary Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div className="flex items-start">
@@ -114,7 +114,7 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
             </div>
 
             {/* Skills and Experience */}
-            <div className="mb-8 bg-purple-50 p-6 rounded-lg">
+            {/* <div className="mb-8 bg-purple-50 p-6 rounded-lg">
                 <h3 className="text-xl font-bold text-purple-800 mb-4">Skills</h3>
                 <div className="grid grid-cols-1 gap-x-8 gap-y-4">
                     <div className="flex items-start">
@@ -142,11 +142,11 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Job Description */}
             {formData.jobDescription && (
-                <div className="mb-8 bg-gray-50 p-6 rounded-lg">
+                <div className="mb-8 bg-gray-50 p-6">
                     <h3 className="text-xl font-bold text-gray-800 mb-4">Job Description</h3>
                     <div className="flex items-start">
                         <FileText className="mr-3 text-gray-600 mt-1" size={18} />
@@ -158,7 +158,7 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
             )}
 
             {/* Media Elements */}
-            <div className="mb-8 bg-gray-50 p-6 rounded-lg">
+            <div className="mb-8 bg-gray-50 p-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Media Elements</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div className="flex items-start">

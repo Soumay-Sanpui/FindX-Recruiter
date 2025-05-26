@@ -675,7 +675,7 @@ const MyJobs = () => {
                                             <div className="flex items-center text-gray-600">
                                                 <DollarSign size={16} className="mr-2 text-blue-600" />
                                                 <span>
-                                                    {job.payRange.currency || ''} {formatCurrency(job.payRange.from)} - {formatCurrency(job.payRange.to)} {job.jobSalaryType || 'Per Month'}
+                                                    {job.currency || ''} {formatCurrency(job.from)} - {formatCurrency(job.to)} {job.jobSalaryType || 'Per Month'}
                                                 </span>
                                             </div>
                                             <div className="flex items-center text-gray-600">
