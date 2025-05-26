@@ -4,6 +4,7 @@ import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import Pricing from "./pages/Pricing.jsx";
+import Contact from "./pages/Contact.jsx";
 import EmployerSignup from "./pages/EmployerSignup.jsx";
 import EmployerLogin from "./pages/EmployerLogin.jsx";
 import EmployerDashboard from "./pages/EmployerDashboard.jsx";
@@ -37,6 +38,20 @@ const router = createBrowserRouter([
           <Header />
           <main className="flex-1">
             <Pricing />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/contact",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Contact />
           </main>
           <Footer />
         </div>

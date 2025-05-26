@@ -48,7 +48,7 @@ const SearchEmployee = () => {
     const loadSuggestedUsers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch/suggested`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/auth/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -67,8 +67,8 @@ const SearchEmployee = () => {
         try {
             setLoading(true);
             setViewingProfile(false);
-            
-            const response = await axios.get(`${CONFIG.apiUrl}/api/auth/users`, {
+            console.log(token);
+            const response = await axios.get(`${CONFIG.apiUrl}/auth/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
