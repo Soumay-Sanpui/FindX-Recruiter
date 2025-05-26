@@ -35,7 +35,7 @@ const Contact = () => {
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
-                <div className="text-center mb-16">
+                <div className="text-center my-16">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         Get in Touch
                     </h1>
@@ -46,7 +46,7 @@ const Contact = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* Contact Form */}
-                    <div className="bg-white rounded-lg shadow-lg p-8">
+                    <div className="bg-white border border-blue-800 shadow-lg p-8">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
