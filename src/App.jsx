@@ -108,7 +108,17 @@ const router = createBrowserRouter([
   },
   {
     path: "/search-employee",
-    element: <ErrorBoundary><SearchEmployee /></ErrorBoundary>,
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <SearchEmployee />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    )
   }
 ]);
 

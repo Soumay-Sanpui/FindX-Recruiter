@@ -35,6 +35,14 @@ const SearchEmployee = () => {
     const token = localStorage.getItem('employerToken');
     const employer = JSON.parse(localStorage.getItem('employer')) || {};
     
+    // Centralized function to handle token expiry
+    const handleTokenExpiry = () => {
+        toast.error('Your session has expired. Please log in again.');
+        localStorage.removeItem('employerToken');
+        localStorage.removeItem('employer');
+        navigate('/employer-login');
+    };
+    
     useEffect(() => {
         if (!token) {
             navigate('/employer-login');
@@ -48,16 +56,47 @@ const SearchEmployee = () => {
     const loadSuggestedUsers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${CONFIG.apiUrl}/auth/users`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/usersearch/suggested`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
             if (response.data.success) {
-                setSuggestedUsers(response.data.users);
+                if (response.data.users && response.data.users.length > 0) {
+                    setSuggestedUsers(response.data.users);
+                } else {
+                    // Fallback: If no suggested users, get all users with a limit
+                    const fallbackResponse = await axios.get(`${CONFIG.apiUrl}/usersearch?limit=10`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (fallbackResponse.data.success) {
+                        setSuggestedUsers(fallbackResponse.data.users);
+                    }
+                }
             }
         } catch (error) {
             console.error('Error loading suggested users:', error);
-            toast.error('Failed to load suggested candidates');
+            if (error.response?.status === 401) {
+                handleTokenExpiry();
+                return;
+            }
+            // If suggested users fails, try to get all users as fallback
+            try {
+                const fallbackResponse = await axios.get(`${CONFIG.apiUrl}/usersearch?limit=10`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (fallbackResponse.data.success) {
+                    setSuggestedUsers(fallbackResponse.data.users);
+                } else {
+                    toast.error('Failed to load suggested candidates');
+                }
+            } catch (fallbackError) {
+                console.error('Fallback error:', fallbackError);
+                if (fallbackError.response?.status === 401) {
+                    handleTokenExpiry();
+                    return;
+                }
+                toast.error('Failed to load suggested candidates');
+            }
         } finally {
             setLoading(false);
         }
@@ -68,18 +107,22 @@ const SearchEmployee = () => {
             setLoading(true);
             setViewingProfile(false);
             console.log(token);
-            const response = await axios.get(`${CONFIG.apiUrl}/auth/users`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/usersearch?limit=50&page=1`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
             if (response.data && response.data.success) {
                 setUsers(response.data.users);
-                // If the response doesn't include pagination info, set reasonable defaults
-                setTotalPages(Math.ceil(response.data.users.length / 10));
-                setCurrentPage(1);
+                // Use the pagination info from the backend response
+                setTotalPages(response.data.totalPages || Math.ceil(response.data.count / 10));
+                setCurrentPage(response.data.currentPage || 1);
             }
         } catch (error) {
             console.error('Error loading all candidates:', error);
+            if (error.response?.status === 401) {
+                handleTokenExpiry();
+                return;
+            }
             toast.error('Failed to load all candidates');
         } finally {
             setLoading(false);
@@ -104,7 +147,7 @@ const SearchEmployee = () => {
             if (workEnv.length > 0) params.append('workEnv', workEnv.join(','));
             params.append('page', currentPage);
             
-            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch?${params.toString()}`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/usersearch?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -115,6 +158,10 @@ const SearchEmployee = () => {
             }
         } catch (error) {
             console.error('Error searching users:', error);
+            if (error.response?.status === 401) {
+                handleTokenExpiry();
+                return;
+            }
             toast.error('Failed to search for candidates');
         } finally {
             setLoading(false);
@@ -125,7 +172,7 @@ const SearchEmployee = () => {
         try {
             setLoading(true);
             
-            const response = await axios.get(`${CONFIG.apiUrl}/api/usersearch/${userId}`, {
+            const response = await axios.get(`${CONFIG.apiUrl}/usersearch/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -135,6 +182,10 @@ const SearchEmployee = () => {
             }
         } catch (error) {
             console.error('Error loading user profile:', error);
+            if (error.response?.status === 401) {
+                handleTokenExpiry();
+                return;
+            }
             toast.error('Failed to load candidate profile');
         } finally {
             setLoading(false);
