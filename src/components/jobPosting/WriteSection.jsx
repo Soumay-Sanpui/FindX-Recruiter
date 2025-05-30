@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PricingSummary from './PricingSummary';
 
 const WriteSection = ({ formData, handleChange, handleStageChange }) => {
@@ -11,12 +11,34 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [referencesSelected, setReferencesSelected] = useState(formData.referencesRequired || false);
     const [notificationOption, setNotificationOption] = useState(formData.notificationOption || 'both');
     
+    // Add state variables for dropdown sections
+    const [showBasicQuestions, setShowBasicQuestions] = useState(false);
+    const [showAdvancedQuestions, setShowAdvancedQuestions] = useState(false);
+    
     // Calculate total cost
     const premiumCost = 750;
     const immediateCost = immediateStartSelected ? 85 : 0;
     const referencesCost = referencesSelected ? 75 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
     const totalCost = premiumCost + immediateCost + referencesCost + notificationCost;
+
+    // Split questions into basic and advanced
+    const basicQuestions = [
+        "Which of the following statements best describes your right to work in Australia?",
+        "How many years experience do you have in similar roles?",
+        "Do you have driver license?",
+        "What's your expected annual base salary?"
+    ];
+    
+    const advancedQuestions = [
+        "Are you willing to undergo pre-employment medical check?",
+        "How much notice are you required to give your current employer?",
+        "Do you have a current Police Check (National Police Certificate) for employment?",
+        "Do you have a current Australian driver's license?",
+        "Do you own or have regular access to a car?",
+        "Are you available to work outside holidays?",
+        "Are you willing to relocate for this role?"
+    ];
 
     const handleLogoUpload = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -92,19 +114,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
     };
 
-    const recommendedQuestions = [
-        "Which of the following statements best describes your right to work in Australia?",
-        "How many years experience do you have in similar roles?",
-        "Do you have driver license?",
-        "Are you willing to undergo pre-employment medical check?",
-        "What's your expected annual base salary?",
-        "How much notice are you required to give your current employer?",
-        "Do you have a current Police Check (National Police Certificate) for employment?",
-        "Do you have a current Australian driver's license?",
-        "Do you own or have regular access to a car?",
-        "Are you available to work outside holidays?"
-    ];
-    
     // Handle question selection
     const handleQuestionSelect = (e, question) => {
         const isChecked = e.target.checked;
@@ -123,6 +132,39 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
             }
         });
     };
+
+    // Initialize basic questions on component mount
+    useEffect(() => {
+        if (!formData.jobQuestions || formData.jobQuestions.length === 0) {
+            const allBasicQuestions = [...basicQuestions];
+            handleChange({
+                target: {
+                    name: 'jobQuestions',
+                    value: allBasicQuestions
+                }
+            });
+        } else {
+            // Ensure all basic questions are included
+            const currentQuestions = [...(formData.jobQuestions || [])];
+            let updated = false;
+            
+            basicQuestions.forEach(basicQuestion => {
+                if (!currentQuestions.includes(basicQuestion)) {
+                    currentQuestions.push(basicQuestion);
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                handleChange({
+                    target: {
+                        name: 'jobQuestions',
+                        value: currentQuestions
+                    }
+                });
+            }
+        }
+    }, [basicQuestions]);
 
     return (
         <div className="flex flex-col lg:flex-row bg-white shadow-lg border-2 border-blue-800">
@@ -272,31 +314,94 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         <span className="ml-2 text-gray-500 text-sm">(optional)</span>
                     </div>
                     
-                    <div className="mb-4">
-                        <p className="text-gray-700 mb-1">Questions are recommended for your role</p>
-                        <p className="text-gray-500 text-sm mb-4">
-                            Your recommendations show questions that other most employers select. These questions will
-                            be displayed at the end of your application questions.
-                        </p>
-                        
-                        <div className="space-y-2">
-                            {recommendedQuestions.map((question, index) => (
-                                <div key={index} className="flex items-start">
-                                    <input 
-                                        type="checkbox" 
-                                        className="mt-1 mr-3" 
-                                        id={`question-${index}`} 
-                                        checked={formData.jobQuestions && formData.jobQuestions.includes(question)}
-                                        onChange={(e) => handleQuestionSelect(e, question)}
-                                    />
-                                    <label htmlFor={`question-${index}`} className="text-gray-700">{question}</label>
-                                </div>
-                            ))}
+                    {/* Basic Questions Section */}
+                    <div className="mb-6">
+                        <div 
+                            className="flex items-center justify-between cursor-pointer p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                            onClick={() => setShowBasicQuestions(!showBasicQuestions)}
+                        >
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-800">Basic Questions</h3>
+                                <p className="text-gray-500 text-sm">
+                                    Essential questions automatically included in your application form
+                                </p>
+                            </div>
+                            <div className="flex-shrink-0 ml-4">
+                                <svg 
+                                    className={`w-6 h-6 text-gray-600 font-bold transition-transform duration-200 ${showBasicQuestions ? 'rotate-180' : ''}`}
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="3"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                         </div>
+                        
+                        {showBasicQuestions && (
+                            <div className="mt-4 bg-blue-50 p-4 rounded-md border border-blue-100">
+                                <div className="space-y-3">
+                                    {basicQuestions.map((question, index) => (
+                                        <div key={index} className="flex items-center">
+                                            <div className="flex-shrink-0 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <span className="text-gray-700 font-medium">{question}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Advanced Questions Section */}
+                    <div className="mb-6">
+                        <div 
+                            className="flex items-center justify-between cursor-pointer p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                            onClick={() => setShowAdvancedQuestions(!showAdvancedQuestions)}
+                        >
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-800">Advanced Questions</h3>
+                                <p className="text-gray-500 text-sm">
+                                    Optional questions to help you better screen applicants
+                                </p>
+                            </div>
+                            <div className="flex-shrink-0 ml-4">
+                                <svg 
+                                    className={`w-6 h-6 text-gray-600 font-bold transition-transform duration-200 ${showAdvancedQuestions ? 'rotate-180' : ''}`}
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="3"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        {showAdvancedQuestions && (
+                            <div className="mt-4 space-y-3">
+                                {advancedQuestions.map((question, index) => (
+                                    <div key={index} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                                        <input 
+                                            type="checkbox" 
+                                            className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                                            id={`advanced-question-${index}`} 
+                                            checked={formData.jobQuestions && formData.jobQuestions.includes(question)}
+                                            onChange={(e) => handleQuestionSelect(e, question)}
+                                        />
+                                        <label htmlFor={`advanced-question-${index}`} className="text-gray-700 cursor-pointer">{question}</label>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     
                     <div className="mb-4">
-                        <p className="text-gray-700 mb-2">Search for relevant questions by keyword</p>
+                        <p className="text-gray-700 mb-2">Search for more relevant questions by keyword</p>
                         <div className="relative">
                             <input 
                                 type="text" 
