@@ -123,7 +123,7 @@ export const jobAPI = {
     
     updateJobStatus: async (jobId, status) => {
         try {
-            const response = await api.put(`/jobs/${jobId}`, { status });
+            const response = await api.put(`/jobs/${jobId}/status`, { status });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

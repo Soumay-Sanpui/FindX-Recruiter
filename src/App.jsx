@@ -10,6 +10,7 @@ import EmployerLogin from "./pages/EmployerLogin.jsx";
 import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 import JobPosting from "./pages/JobPosting.jsx";
 import MyJobs from "./pages/MyJobs.jsx";
+import JobDetails from "./pages/JobDetails.jsx";
 import Settings from "./pages/Settings.jsx";
 import Messages from "./pages/Messages.jsx";
 import SearchEmployee from "./pages/SearchEmployee.jsx";
@@ -97,6 +98,10 @@ const router = createBrowserRouter([
   {
     path: "/my-jobs",
     element: <ErrorBoundary><MyJobs /></ErrorBoundary>,
+  },
+  {
+    path: "/job-details/:jobId",
+    element: <ErrorBoundary><JobDetails /></ErrorBoundary>,
   },
   {
     path: "/messages",
