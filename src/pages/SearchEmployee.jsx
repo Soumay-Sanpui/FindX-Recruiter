@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useSearchUsers, useSuggestedUsers, useUserProfile } from '../hooks/useEmployer';
 import { AiOutlineSearch, AiOutlineUser, AiOutlineLink} from 'react-icons/ai';
 import { FaGraduationCap, FaMapMarkerAlt, FaLanguage } from 'react-icons/fa';
 import { MdOutlineMessage, MdFilterList } from 'react-icons/md';
@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 import CONFIG from '../../config/config.js';
 
 const SearchEmployee = () => {
-    // FIXME: No candidates found while searching for candidates...
     const navigate = useNavigate();
     
     // State for search and filters
@@ -21,19 +20,51 @@ const SearchEmployee = () => {
     const [jobTypes, setJobTypes] = useState([]);
     const [workEnv, setWorkEnv] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
-    
-    // State for data
-    const [users, setUsers] = useState([]);
-    const [suggestedUsers, setSuggestedUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [userProfile, setUserProfile] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [viewingProfile, setViewingProfile] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
     
     // Check if employer is logged in
     const token = localStorage.getItem('employerToken');
     const employer = JSON.parse(localStorage.getItem('employer')) || {};
+    
+    // Search parameters for React Query
+    const searchParams = {
+        keyword,
+        skills,
+        location,
+        languages,
+        qualifications,
+        jobTypes,
+        workEnv,
+        page: currentPage
+    };
+    
+    // Use React Query hooks
+    const hasSearchCriteria = !!(keyword || skills || location || languages.length || qualifications.length || jobTypes.length || workEnv.length);
+    
+    // Always enable search - if no criteria, it will fetch all candidates
+    const { 
+        data: searchData = { users: [], totalPages: 1, currentPage: 1, totalUsers: 0 }, 
+        isLoading: searchLoading, 
+        error: searchError 
+    } = useSearchUsers(searchParams, !!token);
+    
+    // Keep suggested users as fallback (not actively used but available)
+    const { 
+        data: suggestedUsers = [], 
+        isLoading: suggestedLoading 
+    } = useSuggestedUsers();
+    
+    const { 
+        data: userProfile, 
+        isLoading: profileLoading 
+    } = useUserProfile(selectedUserId);
+    
+    // Derived state
+    const users = searchData.users;
+    const totalPages = searchData.totalPages;
+    const loading = searchLoading || profileLoading;
     
     // Centralized function to handle token expiry
     const handleTokenExpiry = () => {
@@ -48,148 +79,30 @@ const SearchEmployee = () => {
             navigate('/employer-login');
             return;
         }
-        
-        // Load suggested users on component mount
-        loadSuggestedUsers();
     }, [token, navigate]);
     
-    const loadSuggestedUsers = async () => {
-        try {
-            setLoading(true);
-            const response = await axios.get(`${CONFIG.apiUrl}/usersearch/suggested`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
-            if (response.data.success) {
-                if (response.data.users && response.data.users.length > 0) {
-                    setSuggestedUsers(response.data.users);
-                } else {
-                    // Fallback: If no suggested users, get all users with a limit
-                    const fallbackResponse = await axios.get(`${CONFIG.apiUrl}/usersearch?limit=10`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (fallbackResponse.data.success) {
-                        setSuggestedUsers(fallbackResponse.data.users);
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Error loading suggested users:', error);
-            if (error.response?.status === 401) {
-                handleTokenExpiry();
-                return;
-            }
-            // If suggested users fails, try to get all users as fallback
-            try {
-                const fallbackResponse = await axios.get(`${CONFIG.apiUrl}/usersearch?limit=10`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (fallbackResponse.data.success) {
-                    setSuggestedUsers(fallbackResponse.data.users);
-                } else {
-                    toast.error('Failed to load suggested candidates');
-                }
-            } catch (fallbackError) {
-                console.error('Fallback error:', fallbackError);
-                if (fallbackError.response?.status === 401) {
-                    handleTokenExpiry();
-                    return;
-                }
-                toast.error('Failed to load suggested candidates');
-            }
-        } finally {
-            setLoading(false);
-        }
+    const handleShowAllCandidates = () => {
+        // Clear all search criteria to show suggested users
+        setKeyword('');
+        setSkills('');
+        setLocation('');
+        setLanguages([]);
+        setQualifications([]);
+        setJobTypes([]);
+        setWorkEnv([]);
+        setCurrentPage(1);
+        setViewingProfile(false);
     };
     
-    const handleShowAllCandidates = async () => {
-        try {
-            setLoading(true);
-            setViewingProfile(false);
-            console.log(token);
-            const response = await axios.get(`${CONFIG.apiUrl}/usersearch?limit=50&page=1`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
-            if (response.data && response.data.success) {
-                setUsers(response.data.users);
-                // Use the pagination info from the backend response
-                setTotalPages(response.data.totalPages || Math.ceil(response.data.count / 10));
-                setCurrentPage(response.data.currentPage || 1);
-            }
-        } catch (error) {
-            console.error('Error loading all candidates:', error);
-            if (error.response?.status === 401) {
-                handleTokenExpiry();
-                return;
-            }
-            toast.error('Failed to load all candidates');
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    const handleSearch = async (e) => {
+    const handleSearch = (e) => {
         e?.preventDefault();
-        
-        try {
-            setLoading(true);
-            setViewingProfile(false);
-            
-            // Build query parameters
-            const params = new URLSearchParams();
-            if (keyword) params.append('keyword', keyword);
-            if (skills) params.append('skills', skills);
-            if (location) params.append('location', location);
-            if (languages.length > 0) params.append('languages', languages.join(','));
-            if (qualifications.length > 0) params.append('qualifications', qualifications.join(','));
-            if (jobTypes.length > 0) params.append('jobTypes', jobTypes.join(','));
-            if (workEnv.length > 0) params.append('workEnv', workEnv.join(','));
-            params.append('page', currentPage);
-            
-            const response = await axios.get(`${CONFIG.apiUrl}/usersearch?${params.toString()}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
-            if (response.data.success) {
-                setUsers(response.data.users);
-                setTotalPages(response.data.totalPages);
-                setCurrentPage(response.data.currentPage);
-            }
-        } catch (error) {
-            console.error('Error searching users:', error);
-            if (error.response?.status === 401) {
-                handleTokenExpiry();
-                return;
-            }
-            toast.error('Failed to search for candidates');
-        } finally {
-            setLoading(false);
-        }
+        setViewingProfile(false);
+        // React Query will automatically refetch when searchParams change
     };
     
-    const viewUserProfile = async (userId) => {
-        try {
-            setLoading(true);
-            
-            const response = await axios.get(`${CONFIG.apiUrl}/usersearch/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
-            if (response.data.success) {
-                setUserProfile(response.data.user);
-                setViewingProfile(true);
-            }
-        } catch (error) {
-            console.error('Error loading user profile:', error);
-            if (error.response?.status === 401) {
-                handleTokenExpiry();
-                return;
-            }
-            toast.error('Failed to load candidate profile');
-        } finally {
-            setLoading(false);
-        }
+    const viewUserProfile = (userId) => {
+        setSelectedUserId(userId);
+        setViewingProfile(true);
     };
     
     const startConversation = async (userId) => {
@@ -573,13 +486,13 @@ const SearchEmployee = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-2xl font-bold mb-6">Find Candidates</h1>
-            {/* Show All Candidates Button */}
+            {/* Clear Search Button */}
             <div className="mb-4">
                 <button
                     onClick={handleShowAllCandidates}
                     className="bg-gray-300 px-4 py-2 hover:bg-blue-800 hover:text-white w-max"
                 >
-                    Show All Candidates
+                    {hasSearchCriteria ? 'Clear Search & Show All' : 'Show All Candidates'}
                 </button>
             </div>
             
@@ -732,26 +645,26 @@ const SearchEmployee = () => {
                 <>
                     {users.length > 0 ? (
                         <>
-                            <h2 className="text-xl font-semibold mb-4">Search Results ({users.length})</h2>
+                            <h2 className="text-xl font-semibold mb-4">
+                                {hasSearchCriteria ? `Search Results (${users.length})` : `All Candidates (${users.length})`}
+                            </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {users.map(user => renderUserCard(user))}
                             </div>
                             {renderPagination()}
                         </>
                     ) : (
-                        <div>
-                            <h2 className="text-xl font-semibold mb-4">Suggested Candidates</h2>
-                            {suggestedUsers.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {suggestedUsers.map(user => renderUserCard(user))}
-                                </div>
-                            ) : (
-                                <div className="bg-gray-50 p-8 text-center rounded-lg">
-                                    <AiOutlineUser size={48} className="mx-auto text-gray-400 mb-4" />
-                                    <h3 className="text-lg font-medium text-gray-700 mb-2">No candidates found</h3>
-                                    <p className="text-gray-500">Use the search form to find candidates that match your requirements.</p>
-                                </div>
-                            )}
+                        <div className="bg-gray-50 p-8 text-center rounded-lg">
+                            <AiOutlineUser size={48} className="mx-auto text-gray-400 mb-4" />
+                            <h3 className="text-lg font-medium text-gray-700 mb-2">
+                                {hasSearchCriteria ? 'No candidates found' : 'No candidates available'}
+                            </h3>
+                            <p className="text-gray-500">
+                                {hasSearchCriteria 
+                                    ? 'Try adjusting your search criteria to find more candidates.' 
+                                    : 'No candidates are currently registered in the system.'
+                                }
+                            </p>
                         </div>
                     )}
                 </>

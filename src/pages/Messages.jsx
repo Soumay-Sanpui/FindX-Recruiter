@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
+import { useJobDetails } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
 import { Send, ArrowLeft, Search, User, Calendar } from 'lucide-react';
 import api from '../services/api';
@@ -10,9 +11,12 @@ const Messages = () => {
     const { employer, isAuthenticated } = useEmployerStore();
     const navigate = useNavigate();
     const { jobId } = useParams();
-    const [loading, setLoading] = useState(true);
+    
+    // Use React Query for job data
+    const { data: jobDetails, isLoading: jobLoading, error: jobError } = useJobDetails(jobId);
+    
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [jobDetails, setJobDetails] = useState(null);
     const [applicants, setApplicants] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -107,7 +111,6 @@ const Messages = () => {
                     // Fetch specific job
                     const response = await api.get(`/jobs/${jobId}`);
                     if (response.data && response.data.success) {
-                        setJobDetails(response.data.job);
                         setApplicants(response.data.job.applicants || []);
                     } else {
                         setError('Failed to load job details');

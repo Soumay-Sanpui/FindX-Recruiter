@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
-import { jobAPI } from '../services/api';
+import { useCreateJob } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
 import Timeline from '../components/jobPosting/Timeline';
 import ClassifySection from '../components/jobPosting/ClassifySection';
@@ -12,7 +12,7 @@ import ManageSection from '../components/jobPosting/ManageSection';
 const JobPosting = () => {
     const { employer } = useEmployerStore();
     const navigate = useNavigate();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const createJobMutation = useCreateJob();
     const [currentStage, setCurrentStage] = useState('Classify');
     const [formErrors, setFormErrors] = useState({});
     const [formData, setFormData] = useState({
@@ -155,8 +155,6 @@ const JobPosting = () => {
         }
         
         try {
-            setIsSubmitting(true);
-            
             const jobData = {
                 ...formData,
                 from: Number(formData.from),
@@ -166,13 +164,11 @@ const JobPosting = () => {
                 postedBy: employer._id
             };
             
-            const response = await jobAPI.createJob(jobData);
+            await createJobMutation.mutateAsync(jobData);
             navigate('/my-jobs');
         } catch (error) {
             console.error('Error posting job:', error);
-            alert('Error posting job. Please try again.');
-        } finally {
-            setIsSubmitting(false);
+            // Error handling is done by the mutation hook
         }
     };
 
@@ -209,7 +205,7 @@ const JobPosting = () => {
                         formData={formData}
                         handleStageChange={handleStageChange}
                         handleSubmit={handleSubmit}
-                        isSubmitting={isSubmitting}
+                        isSubmitting={createJobMutation.isPending}
                     />
                 );
             default:

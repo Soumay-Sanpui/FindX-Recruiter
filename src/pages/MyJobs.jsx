@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
-import { jobAPI } from '../services/api';
+import { useMyPostedJobs, useUpdateApplicationStatus, useUpdateJobStatus } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
 import { Plus, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, Send, MessageCircle } from 'lucide-react';
 
 const MyJobs = () => {
     const { employer, isAuthenticated } = useEmployerStore();
     const navigate = useNavigate();
-    const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    
+    // Use React Query hooks instead of manual state management
+    const { data: jobs = [], isLoading: loading, error } = useMyPostedJobs();
+    const updateApplicationStatusMutation = useUpdateApplicationStatus();
+    const updateJobStatusMutation = useUpdateJobStatus();
+    
     const [selectedJob, setSelectedJob] = useState(null);
     const [showApplicants, setShowApplicants] = useState(false);
     const [showInterviewModal, setShowInterviewModal] = useState(false);
@@ -26,35 +29,11 @@ const MyJobs = () => {
     const [rejectionReason, setRejectionReason] = useState('');
     const [blockReason, setBlockReason] = useState('');
 
-    useEffect(() => {
-        // Redirect to login if not authenticated
-        if (!isAuthenticated) {
-            navigate('/employer-login');
-            return;
-        }
-        
-        const fetchJobs = async () => {
-            try {
-                setLoading(true);
-                
-                const response = await jobAPI.getMyPostedJobs();
-                
-                if (response && response.success) {
-                    setJobs(response.jobs || []);
-                } else {
-                    setJobs([]);
-                    console.warn("No jobs data in response:", response);
-                }
-            } catch (error) {
-                console.error('Error fetching jobs:', error);
-                setError(typeof error === 'string' ? error : (error.message || 'Failed to fetch jobs'));
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchJobs();
-    }, [isAuthenticated, navigate]);
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+        navigate('/employer-login');
+        return null;
+    }
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -122,59 +101,23 @@ const MyJobs = () => {
         if (!selectedJob) return;
         
         try {
-            const response = await jobAPI.updateApplicationStatus(
-                selectedJob._id, 
-                applicationId, 
+            await updateApplicationStatusMutation.mutateAsync({
+                jobId: selectedJob._id,
+                applicationId,
                 status,
                 additionalData
-            );
+            });
             
-            if (response && response.success) {
-                // Update the job in the local state
-                const updatedJobs = jobs.map(job => {
-                    if (job._id === selectedJob._id) {
-                        const updatedApplicants = job.applicants.map(applicant => {
-                            if (applicant._id === applicationId) {
-                                return { 
-                                    ...applicant, 
-                                    status,
-                                    ...(additionalData.interviewDetails && { interviewDetails: additionalData.interviewDetails }),
-                                    ...(additionalData.rejectionReason && { rejectionReason: additionalData.rejectionReason }),
-                                    ...(additionalData.blockReason && { 
-                                        blockReason: additionalData.blockReason,
-                                        isBlocked: true 
-                                    })
-                                };
-                            }
-                            return applicant;
-                        });
-                        
-                        return { ...job, applicants: updatedApplicants };
-                    }
-                    return job;
-                });
-                
-                setJobs(updatedJobs);
-                
-                // Update the selected job
-                const updatedJob = updatedJobs.find(job => job._id === selectedJob._id);
-                if (updatedJob) {
-                    setSelectedJob(updatedJob);
-                }
-                
-                // Close any open modals
-                setShowInterviewModal(false);
-                setShowRejectModal(false);
-                setShowBlockModal(false);
-                setSelectedApplicant(null);
-                
-                alert(`Application status updated to ${status}`);
-            } else {
-                alert('Failed to update application status');
-            }
+            // Close any open modals
+            setShowInterviewModal(false);
+            setShowRejectModal(false);
+            setShowBlockModal(false);
+            setSelectedApplicant(null);
+            
+            // The cache will be automatically updated by the mutation hook
         } catch (error) {
             console.error('Error updating application status:', error);
-            alert('Failed to update application status');
+            // Error is already handled by the mutation hook
         }
     };
 
