@@ -14,6 +14,14 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     // Add state variables for dropdown sections
     const [showBasicQuestions, setShowBasicQuestions] = useState(false);
     const [showAdvancedQuestions, setShowAdvancedQuestions] = useState(false);
+    const [showQuestionOptions, setShowQuestionOptions] = useState({});
+    const [showSectionDropdowns, setShowSectionDropdowns] = useState({
+        section1: false,
+        section2: false,
+        section3: false,
+        section4: false,
+        section5: false
+    });
     
     // Calculate total cost
     const premiumCost = 750;
@@ -22,23 +30,397 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
     const totalCost = premiumCost + immediateCost + referencesCost + notificationCost;
 
-    // Split questions into basic and advanced
-    const basicQuestions = [
-        "Which of the following statements best describes your right to work in Australia?",
-        "How many years experience do you have in similar roles?",
-        "Do you have driver license?",
-        "What's your expected annual base salary?"
-    ];
+    // Updated basic questions with options from the Common question first set.txt
+    const basicQuestionsWithOptions = [
+        // 🔹 SECTION 1: WORK RIGHTS & LEGAL ELIGIBILITY
+        {
+          question: "What best describes your right to work in Australia?",
+          options: [
+            "I am an Australian citizen",
+            "I am a permanent resident",
+            "I hold a valid temporary work visa with no restrictions",
+            "I hold a valid temporary work visa with restrictions",
+            "I am on a student visa with limited work rights",
+            "I am on a working holiday visa",
+            "I require sponsorship to work in Australia",
+            "Other (please specify)"
+          ]
+        },
+        {
+          question: "Are you legally allowed to work with children or vulnerable people?",
+          options: [
+            "Yes – I have a current Working with Children Check (WWCC)",
+            "No – but I'm willing to obtain one",
+            "No – and I'm not planning to work in such roles"
+          ]
+        },
+        {
+          question: "Do you have a current Police Check?",
+          options: [
+            "Yes – issued within the last 6 months",
+            "Yes – issued within the last 12 months",
+            "Yes – issued more than 12 months ago",
+            "No, but I'm willing to obtain one",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have a current Australian driver's licence?",
+          options: [
+            "Yes – full unrestricted licence",
+            "Yes – provisional licence",
+            "Yes – international licence",
+            "No"
+          ]
+        },
+        {
+          question: "Do you own or have regular access to a car?",
+          options: [
+            "Yes – I own a car",
+            "Yes – I have regular access to a car",
+            "No"
+          ]
+        },
+      
+        // 🔹 SECTION 2: AVAILABILITY & LOGISTICS
+        {
+          question: "How much notice are you required to give your current employer?",
+          options: [
+            "I'm available immediately",
+            "1 week",
+            "2 weeks",
+            "3 weeks",
+            "4 weeks",
+            "5 weeks",
+            "6 or more weeks",
+            "Other (please specify)"
+          ]
+        },
+        {
+          question: "What is your availability during weekdays?",
+          options: [
+            "Available full weekdays (Mon–Fri)",
+            "Available only mornings",
+            "Available only afternoons",
+            "Available only evenings",
+            "Varies – schedule-dependent",
+            "Not available on weekdays"
+          ]
+        },
+        {
+          question: "Are you available to work weekends?",
+          options: [
+            "Yes – available both Saturdays and Sundays",
+            "Yes – available only Saturdays",
+            "Yes – available only Sundays",
+            "Yes – on a rotating weekend basis",
+            "No"
+          ]
+        },
+        {
+          question: "Are you available to work on public holidays?",
+          options: [
+            "Yes – available any public holiday",
+            "Yes – available only on selected public holidays",
+            "No"
+          ]
+        },
+        {
+          question: "Are you willing to relocate for this role?",
+          options: [
+            "Yes – I'm open to relocating anywhere in Australia",
+            "Yes – I'm willing to relocate within my state",
+            "No – I prefer to work in my current location",
+            "I already live in the region"
+          ]
+        },
+        {
+          question: "Are you open to travel for work-related purposes?",
+          options: [
+            "Yes – frequently",
+            "Yes – occasionally",
+            "No – I prefer local or remote work"
+          ]
+        },
+        {
+          question: "Are you open to shift-based work (e.g., morning/night shifts)?",
+          options: [
+            "Yes – open to all shift types",
+            "Yes – but prefer day shifts",
+            "Yes – but prefer night shifts",
+            "No"
+          ]
+        },
+      
+        // 🔹 SECTION 3: WORK PREFERENCES
+        {
+          question: "What type of work are you looking for?",
+          options: [
+            "Full-time",
+            "Part-time",
+            "Casual",
+            "Contract/Freelance",
+            "Internship",
+            "Open to all types"
+          ]
+        },
+        {
+          question: "Are you currently studying or planning to study soon?",
+          options: [
+            "Yes – I'm studying part-time",
+            "Yes – I'm studying full-time",
+            "No – but planning to enrol soon",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have experience working in remote or hybrid environments?",
+          options: [
+            "Yes – fully remote",
+            "Yes – hybrid (some days in office, some remote)",
+            "No – only onsite/in-person roles",
+            "No – but I'm open to it"
+          ]
+        },
+        {
+          question: "Are you open to completing additional training if the role requires it?",
+          options: [
+            "Yes – open to ongoing professional development",
+            "Yes – if it's job-relevant and provided by the employer",
+            "No"
+          ]
+        },
+      
+        // 🔹 SECTION 4: EDUCATION & CERTIFICATIONS
+        {
+          question: "What is your highest completed level of education?",
+          options: [
+            "No formal education",
+            "High school (Year 12 or equivalent)",
+            "Certificate I/II/III/IV",
+            "Diploma or Advanced Diploma",
+            "Bachelor's degree",
+            "Postgraduate degree (Master's/PhD)",
+            "Currently studying"
+          ]
+        },
+        {
+          question: "Do you have any industry-specific certifications?",
+          options: [
+            "Yes – [please specify]",
+            "No – but I'm working towards it",
+            "No"
+          ]
+        },
+        {
+          question: "Have you completed any safety training or certifications (e.g., First Aid, White Card)?",
+          options: [
+            "Yes – First Aid",
+            "Yes – White Card",
+            "Yes – Other (please specify)",
+            "No – but I'm planning to",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have a forklift or heavy vehicle licence?",
+          options: [
+            "Yes – Forklift licence",
+            "Yes – Heavy Rigid (HR) licence",
+            "Yes – Multi Combination (MC) or other",
+            "No – but I'm willing to get licensed",
+            "No"
+          ]
+        },
+      
+        // 🔹 SECTION 5: COMMUNICATION & LANGUAGE
+        {
+          question: "What is your level of proficiency in English?",
+          options: [
+            "Native speaker",
+            "Fluent",
+            "Intermediate",
+            "Basic",
+            "Not proficient"
+          ]
+        },
+        {
+          question: "Are you fluent in any languages other than English?",
+          options: [
+            "Yes – [please specify]",
+            "No"
+          ]
+        },
+        {
+          question: "Are you comfortable using workplace technology/tools (e.g., Zoom, Slack, CRM)?",
+          options: [
+            "Yes – highly proficient",
+            "Yes – basic knowledge",
+            "No – but willing to learn",
+            "No – I prefer non-digital workflows"
+          ]
+        },
+        {
+          question: "Do you have customer service experience?",
+          options: [
+            "Yes – in-person (e.g. retail, hospitality)",
+            "Yes – remote/phone-based (e.g. call centre)",
+            "Yes – both in-person and remote",
+            "No – but I'm willing to learn",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have experience handling cash or point-of-sale (POS) systems?",
+          options: [
+            "Yes – extensive cash handling and POS experience",
+            "Yes – some experience",
+            "No – but I'm willing to learn",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have experience with customer conflict resolution?",
+          options: [
+            "Yes – extensive experience handling complaints and escalations",
+            "Yes – some experience",
+            "No – but I've been trained in it",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have previous team management or leadership experience?",
+          options: [
+            "Yes – I have managed large teams (10+ people)",
+            "Yes – I have managed small teams (2–9 people)",
+            "Yes – but only on short-term projects",
+            "No – but I have mentored others",
+            "No – but I'm interested in leadership roles",
+            "No"
+          ]
+        },
+        {
+          question: "Do you have experience working in multicultural teams or diverse environments?",
+          options: [
+            "Yes – regularly",
+            "Yes – occasionally",
+            "No – but I'm comfortable doing so",
+            "No"
+          ]
+        },
+        {
+          question: "Are you comfortable working in high-pressure environments?",
+          options: [
+            "Yes – I thrive in fast-paced settings",
+            "Yes – I can manage under pressure when required",
+            "Somewhat – depends on the task",
+            "No – I prefer steady-paced work environments"
+          ]
+        },
+        {
+          question: "Are you physically fit for roles that require manual labour or standing for long periods?",
+          options: [
+            "Yes – I can handle heavy lifting and physical work",
+            "Yes – I'm comfortable standing or walking long hours",
+            "Somewhat – I have mild limitations",
+            "No – I require a seated/desk-based role"
+          ]
+        },
+        {
+          question: "Are you comfortable using or wearing personal protective equipment (PPE)?",
+          options: [
+            "Yes – I'm trained in PPE use",
+            "Yes – I'm comfortable following PPE protocols",
+            "No – but I'm willing to comply",
+            "No"
+          ]
+        },
+        {
+          question: "Are you comfortable working in environments that require confidentiality (e.g., healthcare, legal)?",
+          options: [
+            "Yes – I've worked in such settings before",
+            "Yes – I understand confidentiality practices",
+            "No – but I'm willing to learn",
+            "No"
+          ]
+        },
+        {
+          question: "Have you worked in compliance-heavy industries (e.g., finance, insurance, healthcare)?",
+          options: [
+            "Yes – extensive experience",
+            "Yes – some experience",
+            "No – but willing to undergo training",
+            "No"
+          ]
+        },
+      
+        // This question is handled via UI dropdown/input
+        {
+          question: "What's your expected annual base salary?",
+          options: []
+        },
+      
+        {
+          question: "Are you willing to undergo a pre-employment medical check?",
+          options: [
+            "Yes – no issues",
+            "Yes – but I have medical conditions to declare",
+            "No"
+          ]
+        }
+      ];
+      
     
     const advancedQuestions = [
         "Are you willing to undergo pre-employment medical check?",
-        "How much notice are you required to give your current employer?",
-        "Do you have a current Police Check (National Police Certificate) for employment?",
-        "Do you have a current Australian driver's license?",
-        "Do you own or have regular access to a car?",
-        "Are you available to work outside holidays?",
-        "Are you willing to relocate for this role?"
+        "Are you available to work on public holidays?",
+        "Are you willing to relocate for this role?",
+        "Are you open to travel for work-related purposes?",
+        "Are you open to shift-based work (e.g., morning/night shifts)?",
+        "What type of work are you looking for?",
+        "Are you currently studying or planning to study soon?"
     ];
+
+    // Group questions by sections
+    const questionSections = {
+        section1: {
+            title: "Work Rights & Legal Eligibility",
+            questions: basicQuestionsWithOptions.slice(0, 5) // Questions 1-5
+        },
+        section2: {
+            title: "Availability & Logistics", 
+            questions: basicQuestionsWithOptions.slice(5, 12) // Questions 6-12
+        },
+        section3: {
+            title: "Work Preferences",
+            questions: basicQuestionsWithOptions.slice(12, 16) // Questions 13-16
+        },
+        section4: {
+            title: "Education & Certifications", 
+            questions: basicQuestionsWithOptions.slice(16, 20) // Questions 17-20
+        },
+        section5: {
+            title: "Communication & Languages",
+            questions: basicQuestionsWithOptions.slice(20) // Questions 21 to end
+        }
+    };
+
+    // Toggle section dropdown visibility
+    const toggleSectionDropdown = (sectionKey) => {
+        setShowSectionDropdowns(prev => ({
+            ...prev,
+            [sectionKey]: !prev[sectionKey]
+        }));
+    };
+
+    // Toggle question options visibility
+    const toggleQuestionOptions = (sectionKey, questionIndex) => {
+        const key = `${sectionKey}-${questionIndex}`;
+        setShowQuestionOptions(prev => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
+    };
 
     const handleLogoUpload = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -136,7 +518,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     // Initialize basic questions on component mount
     useEffect(() => {
         if (!formData.jobQuestions || formData.jobQuestions.length === 0) {
-            const allBasicQuestions = [...basicQuestions];
+            const allBasicQuestions = basicQuestionsWithOptions.map(q => q.question);
             handleChange({
                 target: {
                     name: 'jobQuestions',
@@ -146,9 +528,10 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         } else {
             // Ensure all basic questions are included
             const currentQuestions = [...(formData.jobQuestions || [])];
+            const basicQuestionTexts = basicQuestionsWithOptions.map(q => q.question);
             let updated = false;
             
-            basicQuestions.forEach(basicQuestion => {
+            basicQuestionTexts.forEach(basicQuestion => {
                 if (!currentQuestions.includes(basicQuestion)) {
                     currentQuestions.push(basicQuestion);
                     updated = true;
@@ -164,7 +547,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 });
             }
         }
-    }, [basicQuestions]);
+    }, []);
 
     return (
         <div className="flex flex-col lg:flex-row bg-white shadow-lg border-2 border-blue-800">
@@ -341,15 +724,99 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         
                         {showBasicQuestions && (
                             <div className="mt-4 bg-blue-50 p-4 rounded-md border border-blue-100">
-                                <div className="space-y-3">
-                                    {basicQuestions.map((question, index) => (
-                                        <div key={index} className="flex items-center">
-                                            <div className="flex-shrink-0 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-                                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                <div className="space-y-4">
+                                    {Object.entries(questionSections).map(([sectionKey, section]) => (
+                                        <div key={sectionKey} className="bg-white rounded-md border border-blue-200 overflow-hidden">
+                                            {/* Section Header */}
+                                            <div 
+                                                className="flex items-center justify-between cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                                onClick={() => toggleSectionDropdown(sectionKey)}
+                                            >
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                                        <span className="text-white text-sm font-bold">
+                                                            {sectionKey.replace('section', '')}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-base font-semibold text-gray-800">
+                                                            Section {sectionKey.replace('section', '')}: {section.title}
+                                                        </h4>
+                                                        <p className="text-sm text-gray-600">
+                                                            {section.questions.length} questions
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <svg 
+                                                    className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                                                        showSectionDropdowns[sectionKey] ? 'rotate-180' : ''
+                                                    }`}
+                                                    fill="none" 
+                                                    stroke="currentColor" 
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="2"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                                 </svg>
                                             </div>
-                                            <span className="text-gray-700 font-medium">{question}</span>
+                                            
+                                            {/* Section Questions */}
+                                            {showSectionDropdowns[sectionKey] && (
+                                                <div className="p-4 space-y-3 border-t border-gray-200">
+                                                    {section.questions.map((questionObj, questionIndex) => (
+                                                        <div key={questionIndex} className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center flex-1">
+                                                                    <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center mr-3">
+                                                                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <span className="text-gray-700 font-medium text-sm">
+                                                                        {questionObj.question}
+                                                                    </span>
+                                                                </div>
+                                                                {questionObj.options && questionObj.options.length > 0 ? (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            toggleQuestionOptions(sectionKey, questionIndex);
+                                                                        }}
+                                                                        className="ml-3 p-2 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
+                                                                        title="View answer options"
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="ml-3 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                        Candidate will fill from app
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            {/* Question Options Dropdown */}
+                                                            {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
+                                                                <div className="mt-3 pl-9 pr-4">
+                                                                    <div className="bg-white rounded-md p-3 border border-gray-300">
+                                                                        <p className="text-xs font-medium text-gray-700 mb-2">Answer options:</p>
+                                                                        <ul className="space-y-1">
+                                                                            {questionObj.options.map((option, optionIndex) => (
+                                                                                <li key={optionIndex} className="text-xs text-gray-600 flex items-center">
+                                                                                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
+                                                                                    {option}
+                                                                                </li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

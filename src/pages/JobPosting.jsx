@@ -141,11 +141,9 @@ const JobPosting = () => {
         setFormErrors({});
     };
 
-    const handleSubmit = async (e) => {
-        if (e) e.preventDefault();
-        
-        // Validate the current section
-        if (currentStage === 'Classify' && !validateClassifySection()) {
+    const handleSubmit = async () => {
+        if (!validateClassifySection()) {
+            setCurrentStage('Classify');
             return;
         }
         
@@ -155,14 +153,99 @@ const JobPosting = () => {
         }
         
         try {
+            // Convert jobQuestions to applicationQuestions format
+            const applicationQuestions = formData.jobQuestions?.map(question => {
+                // Define options for each question
+                const questionOptionsMap = {
+                    "Which of the following statements best describes your right to work in Australia?": [
+                        "I am an Australian citizen",
+                        "I am a permanent resident",
+                        "I have a valid work visa",
+                        "I am not authorized to work in Australia"
+                    ],
+                    "How many years experience do you have in similar roles?": [
+                        "Less than 1 year",
+                        "1-2 years",
+                        "3-5 years",
+                        "5-10 years",
+                        "More than 10 years"
+                    ],
+                    "Do you have driver license?": [
+                        "Yes, I have a valid driver's license",
+                        "No, I don't have a driver's license",
+                        "I have a learner's permit"
+                    ],
+                    "What's your expected annual base salary?": [
+                        "Under $40,000",
+                        "$40,000 - $60,000",
+                        "$60,000 - $80,000",
+                        "$80,000 - $100,000",
+                        "$100,000 - $120,000",
+                        "Over $120,000"
+                    ],
+                    "Are you willing to undergo pre-employment medical check?": [
+                        "Yes",
+                        "No",
+                        "Depends on the requirements"
+                    ],
+                    "How much notice are you required to give your current employer?": [
+                        "No notice required",
+                        "1 week",
+                        "2 weeks",
+                        "1 month",
+                        "More than 1 month"
+                    ],
+                    "Do you have a current Police Check (National Police Certificate) for employment?": [
+                        "Yes, current within 12 months",
+                        "Yes, but older than 12 months",
+                        "No, but willing to obtain one",
+                        "No"
+                    ],
+                    "Do you have a current Australian driver's license?": [
+                        "Yes, full license",
+                        "Yes, provisional license",
+                        "Yes, learner's permit",
+                        "No"
+                    ],
+                    "Do you own or have regular access to a car?": [
+                        "Yes, I own a car",
+                        "Yes, I have regular access to a car",
+                        "No, but I can arrange transport",
+                        "No"
+                    ],
+                    "Are you available to work outside holidays?": [
+                        "Yes, always available",
+                        "Yes, with advance notice",
+                        "Limited availability",
+                        "No"
+                    ],
+                    "Are you willing to relocate for this role?": [
+                        "Yes, willing to relocate anywhere",
+                        "Yes, within the same state/region",
+                        "Yes, within the same city",
+                        "No, not willing to relocate"
+                    ]
+                };
+
+                return {
+                    question: question,
+                    options: questionOptionsMap[question] || ["Yes", "No", "Maybe"],
+                    required: true
+                };
+            }) || [];
+
             const jobData = {
                 ...formData,
                 from: Number(formData.from),
                 to: Number(formData.to),
                 jobSkills: formData.jobSkills.split(',').map(skill => skill.trim()),
                 jobKeywords: formData.jobKeywords.split(',').map(keyword => keyword.trim()),
+                applicationQuestions: applicationQuestions,
                 postedBy: employer._id
             };
+            
+            // Remove the old jobQuestions field
+            delete jobData.jobQuestions;
             
             await createJobMutation.mutateAsync(jobData);
             navigate('/my-jobs');

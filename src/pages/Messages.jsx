@@ -3,9 +3,8 @@ import { useNavigate, useParams } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { useJobDetails } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
-import { Send, ArrowLeft, Search, User, Calendar } from 'lucide-react';
+import { Send, ArrowLeft, Search, User, Calendar, RefreshCw } from 'lucide-react';
 import api from '../services/api';
-import socketService from '../services/socketService';
 
 const Messages = () => {
     const { employer, isAuthenticated } = useEmployerStore();
@@ -23,71 +22,41 @@ const Messages = () => {
     const [newMessage, setNewMessage] = useState('');
     const [sendingMessage, setSendingMessage] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
     const messagesEndRef = useRef(null);
     const messageContainerRef = useRef(null);
-
-    // Initialize socket connection
-    useEffect(() => {
-        if (employer && employer._id) {
-            // Initialize socket
-            socketService.init();
-            
-            // Join as employer
-            socketService.joinUser(employer._id, 'Employer');
-            
-            // Set up socket event listeners
-            const onReceiveMessage = (message) => {
-                if (selectedApplicant && 
-                    ((message.from === employer._id && message.to === selectedApplicant.user._id) || 
-                     (message.to === employer._id && message.from === selectedApplicant.user._id))) {
-                    setMessages(prev => [...prev, message]);
-                    // Mark message as read
-                    socketService.markAsRead(message._id);
-                    // Scroll to bottom
-                    setTimeout(scrollToBottom, 100);
-                }
-            };
-            
-            const onConversationHistory = (data) => {
-                setMessages(data.messages || data);
-                setLoading(false);
-                // Scroll to bottom after loading messages
-                setTimeout(scrollToBottom, 100);
-            };
-
-            const onMessageError = (error) => {
-                console.error('Message error:', error);
-                alert(error.error || 'Failed to send message');
-                setSendingMessage(false);
-            };
-            
-            // Register socket event listeners
-            const unsubscribeReceiveMessage = socketService.onReceiveMessage(onReceiveMessage);
-            const unsubscribeConversationHistory = socketService.onConversationHistory(onConversationHistory);
-            const unsubscribeMessageError = socketService.onMessageError(onMessageError);
-            const unsubscribeMessageSent = socketService.onMessageSent((message) => {
-                if (!selectedApplicant) return;
-                
-                if (message.from === employer._id && message.to === selectedApplicant.user._id) {
-                    setMessages(prev => [...prev, message]);
-                    setTimeout(scrollToBottom, 100);
-                }
-            });
-            
-            // Clean up on unmount
-            return () => {
-                unsubscribeReceiveMessage();
-                unsubscribeConversationHistory();
-                unsubscribeMessageError();
-                unsubscribeMessageSent();
-            };
-        }
-    }, [employer, selectedApplicant]);
+    const pollingInterval = useRef(null);
 
     // Scroll to bottom of messages
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    // Set up polling for messages when applicant is selected
+    useEffect(() => {
+        if (selectedApplicant && employer) {
+            // Load initial messages
+            loadConversationHistory();
+            
+            // Set up polling for new messages every 3 seconds
+            pollingInterval.current = setInterval(() => {
+                loadConversationHistory(false); // Silent refresh
+            }, 3000);
+        } else {
+            // Clear polling when no applicant selected
+            if (pollingInterval.current) {
+                clearInterval(pollingInterval.current);
+                pollingInterval.current = null;
+            }
+        }
+
+        return () => {
+            if (pollingInterval.current) {
+                clearInterval(pollingInterval.current);
+                pollingInterval.current = null;
+            }
+        };
+    }, [selectedApplicant, employer]);
 
     useEffect(() => {
         // Check if the user is authenticated
@@ -102,72 +71,79 @@ const Messages = () => {
             return;
         }
 
-        // Fetch job details and applicants
         const fetchJobData = async () => {
+            if (!jobId || !employer) return;
+            
+            setLoading(true);
+            setError(null);
+            
             try {
-                setLoading(true);
+                // Fetch job details if not already loaded
+                let job = jobDetails?.job;
                 
-                if (jobId) {
-                    // Fetch specific job
+                if (!job) {
                     const response = await api.get(`/jobs/${jobId}`);
-                    if (response.data && response.data.success) {
-                        setApplicants(response.data.job.applicants || []);
-                    } else {
-                        setError('Failed to load job details');
-                    }
-                } else {
-                    // Fetch all jobs posted by the employer
-                    const response = await api.get('/jobs/my/posted');
-                    if (response.data && response.data.success) {
-                        const allApplicants = [];
-                        const jobs = response.data.jobs || [];
-                        
-                        // Collect all applicants from all jobs
-                        jobs.forEach(job => {
-                            if (job.applicants && job.applicants.length > 0) {
-                                job.applicants.forEach(applicant => {
-                                    allApplicants.push({
-                                        ...applicant,
-                                        jobTitle: job.jobTitle,
-                                        jobId: job._id
-                                    });
-                                });
-                            }
-                        });
-                        
-                        setApplicants(allApplicants);
-                    } else {
-                        setError('Failed to load jobs');
-                    }
+                    job = response.data.job;
                 }
+                
+                if (!job) {
+                    setError('Job not found');
+                    return;
+                }
+                
+                // Check if the employer owns this job
+                if (job.postedBy._id !== employer._id && job.postedBy !== employer._id) {
+                    setError('You do not have permission to view messages for this job');
+                    return;
+                }
+                
+                // Extract applicants with user details
+                const applicantsWithDetails = job.applicants.map(applicant => ({
+                    ...applicant,
+                    jobId: job._id,
+                    jobTitle: job.jobTitle
+                }));
+                
+                setApplicants(applicantsWithDetails);
+                
             } catch (err) {
                 console.error('Error fetching job data:', err);
-                setError('An error occurred while loading data');
+                setError('Failed to load job data');
             } finally {
                 setLoading(false);
             }
         };
 
         fetchJobData();
-    }, [isAuthenticated, navigate, employer, jobId]);
+    }, [isAuthenticated, navigate, employer, jobId, jobDetails]);
 
-    useEffect(() => {
-        // Fetch messages when an applicant is selected
+    // Load conversation history between employer and selected applicant
+    const loadConversationHistory = async (showLoading = true) => {
         if (!selectedApplicant || !employer) return;
         
-        setLoading(true);
+        if (showLoading) setLoading(true);
         
-        // Request conversation history from socket with job ID
-        const jobIdToUse = selectedApplicant.jobId || jobId;
-        socketService.getConversation(employer._id, selectedApplicant.user._id, jobIdToUse);
-        
-    }, [selectedApplicant, employer]);
+        try {
+            const jobIdToUse = selectedApplicant.jobId || jobId;
+            const response = await api.get(`/messages/conversation/${employer._id}/${selectedApplicant.user._id}/${jobIdToUse}`);
+            
+            if (response.data && response.data.messages) {
+                setMessages(response.data.messages);
+                
+                // Scroll to bottom after loading messages
+                setTimeout(scrollToBottom, 100);
+            }
+        } catch (err) {
+            console.error('Error loading conversation:', err);
+            if (showLoading) {
+                setError('Failed to load conversation');
+            }
+        } finally {
+            if (showLoading) setLoading(false);
+        }
+    };
 
-    // Scroll to bottom when messages change
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
+    // Handle sending a new message
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !selectedApplicant || !employer) return;
         
@@ -184,18 +160,41 @@ const Messages = () => {
                 jobId: selectedApplicant.jobId || jobId
             };
             
-            // Send via socket
-            socketService.sendMessage(messageData);
+            // Send via HTTP API
+            const response = await api.post('/messages/employer/send', messageData);
             
-            // Clear the input
-            setNewMessage('');
+            if (response.data && response.data.success) {
+                // Clear the input
+                setNewMessage('');
+                
+                // Refresh conversation to show the new message
+                loadConversationHistory(false);
+            } else {
+                throw new Error(response.data?.message || 'Failed to send message');
+            }
             
-            // We'll get the message back from the socket
         } catch (err) {
             console.error('Error sending message:', err);
-            alert('Failed to send message');
+            setError('Failed to send message');
         } finally {
             setSendingMessage(false);
+        }
+    };
+
+    // Manual refresh function
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        if (selectedApplicant) {
+            await loadConversationHistory(false);
+        }
+        setRefreshing(false);
+    };
+
+    // Handle key press in message input
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
         }
     };
 
@@ -212,103 +211,139 @@ const Messages = () => {
         const date = new Date(dateString);
         return date.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
-            minute: '2-digit'
+            minute: '2-digit' 
         });
     };
 
     // Filter applicants based on search term
-    const filteredApplicants = applicants.filter(applicant => {
-        const name = applicant.user?.name || '';
-        return name.toLowerCase().includes(searchTerm.toLowerCase());
-    });
+    const filteredApplicants = applicants.filter(applicant => 
+        applicant.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        applicant.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    if (loading) {
+    if (jobLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-bl from-blue-200 via-blue-50 to-white">
+            <div className="min-h-screen bg-gray-50">
                 <DHeader employer={employer} />
-                <div className="container mx-auto px-8 py-8 flex justify-center items-center h-[70vh]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+                <div className="flex items-center justify-center h-96">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Loading job details...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (jobError || error) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <DHeader employer={employer} />
+                <div className="container mx-auto px-4 py-8">
+                    <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                        <div className="text-red-500 text-xl mb-4">⚠️</div>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-2">Error</h2>
+                        <p className="text-gray-600 mb-4">{error || jobError?.message || 'Something went wrong'}</p>
+                        <button
+                            onClick={() => navigate('/my-jobs')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                        >
+                            Back to My Jobs
+                        </button>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-bl from-blue-200 via-blue-50 to-white">
+        <div className="min-h-screen bg-gray-50">
             <DHeader employer={employer} />
-            <div className="container mx-auto px-4 py-8">
-                <div className="mb-6 flex items-center">
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="flex items-center text-blue-600 hover:text-blue-800 mr-4"
-                    >
-                        <ArrowLeft size={20} className="mr-1" />
-                        Back
-                    </button>
-                    <h1 className="text-3xl font-bold text-gray-800">
-                        {jobId && jobDetails ? `Messages for ${jobDetails.jobTitle}` : 'All Messages'}
-                    </h1>
-                </div>
-                
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {error}
+            
+            <div className="container mx-auto px-4 py-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center">
+                        <button
+                            onClick={() => navigate(`/job-details/${jobId}`)}
+                            className="mr-4 p-2 hover:bg-gray-200 rounded-full transition"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
+                            <p className="text-gray-600">{jobDetails?.job?.jobTitle}</p>
+                        </div>
                     </div>
-                )}
-                
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden grid grid-cols-1 md:grid-cols-3 h-[75vh]">
+                    
+                    {selectedApplicant && (
+                        <button
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-blue-400"
+                        >
+                            <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
                     {/* Applicants List - Left Side */}
-                    <div className="border-r border-gray-200 h-full flex flex-col overflow-hidden">
-                        {/* Search Header - Fixed */}
-                        <div className="p-4 border-b bg-white sticky top-0 z-10">
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h3 className="font-semibold text-gray-800 mb-3">
+                                Applicants ({filteredApplicants.length})
+                            </h3>
+                            
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Search size={18} className="text-gray-400" />
-                                </div>
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                                 <input
                                     type="text"
                                     placeholder="Search applicants..."
-                                    className="pl-10 pr-4 py-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
                         </div>
                         
-                        {/* Applicant List - Scrollable */}
                         <div className="flex-1 overflow-y-auto">
                             {filteredApplicants.length === 0 ? (
                                 <div className="p-6 text-center text-gray-500">
-                                    No applicants found
+                                    {applicants.length === 0 ? 'No applicants yet' : 'No applicants found'}
                                 </div>
                             ) : (
                                 filteredApplicants.map((applicant) => (
                                     <div 
                                         key={applicant._id}
                                         onClick={() => setSelectedApplicant(applicant)}
-                                        className={`p-4 border-b hover:bg-gray-50 cursor-pointer ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+                                        className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
                                     >
-                                        <div className="flex items-start">
-                                            <div className="bg-gray-200 rounded-full h-10 w-10 flex items-center justify-center mr-3">
-                                                <User size={18} className="text-gray-600" />
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <User size={20} className="text-blue-600" />
                                             </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-medium text-gray-800">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 truncate">
                                                     {applicant.user?.name || 'Applicant'}
-                                                </h3>
-                                                {!jobId && applicant.jobTitle && (
-                                                    <p className="text-xs text-gray-500 mb-1">
-                                                        Applied for: {applicant.jobTitle}
-                                                    </p>
-                                                )}
-                                                <div className="flex items-center text-xs text-gray-500">
-                                                    <Calendar size={12} className="mr-1" />
-                                                    {formatDate(applicant.appliedOn || applicant.appliedAt)}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {applicant.user?.email || ''}
+                                                </p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                        applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                        applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
+                                                        applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
+                                                        applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                        'bg-gray-100 text-gray-800'
+                                                    }`}>
+                                                        {applicant.status}
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                {applicant.status}
-                                            </span>
                                         </div>
                                     </div>
                                 ))
@@ -317,51 +352,64 @@ const Messages = () => {
                     </div>
                     
                     {/* Message Area - Right Side */}
-                    <div className="col-span-2 flex flex-col h-full overflow-hidden">
+                    <div className="col-span-2 flex flex-col bg-white rounded-lg shadow-md overflow-hidden">
                         {!selectedApplicant ? (
-                            <div className="flex-1 flex items-center justify-center p-6 bg-gray-50">
-                                <div className="text-center">
+                            <div className="flex-1 flex items-center justify-center p-6 text-center">
+                                <div>
                                     <User size={48} className="mx-auto text-gray-300 mb-4" />
-                                    <p className="text-gray-500">Select an applicant to view messages</p>
+                                    <p className="text-gray-500 text-lg">Select an applicant to view messages</p>
+                                    <p className="text-gray-400 text-sm mt-2">Choose from the list on the left to start messaging</p>
                                 </div>
                             </div>
                         ) : (
                             <>
-                                {/* Message Header - Fixed */}
-                                <div className="p-4 border-b bg-gray-50 sticky top-0 z-10">
+                                {/* Chat Header */}
+                                <div className="p-4 border-b bg-gray-50">
                                     <div className="flex items-center">
-                                        <div className="bg-blue-100 rounded-full h-10 w-10 flex items-center justify-center mr-3">
-                                            <User size={18} className="text-blue-600" />
+                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <User size={20} className="text-blue-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-gray-800">
+                                            <h3 className="font-semibold text-gray-900">
                                                 {selectedApplicant.user?.name || 'Applicant'}
                                             </h3>
-                                            <p className="text-xs text-gray-500">
-                                                {selectedApplicant.user?.email || 'Email not available'}
-                                            </p>
+                                            <p className="text-sm text-gray-500">{selectedApplicant.user?.email}</p>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                {/* Message Content - Scrollable */}
+                                {/* Messages */}
                                 <div 
                                     ref={messageContainerRef}
-                                    className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
+                                    className="flex-1 overflow-y-auto p-4 space-y-4"
                                 >
-                                    {messages.length === 0 ? (
-                                        <div className="text-center py-6">
+                                    {loading ? (
+                                        <div className="flex justify-center items-center h-32">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                        </div>
+                                    ) : messages.length === 0 ? (
+                                        <div className="text-center py-8">
                                             <p className="text-gray-500">No messages yet. Start the conversation!</p>
                                         </div>
                                     ) : (
-                                        messages.map((msg) => (
-                                            <div 
-                                                key={msg._id}
-                                                className={`max-w-[80%] p-3 rounded-lg ${msg.fromModel === 'Employer' ? 'ml-auto bg-blue-600 text-white' : 'mr-auto bg-white border'}`}
+                                        messages.map((message) => (
+                                            <div
+                                                key={message._id}
+                                                className={`flex ${message.fromModel === 'Employer' ? 'justify-end' : 'justify-start'}`}
                                             >
-                                                <p>{msg.content}</p>
-                                                <div className={`text-xs mt-1 text-right ${msg.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                    {formatTime(msg.createdAt)}
+                                                <div
+                                                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                                        message.fromModel === 'Employer'
+                                                            ? 'bg-blue-600 text-white'
+                                                            : 'bg-gray-200 text-gray-900'
+                                                    }`}
+                                                >
+                                                    <p className="text-sm">{message.content}</p>
+                                                    <p className={`text-xs mt-1 ${
+                                                        message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
+                                                    }`}>
+                                                        {formatTime(message.timestamp || message.createdAt)}
+                                                    </p>
                                                 </div>
                                             </div>
                                         ))
@@ -369,26 +417,27 @@ const Messages = () => {
                                     <div ref={messagesEndRef} />
                                 </div>
                                 
-                                {/* Message Input - Fixed */}
-                                <div className="p-4 border-t bg-white sticky bottom-0 z-10">
-                                    <div className="flex">
-                                        <input
-                                            type="text"
-                                            placeholder="Type your message..."
-                                            className="flex-1 px-4 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                {/* Message Input */}
+                                <div className="p-4 border-t bg-gray-50">
+                                    <div className="flex space-x-2">
+                                        <textarea
                                             value={newMessage}
                                             onChange={(e) => setNewMessage(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                            onKeyPress={handleKeyPress}
+                                            placeholder="Type your message..."
+                                            rows={3}
+                                            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            disabled={sendingMessage}
                                         />
                                         <button
                                             onClick={handleSendMessage}
                                             disabled={!newMessage.trim() || sendingMessage}
-                                            className="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                                         >
                                             {sendingMessage ? (
-                                                <div className="h-5 w-5 border-t-2 border-r-2 border-white rounded-full animate-spin mx-auto"></div>
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                             ) : (
-                                                <Send size={18} />
+                                                <Send size={20} />
                                             )}
                                         </button>
                                     </div>
