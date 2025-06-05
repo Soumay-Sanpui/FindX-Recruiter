@@ -195,6 +195,7 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
                                 className={`w-full px-4 py-2 border ${formErrors.currency ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                                 required
                             >
+                                <option value="">Select Currency</option>
                                 <option value="AED">AED - United Arab Emirates Dirham</option>
                                 <option value="AFN">AFN - Afghan Afghani</option>
                                 <option value="ALL">ALL - Albanian Lek</option>

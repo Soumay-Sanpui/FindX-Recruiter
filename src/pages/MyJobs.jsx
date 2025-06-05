@@ -8,13 +8,13 @@ import { Plus, Briefcase, MapPin, DollarSign, Clock, Users, MessageCircle } from
 const MyJobs = () => {
     const { employer, isAuthenticated } = useEmployerStore();
     const navigate = useNavigate();
-    
+
     // Use React Query hooks instead of manual state management
     const { data: jobs = [], isLoading: loading, error } = useMyPostedJobs();
 
-    // Redirect to login if not authenticated
-    if (!isAuthenticated) {
-        navigate('/employer-login');
+        // Redirect to login if not authenticated
+        if (!isAuthenticated) {
+            navigate('/employer-login');
         return null;
     }
 
@@ -26,7 +26,7 @@ const MyJobs = () => {
             day: 'numeric' 
         });
     };
-    
+
     const formatCurrency = (amount) => {
         if (!amount) return '0';
         return new Intl.NumberFormat('en-US').format(amount);
@@ -109,15 +109,15 @@ const MyJobs = () => {
                                             <div className="flex flex-wrap gap-1 mb-3">
                                                 {job.jobSkills.slice(0, 3).map((skill, index) => (
                                                     <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                                                        {skill}
-                                                    </span>
-                                                ))}
+                                                    {skill}
+                                                </span>
+                                            ))}
                                                 {job.jobSkills.length > 3 && (
                                                     <span className="text-xs text-gray-500 px-2 py-1">
                                                         +{job.jobSkills.length - 3} more
                                                     </span>
                                                 )}
-                                            </div>
+                                        </div>
                                         )}
                                     </div>
                                     

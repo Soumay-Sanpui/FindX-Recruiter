@@ -22,6 +22,14 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         section4: false,
         section5: false
     });
+    const [showAdvancedSectionDropdowns, setShowAdvancedSectionDropdowns] = useState({
+        business: false,
+        technology: false,
+        professional: false,
+        creative: false,
+        industry: false,
+        health: false
+    });
     
     // Calculate total cost
     const premiumCost = 750;
@@ -381,6 +389,604 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         "Are you currently studying or planning to study soon?"
     ];
 
+    // Advanced questions organized by industry categories
+    const advancedQuestionSections = {
+        business: {
+          title: "Business & Finance",
+          categories: ["Accounting", "Banking & Financial Services", "Insurance & Superannuation", "Sales", "CEO & General Management", "Consulting & Strategy"],
+          questions: [
+            // Accounting
+            {
+              question: "Do you have experience using MYOB or Xero for invoicing?",
+              options: ["Yes – MYOB", "Yes – Xero", "Yes – both", "No – but willing to learn", "No"]
+            },
+            {
+              question: "Can you manage high-volume transactional processing?",
+              options: ["Yes – regularly in past roles", "Yes – some experience", "No – not my strength"]
+            },
+            {
+              question: "Are you familiar with Single Touch Payroll (STP) compliance in Australia?",
+              options: ["Yes – fully confident", "Yes – basic knowledge", "No – unfamiliar"]
+            },
+            {
+              question: "How many employees have you managed payroll for in previous roles?",
+              options: ["1–10", "11–50", "51–200", "200+"]
+            },
+            {
+              question: "Have you worked with Big 4 audit firms or equivalent clients?",
+              options: ["Yes – Big 4", "Yes – non-Big 4 corporate clients", "No"]
+            },
+            {
+              question: "Are you familiar with risk-based audit methodologies?",
+              options: ["Yes – proficient", "Basic knowledge", "No"]
+            },
+            // Banking & Financial Services
+            {
+              question: "Are you RG146 compliant?",
+              options: ["Yes – currently certified", "Previously certified (expired)", "No – not certified"]
+            },
+            {
+              question: "Have you handled financial products such as loans, superannuation, or insurance?",
+              options: ["Yes – all of the above", "Yes – some of the above", "No – but familiar with basic concepts", "No"]
+            },
+            {
+              question: "What level of lending authority have you held in past roles?",
+              options: ["Up to $50K", "$50K – $200K", "$200K – $1M", "Above $1M", "None"]
+            },
+            {
+              question: "Have you worked with mortgage aggregation software or loan origination tools?",
+              options: ["Yes – extensively", "Yes – limited experience", "No – but I'm willing to learn", "No"]
+            },
+            // Insurance & Superannuation
+            {
+              question: "What types of insurance have you handled?",
+              options: ["Life Insurance", "General / Property", "Workers Compensation", "Other (please specify)"]
+            },
+            {
+              question: "Are you Tier 1 or Tier 2 certified under ASIC standards?",
+              options: ["Tier 1", "Tier 2", "Both", "No"]
+            },
+            {
+              question: "Do you have experience processing insurance claims or managing policies?",
+              options: ["Yes – 100+ claims/month", "Yes – occasional claims", "No"]
+            },
+            {
+              question: "Are you proficient with risk assessment or underwriting software?",
+              options: ["Yes – regularly use", "Yes – occasionally", "No"]
+            },
+            // Sales
+            {
+              question: "What type of sales are you most experienced in?",
+              options: ["B2B (Business to Business)", "B2C (Business to Consumer)", "Telesales", "Retail", "Other"]
+            },
+            {
+              question: "Are you confident in managing your own sales pipeline and CRM tools (e.g., Salesforce, Zoho)?",
+              options: ["Yes – highly proficient", "Yes – some experience", "No"]
+            },
+            {
+              question: "What's the average deal size you've handled?",
+              options: ["Under $1,000", "$1,000–$10,000", "$10,000–$100,000", "$100,000+"]
+            },
+            {
+              question: "Have you consistently met or exceeded sales targets?",
+              options: ["Yes – consistently", "Sometimes", "No"]
+            },
+            // CEO & General Management
+            {
+              question: "Have you held full P&L responsibility in a leadership role?",
+              options: ["Yes – full ownership", "Yes – partial responsibility", "No"]
+            },
+            {
+              question: "Have you led business transformation or turnaround projects?",
+              options: ["Yes – multiple times", "Yes – once", "No"]
+            },
+            {
+              question: "What's the largest team you have managed?",
+              options: ["1–10", "11–50", "51–200", "200+"]
+            },
+            {
+              question: "Have you directly overseen budgeting and forecasting?",
+              options: ["Yes – department-level", "Yes – full organization", "No"]
+            },
+            // Consulting & Strategy
+            {
+              question: "Are you experienced in using tools like Power BI, Tableau or SQL for reporting?",
+              options: ["Yes – highly proficient", "Yes – beginner level", "No"]
+            },
+            {
+              question: "Have you conducted SWOT, PESTEL or competitor analysis for clients?",
+              options: ["Yes – all", "Yes – some", "No"]
+            },
+            {
+              question: "Have you advised senior stakeholders or government on policy?",
+              options: ["Yes – extensively", "Yes – limited projects", "No"]
+            },
+            {
+              question: "Do you have experience in risk or change management frameworks?",
+              options: ["Yes – certified (e.g., Prosci, ISO31000)", "Yes – non-certified", "No"]
+            }
+          ]
+        },
+        technology: {
+          title: "Technology & Innovation",
+          categories: ["Information & Communication Technology", "AI, Robotics & Emerging Tech", "Crypto, Blockchain & Web3", "Startups & Innovation", "Science & Technology"],
+          questions: [
+            // Information & Communication Technology
+            {
+              question: "Which languages are you most comfortable with?",
+              options: ["JavaScript", "Python", "Java", "PHP", "C#", "Other"]
+            },
+            {
+              question: "Do you follow Agile/Scrum practices?",
+              options: ["Yes – certified", "Yes – experienced", "No"]
+            },
+            {
+              question: "Which certifications do you currently hold?",
+              options: ["CompTIA A+ / Network+", "CCNA / Cisco", "Microsoft Certified", "None"]
+            },
+            {
+              question: "Have you managed IT infrastructure or security protocols in an organization?",
+              options: ["Yes – end-to-end", "Yes – partially", "No"]
+            },
+            // Science & Technology
+            {
+              question: "Do you have lab experience in a regulated environment (e.g., GLP/GMP)?",
+              options: ["Yes – GLP", "Yes – GMP", "Both", "No"]
+            },
+            {
+              question: "What areas have you worked in?",
+              options: ["Biology / Biomedical", "Chemistry / Physics", "Environmental Science", "Food Technology", "Other"]
+            },
+            {
+              question: "What analytical tools or languages are you skilled in?",
+              options: ["Python / R", "Excel (Advanced)", "SPSS / SAS", "Tableau / Power BI", "Other"]
+            },
+            {
+              question: "Have you worked on statistical modelling or machine learning projects?",
+              options: ["Yes – multiple", "Yes – a few", "No"]
+            },
+            // AI, Robotics & Emerging Tech
+            {
+              question: "Have you worked with any AI or robotics frameworks/tools?",
+              options: ["Yes – TensorFlow / PyTorch / ROS / OpenCV / others", "Yes – custom-built solutions", "No – learning currently", "No – but interested"]
+            },
+            {
+              question: "How do you stay updated on rapidly evolving AI/tech trends?",
+              options: ["Follow leading researchers, newsletters, and GitHub", "Take courses and attend conferences", "Learn on the job or when required", "I'm not actively keeping up"]
+            },
+            {
+              question: "How do you balance innovation with ethical responsibility in AI or robotics?",
+              options: ["Follow ethical AI frameworks and safety reviews", "Raise red flags when needed, even if unpopular", "I focus more on performance than ethics", "I'm unsure how to evaluate ethics"]
+            },
+            // Crypto, Blockchain & Web3
+            {
+              question: "What is your primary area of experience in blockchain?",
+              options: ["Smart contract development (e.g., Solidity)", "Tokenomics / DeFi protocols", "Crypto trading / investment", "Community or DAO management", "I'm new to blockchain"]
+            },
+            {
+              question: "How do you approach risk and volatility in crypto-related roles?",
+              options: ["I work within regulated frameworks and disclaimers", "I'm comfortable with high-risk projects", "I prefer backend or technical roles without exposure", "I avoid volatile environments"]
+            },
+            {
+              question: "Have you ever participated in an ICO, NFT project, or DeFi launch?",
+              options: ["Yes – as a builder or founder", "Yes – as a contributor/community manager", "Yes – as an investor/user", "No – but researching", "No"]
+            },
+            // Startups & Innovation
+            {
+              question: "What's your comfort level working in fast-paced, ambiguous startup environments?",
+              options: ["I thrive in chaos and love building from scratch", "I like fast-moving environments with some structure", "I prefer clarity and process", "I'm unsure — never worked in a startup"]
+            },
+            {
+              question: "How do you handle failure when launching a new product or initiative?",
+              options: ["I reflect, iterate fast, and relaunch", "I consult mentors/team and pivot if needed", "I prefer to avoid risk-heavy roles", "I struggle with failure"]
+            },
+            {
+              question: "What's your preferred style of collaboration in a startup?",
+              options: ["Daily stand-ups and async tools like Slack, Notion", "Weekly planning and in-person discussions", "Informal chats and spontaneous decision-making", "I don't enjoy unstructured collaboration"]
+            }
+          ]
+        },
+        professional: {
+          title: "Professional Services",
+          categories: ["Legal", "Human Resources & Recruitment", "Real Estate & Property", "Education & Training", "Government & Defence"],
+          questions: [
+            // Legal
+            {
+              question: "Which legal systems or case management tools have you worked with?",
+              options: ["LEAP", "Actionstep", "Affinity", "Other", "None"]
+            },
+            {
+              question: "Do you have experience preparing legal briefs, documents or affidavits?",
+              options: ["Yes – independently", "Yes – with supervision", "No"]
+            },
+            {
+              question: "Which areas of law are you experienced in?",
+              options: ["Family Law", "Criminal Law", "Corporate/Commercial", "Employment Law", "Intellectual Property", "Other"]
+            },
+            {
+              question: "Are you admitted to practice in Australia?",
+              options: ["Yes – admitted", "No – waiting admission", "No"]
+            },
+            // Human Resources & Recruitment
+            {
+              question: "Which HRIS systems are you familiar with?",
+              options: ["SAP SuccessFactors", "Workday", "BambooHR", "Other (please specify)", "None"]
+            },
+            {
+              question: "Do you have experience conducting interviews and onboarding?",
+              options: ["Yes – full-cycle", "Yes – partially", "No"]
+            },
+            {
+              question: "Are you trained in Fair Work compliance and Australian workplace law?",
+              options: ["Yes – advanced level", "Basic understanding", "No"]
+            },
+            {
+              question: "Do you have a Certificate IV in Work Health & Safety (WHS)?",
+              options: ["Yes", "No – but studying", "No"]
+            },
+            // Real Estate & Property
+            {
+              question: "Do you hold a current real estate certificate or license (e.g., NSW Certificate of Registration)?",
+              options: ["Yes – licensed", "No – but studying", "No"]
+            },
+            {
+              question: "Which areas have you worked in?",
+              options: ["Residential Sales", "Commercial Leasing", "Property Management", "Buyer Advocacy", "Other"]
+            },
+            {
+              question: "Do you have experience using property software (e.g., Console, PropertyMe)?",
+              options: ["Yes – confidently", "Yes – basic use", "No"]
+            },
+            {
+              question: "Have you dealt with tenant disputes or VCAT matters?",
+              options: ["Yes – frequently", "Yes – occasionally", "No"]
+            },
+            // Education & Training
+            {
+              question: "Are you registered with the relevant teaching authority (e.g., TRB or VIT)?",
+              options: ["Yes – fully registered", "Yes – provisionally registered", "No – but in process", "No"]
+            },
+            {
+              question: "Which curriculum are you most experienced in teaching?",
+              options: ["Australian Curriculum", "IB (International Baccalaureate)", "British Curriculum", "Other (please specify)"]
+            },
+            {
+              question: "Are you a certified workplace trainer (e.g., TAE40122)?",
+              options: ["Yes", "No – but studying", "No"]
+            },
+            {
+              question: "Do you have experience delivering online or hybrid training programs?",
+              options: ["Yes – online only", "Yes – hybrid (online + face-to-face)", "No"]
+            },
+            // Government & Defence
+            {
+              question: "Are you currently or previously employed in a government department or agency?",
+              options: ["Yes – currently", "Yes – previously", "No"]
+            },
+            {
+              question: "Do you have NV1 or Baseline Security Clearance?",
+              options: ["Yes – current", "Yes – expired", "No – but eligible", "No"]
+            },
+            {
+              question: "Have you worked in a role involving legislation or regulatory compliance?",
+              options: ["Yes – in-depth experience", "Yes – some experience", "No"]
+            }
+          ]
+        },
+        creative: {
+          title: "Creative & Operations",
+          categories: ["Advertising, Arts & Media", "Design & Architecture", "Marketing & Communications", "Call Centre & Customer Service", "Administration & Office Support"],
+          questions: [
+            // Advertising, Arts & Media
+            {
+              question: "Which design tools are you proficient in?",
+              options: ["Adobe Photoshop", "Adobe Illustrator", "Figma", "Canva", "Other (please specify)"]
+            },
+            {
+              question: "Do you have experience designing for both print and digital formats?",
+              options: ["Yes – both print and digital", "Yes – digital only", "Yes – print only", "No"]
+            },
+            {
+              question: "Have you published articles for mainstream media outlets or blogs?",
+              options: ["Yes – mainstream media", "Yes – blogs or niche platforms", "No – personal writing only", "No"]
+            },
+            {
+              question: "What writing styles are you most experienced in?",
+              options: ["Editorial writing", "Copywriting/Advertising", "News reporting", "Scriptwriting", "Technical writing", "Other (please specify)"]
+            },
+            // Design & Architecture
+            {
+              question: "Are you proficient in AutoCAD, Revit, or SketchUp?",
+              options: ["Yes – all", "Yes – some", "No"]
+            },
+            {
+              question: "Do you have experience managing residential or commercial design projects?",
+              options: ["Residential only", "Commercial only", "Both", "No"]
+            },
+            {
+              question: "Which platforms/tools are you strongest in?",
+              options: ["Adobe Suite", "Figma", "Canva", "CorelDraw", "Other (please specify)"]
+            },
+            {
+              question: "Have you worked in UX/UI or branding design specifically?",
+              options: ["Yes – UX/UI", "Yes – Branding", "Yes – Both", "No"]
+            },
+            // Marketing & Communications
+            {
+              question: "Which digital marketing platforms/tools are you most experienced in?",
+              options: ["Google Ads", "Meta (Facebook) Business Manager", "HubSpot", "Mailchimp", "Other"]
+            },
+            {
+              question: "Are you proficient in Google Analytics or other web reporting tools?",
+              options: ["Yes – daily use", "Yes – occasional", "No"]
+            },
+            {
+              question: "Have you managed campaigns across multiple channels (e.g., social, email, TV)?",
+              options: ["Yes – end-to-end", "Yes – with support", "No"]
+            },
+            {
+              question: "Do you have event coordination or sponsorship experience?",
+              options: ["Yes – regularly", "Yes – occasionally", "No"]
+            },
+            // Call Centre & Customer Service
+            {
+              question: "What is your average call handling time (AHT)?",
+              options: ["Less than 2 minutes", "2–5 minutes", "5–10 minutes", "Above 10 minutes", "I don't know"]
+            },
+            {
+              question: "Have you consistently met KPIs in outbound call campaigns?",
+              options: ["Yes – regularly exceeded targets", "Yes – consistently met targets", "Sometimes met targets", "No – struggled with targets", "No – not applicable"]
+            },
+            {
+              question: "Have you led a team in a BPO or contact centre environment?",
+              options: ["Yes – more than 10 people", "Yes – up to 10 people", "No – but I've acted in a supervisor role", "No"]
+            },
+            {
+              question: "Do you have experience with workforce management tools (e.g., Genesys, NICE)?",
+              options: ["Yes – proficient in multiple tools", "Yes – one specific tool", "Familiar with dashboards only", "No"]
+            },
+            // Administration & Office Support
+            {
+              question: "Are you comfortable handling multi-line phone systems?",
+              options: ["Yes – experienced", "Yes – with limited experience", "No"]
+            },
+            {
+              question: "Do you have experience greeting clients or visitors in a corporate environment?",
+              options: ["Yes – regularly", "Yes – occasionally", "No"]
+            },
+            {
+              question: "How many keystrokes per hour (KPH) can you type accurately?",
+              options: ["Below 7,000 KPH", "7,000–10,000 KPH", "10,000–13,000 KPH", "Above 13,000 KPH", "I'm not sure"]
+            },
+            {
+              question: "Are you familiar with CRM or ERP data entry systems?",
+              options: ["Yes – CRM", "Yes – ERP", "Yes – both", "No – but willing to learn", "No"]
+            }
+          ]
+        },
+        industry: {
+          title: "Industry & Trade",
+          categories: ["Construction", "Engineering", "Manufacturing, Transport & Logistics", "Mining, Resources & Energy", "Trades & Services"],
+          questions: [
+            // Construction
+            {
+              question: "Do you have a valid White Card and First Aid certificate?",
+              options: ["Yes – both", "Yes – only White Card", "Yes – only First Aid", "No"]
+            },
+            {
+              question: "Have you supervised subcontractors or trades on-site?",
+              options: ["Yes – frequently", "Yes – occasionally", "No"]
+            },
+            {
+              question: "Have you managed residential, commercial, or civil construction projects?",
+              options: ["Residential", "Commercial", "Civil", "All of the above", "None"]
+            },
+            {
+              question: "What project values have you worked on (AUD)?",
+              options: ["Under $100K", "$100K–$500K", "$500K–$1M", "$1M–$10M", "$10M+"]
+            },
+            // Engineering
+            {
+              question: "Do you have CPEng (Chartered Professional Engineer) or RPEQ registration?",
+              options: ["Yes – current", "No – but eligible", "No"]
+            },
+            {
+              question: "Which types of engineering projects have you worked on?",
+              options: ["Infrastructure (roads, bridges)", "Commercial buildings", "Manufacturing / Industrial", "Energy / Utilities", "Other (please specify)"]
+            },
+            {
+              question: "Are you proficient with CAD, SolidWorks, or engineering simulation tools?",
+              options: ["Yes – expert", "Yes – intermediate", "No"]
+            },
+            {
+              question: "Have you been involved in Lean, Six Sigma, or other process improvement methodologies?",
+              options: ["Yes – certified", "Yes – practical experience only", "No"]
+            },
+            // Manufacturing, Transport & Logistics
+            {
+              question: "Are you experienced with specific machinery (e.g., CNC, forklifts, textile)?",
+              options: ["Yes – CNC", "Yes – Forklifts", "Yes – Other industrial machinery", "No"]
+            },
+            {
+              question: "Can you read and interpret technical drawings or production specs?",
+              options: ["Yes – confidently", "Yes – limited exposure", "No"]
+            },
+            {
+              question: "Do you hold any of the following licenses?",
+              options: ["Forklift", "HR/MR/HC truck license", "Dangerous goods license", "None"]
+            },
+            {
+              question: "Have you used warehouse management systems (e.g., SAP, NetSuite, Cin7)?",
+              options: ["Yes – advanced user", "Yes – basic use", "No"]
+            },
+            {
+              question: "Are you comfortable with strict KPIs like delivery time, safety, or packing accuracy?",
+              options: ["Yes – thrive in structured environments", "Yes – if realistic", "No – prefer flexible roles"]
+            },
+            // Mining, Resources & Energy
+            {
+              question: "Are you experienced in FIFO or DIDO roles?",
+              options: ["Yes – FIFO", "Yes – DIDO", "No"]
+            },
+            {
+              question: "Do you hold a current Mining Induction (Standard 11) or BHP/RIIOHS certificate?",
+              options: ["Yes – current", "Expired", "No"]
+            },
+            {
+              question: "Have you worked on offshore rigs or gas pipelines?",
+              options: ["Yes – offshore", "Yes – pipelines", "No"]
+            },
+            {
+              question: "Are you trained in hazardous area compliance or isolation procedures?",
+              options: ["Yes – fully certified", "Yes – partial knowledge", "No"]
+            },
+            // Trades & Services
+            {
+              question: "What licenses or trade certificates do you hold?",
+              options: ["Electrical License", "Plumbing License", "Carpentry or Trade Certificate", "White Card", "Other"]
+            },
+            {
+              question: "Are you experienced working with tools or heavy machinery?",
+              options: ["Yes – daily use", "Yes – occasionally", "No"]
+            },
+            {
+              question: "Do you have police clearance or security clearance for work?",
+              options: ["Yes – current", "No – but willing to obtain", "No"]
+            },
+            {
+              question: "Have you worked independently or as part of a mobile/on-call team?",
+              options: ["Independently", "On-call/mobile team", "Both", "No"]
+            }
+          ]
+        },
+        health: {
+          title: "Health & Community",
+          categories: ["Healthcare & Medical", "Community Services & Development", "Sport & Recreation", "Hospitality & Tourism", "Retail & Consumer Products", "Farming, Animals & Conservation", "Self Employment"],
+          questions: [
+            // Healthcare & Medical
+            {
+              question: "Are you registered with AHPRA?",
+              options: ["Yes – full registration", "Yes – limited registration", "No"]
+            },
+            {
+              question: "What areas of care are you most experienced in?",
+              options: ["Aged Care", "Acute Care", "Mental Health", "Community Nursing", "Theatre/ICU"]
+            },
+            {
+              question: "Are you credentialed with any health funds or NDIS providers?",
+              options: ["Yes – both", "Yes – one of them", "No"]
+            },
+            {
+              question: "Do you have experience in writing treatment plans or conducting assessments?",
+              options: ["Yes – regularly", "Occasionally", "No"]
+            },
+            // Community Services & Development
+            {
+              question: "Do you hold a Certificate III or IV in Individual Support or equivalent?",
+              options: ["Yes – Certificate III", "Yes – Certificate IV", "No – but currently studying", "No"]
+            },
+            {
+              question: "Are you comfortable with personal care and mobility assistance?",
+              options: ["Yes", "Yes – with some support", "No"]
+            },
+            {
+              question: "Do you hold a Working With Children Check (WWCC)?",
+              options: ["Yes – current", "No – but willing to obtain", "No"]
+            },
+            {
+              question: "Do you have trauma-informed care training?",
+              options: ["Yes – advanced level", "Yes – introductory level", "No"]
+            },
+            // Sport & Recreation
+            {
+              question: "Are you accredited through Fitness Australia or equivalent?",
+              options: ["Yes – current", "No – expired", "No – not registered"]
+            },
+            {
+              question: "Do you hold a current CPR or First Aid certification?",
+              options: ["Yes – both", "Yes – First Aid only", "No"]
+            },
+            {
+              question: "Have you managed sport programs, leagues or events?",
+              options: ["Yes – regularly", "Yes – occasionally", "No"]
+            },
+            {
+              question: "Are you familiar with player safety guidelines or sports integrity policies?",
+              options: ["Yes – strong knowledge", "Yes – general awareness", "No"]
+            },
+            // Hospitality & Tourism
+            {
+              question: "What type of kitchen environments have you worked in?",
+              options: ["Café", "Fine Dining", "Hotel / Resort", "Catering / Events", "Other"]
+            },
+            {
+              question: "Do you hold a current Food Safety or RSA certificate?",
+              options: ["Yes – both", "Yes – Food Safety only", "Yes – RSA only", "No"]
+            },
+            {
+              question: "Are you experienced with booking software like Opera, RMS, or RoomKey?",
+              options: ["Yes – highly proficient", "Yes – basic level", "No"]
+            },
+            {
+              question: "What's your level of spoken English for guest interactions?",
+              options: ["Fluent", "Intermediate", "Basic", "Not fluent"]
+            },
+            // Retail & Consumer Products
+            {
+              question: "What retail environments have you worked in?",
+              options: ["Supermarket", "Fashion / Apparel", "Electronics / Tech", "Hospitality / Café", "Other"]
+            },
+            {
+              question: "Do you have POS or inventory management system experience?",
+              options: ["Yes – POS only", "Yes – POS + Inventory", "No"]
+            },
+            {
+              question: "Are you confident in managing merchandising plans and planograms?",
+              options: ["Yes – independent role", "Yes – with support", "No"]
+            },
+            {
+              question: "Have you worked with suppliers and negotiated wholesale pricing?",
+              options: ["Yes – regularly", "Occasionally", "No"]
+            },
+            // Farming, Animals & Conservation
+            {
+              question: "Do you have qualifications in agriculture, biology or animal sciences?",
+              options: ["Yes – agriculture", "Yes – animal sciences", "Yes – both", "No"]
+            },
+            {
+              question: "Are you familiar with organic or sustainable farming practices?",
+              options: ["Yes – in-depth knowledge", "Some knowledge", "No"]
+            },
+            {
+              question: "Are you licensed or certified to work with animals (e.g., vet nurse, ranger)?",
+              options: ["Yes – certified/licensed", "No – but studying", "No"]
+            },
+            {
+              question: "Do you have fieldwork or park ranger experience?",
+              options: ["Yes – government agency", "Yes – private sector", "No"]
+            },
+            // Self Employment
+            {
+              question: "What type of self-employment have you been involved in?",
+              options: ["Freelancer", "Contractor (ABN holder)", "Sole Trader", "Startup Founder", "Other"]
+            },
+            {
+              question: "Are you currently seeking:",
+              options: ["Freelance projects", "Short-term contracts", "Full-time opportunities", "Business partnerships", "All of the above"]
+            },
+            {
+              question: "Do you carry your own public liability or professional indemnity insurance?",
+              options: ["Yes", "No – but willing to obtain", "No"]
+            },
+            {
+              question: "How do you manage inconsistent income or downtime in self-employment?",
+              options: ["Save during good periods and plan ahead", "Take side gigs or freelance work", "Look for part-time contracts", "I struggle with inconsistency"]
+            }
+          ]
+        }
+      };
+      
+
     // Group questions by sections
     const questionSections = {
         section1: {
@@ -408,6 +1014,14 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     // Toggle section dropdown visibility
     const toggleSectionDropdown = (sectionKey) => {
         setShowSectionDropdowns(prev => ({
+            ...prev,
+            [sectionKey]: !prev[sectionKey]
+        }));
+    };
+
+    // Toggle advanced section dropdown visibility
+    const toggleAdvancedSectionDropdown = (sectionKey) => {
+        setShowAdvancedSectionDropdowns(prev => ({
             ...prev,
             [sectionKey]: !prev[sectionKey]
         }));
@@ -737,7 +1351,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                         <span className="text-white text-sm font-bold">
                                                             {sectionKey.replace('section', '')}
                                                         </span>
-                                                    </div>
+                                </div>
                                                     <div>
                                                         <h4 className="text-base font-semibold text-gray-800">
                                                             Section {sectionKey.replace('section', '')}: {section.title}
@@ -810,7 +1424,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                                 </li>
                                                                             ))}
                                                                         </ul>
-                                                                    </div>
+                        </div>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -850,24 +1464,111 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         </div>
                         
                         {showAdvancedQuestions && (
-                            <div className="mt-4 space-y-3">
-                                {advancedQuestions.map((question, index) => (
-                                    <div key={index} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
-                                        <input 
-                                            type="checkbox" 
-                                            className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
-                                            id={`advanced-question-${index}`} 
-                                            checked={formData.jobQuestions && formData.jobQuestions.includes(question)}
-                                            onChange={(e) => handleQuestionSelect(e, question)}
-                                        />
-                                        <label htmlFor={`advanced-question-${index}`} className="text-gray-700 cursor-pointer">{question}</label>
-                                    </div>
-                                ))}
+                            <div className="mt-4 bg-purple-50 p-4 rounded-md border border-purple-100">
+                                <div className="space-y-4">
+                                    {Object.entries(advancedQuestionSections).map(([sectionKey, section]) => (
+                                        <div key={sectionKey} className="bg-white rounded-md border border-purple-200 overflow-hidden">
+                                            {/* Section Header */}
+                                            <div 
+                                                className="flex items-center justify-between cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                                onClick={() => toggleAdvancedSectionDropdown(sectionKey)}
+                                            >
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center mr-3">
+                                                        <span className="text-white text-xs font-bold">
+                                                            {sectionKey.charAt(0).toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-base font-semibold text-gray-800">
+                                                            {section.title}
+                                                        </h4>
+                                                        <p className="text-sm text-gray-600">
+                                                            {section.categories.join(", ")}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            {section.questions.length} questions available
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <svg 
+                                                    className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                                                        showAdvancedSectionDropdowns[sectionKey] ? 'rotate-180' : ''
+                                                    }`}
+                                                    fill="none" 
+                                                    stroke="currentColor" 
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="2"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                            
+                                            {/* Section Questions */}
+                                            {showAdvancedSectionDropdowns[sectionKey] && (
+                                                <div className="p-4 space-y-3 border-t border-gray-200">
+                                                    {section.questions.map((questionObj, questionIndex) => (
+                                                        <div key={questionIndex} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="mt-1 mr-3 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" 
+                                                                id={`advanced-question-${sectionKey}-${questionIndex}`} 
+                                                                checked={formData.jobQuestions && formData.jobQuestions.includes(questionObj.question)}
+                                                                onChange={(e) => handleQuestionSelect(e, questionObj.question)}
+                                                            />
+                                                            <div className="flex-1">
+                                                                <label htmlFor={`advanced-question-${sectionKey}-${questionIndex}`} className="text-gray-700 cursor-pointer text-sm font-medium">
+                                                                    {questionObj.question}
+                                                                </label>
+                                                                {questionObj.options && questionObj.options.length > 0 ? (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            toggleQuestionOptions(sectionKey, questionIndex);
+                                                                        }}
+                                                                        className="ml-2 p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
+                                                                        title="View answer options"
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                        Candidate will fill from app
+                                                                    </span>
+                                                                )}
+                                                                
+                                                                {/* Question Options Dropdown */}
+                                                                {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
+                                                                    <div className="mt-2">
+                                                                        <div className="bg-white rounded-md p-2 border border-gray-300">
+                                                                            <p className="text-xs font-medium text-gray-700 mb-1">Answer options:</p>
+                                                                            <ul className="space-y-1">
+                                                                                {questionObj.options.map((option, optionIndex) => (
+                                                                                    <li key={optionIndex} className="text-xs text-gray-600 flex items-center">
+                                                                                        <span className="w-1 h-1 bg-purple-400 rounded-full mr-2 flex-shrink-0"></span>
+                                                                                        {option}
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
                     
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <p className="text-gray-700 mb-2">Search for more relevant questions by keyword</p>
                         <div className="relative">
                             <input 
@@ -894,7 +1595,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                 </button>
                             )}
                         </div>
-                    </div>
+                    </div> */}
                     
                     <div className="mb-4 bg-blue-50 p-4 rounded-md border border-blue-100">
                         <div className="flex items-start">
@@ -910,7 +1611,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         </div>
                     </div>
                     
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <label className="block text-gray-700 mb-1">
                             Internal job reference # <span className="text-gray-500 text-sm">(optional)</span>
                         </label>
@@ -921,7 +1622,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                             value={formData.internalReference || ''}
                             onChange={handleInputChange}
                         />
-                    </div>
+                    </div> */}
                 </div>
                 
                 <div className="flex justify-between gap-4 mt-10">
@@ -1064,27 +1765,27 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         <p className="text-xs text-gray-500 mt-1">Plus applicable taxes</p>
                     </div>
                 </div>
-            </div>
-            
-            {/* Mobile Job Ad Summary - Only visible on mobile devices */}
-            <div className="block lg:hidden mt-10 border border-gray-300 shadow-md rounded-md bg-white">
-                <div className="bg-blue-600 text-white py-3 px-4 font-bold">
-                    Your Job Ad Summary
                 </div>
-                <div className="p-4">
-                    <div className="flex justify-between mb-2">
+                
+                {/* Mobile Job Ad Summary - Only visible on mobile devices */}
+                <div className="block lg:hidden mt-10 border border-gray-300 shadow-md rounded-md bg-white">
+                    <div className="bg-blue-600 text-white py-3 px-4 font-bold">
+                        Your Job Ad Summary
+                    </div>
+                    <div className="p-4">
+                        <div className="flex justify-between mb-2">
                         <span className="font-semibold">Premium Job Ad Package:</span>
                         <span className="font-bold text-xl">${premiumCost}</span>
-                    </div>
-                    
-                    <div className="text-sm space-y-1 mb-4">
-                        <p className="font-medium">Includes:</p>
-                        <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                            <li>30-day job listing</li>
-                            <li>Unlimited applicants</li>
-                            <li>Dashboard & management tools</li>
-                            <li>Free access to candidates profiles</li>
-                            <li>Send & Receive messages with candidates</li>
+                        </div>
+                        
+                        <div className="text-sm space-y-1 mb-4">
+                            <p className="font-medium">Includes:</p>
+                            <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                                <li>30-day job listing</li>
+                                <li>Unlimited applicants</li>
+                                <li>Dashboard & management tools</li>
+                                <li>Free access to candidates profiles</li>
+                                <li>Send & Receive messages with candidates</li>
                                 <li>Complete branding</li>
                             </ul>
                             <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
@@ -1105,9 +1806,9 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                     <div className="flex justify-between mt-4 font-bold">
                         <span>Total:</span>
                         <span className="text-blue-600 text-xl">${totalCost}</span>
-                    </div>
-                </div>
-            </div>
+                            </div>
+                        </div>
+                        </div>
         </div>
     );
 };
