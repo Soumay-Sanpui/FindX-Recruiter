@@ -247,6 +247,7 @@ const JobDetails = () => {
                                         <span className="text-sm text-gray-600">
                                             {job.status === 'Open' ? 'Job is Open' : 'Job is Closed'}
                                         </span>
+                                        {job.status === 'Open' && (
                                         <button
                                             onClick={handleJobStatusToggle}
                                             disabled={updateJobStatusMutation.isPending}
@@ -254,13 +255,12 @@ const JobDetails = () => {
                                         >
                                             {updateJobStatusMutation.isPending ? (
                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            ) : job.status === 'Open' ? (
-                                                <ToggleRight size={16} />
                                             ) : (
-                                                <ToggleLeft size={16} />
+                                                <ToggleRight size={16} />
                                             )}
-                                            {job.status === 'Open' ? 'Close Job' : 'Reopen Job'}
+                                            Close Job
                                         </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
