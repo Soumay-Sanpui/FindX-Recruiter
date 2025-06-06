@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { useJobDetails, useUpdateApplicationStatus, useUpdateJobStatus } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
-import { ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, MessageCircle, Globe, Edit, ToggleLeft, ToggleRight } from 'lucide-react';
+import { ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, MessageCircle, Globe, Edit, ToggleLeft, ToggleRight, ChevronDown, ChevronUp } from 'lucide-react';
 
 const JobDetails = () => {
     const { jobId } = useParams();
@@ -28,6 +28,18 @@ const JobDetails = () => {
     });
     const [rejectionReason, setRejectionReason] = useState('');
     const [blockReason, setBlockReason] = useState('');
+    
+    // Application Questions dropdown states
+    const [showApplicationQuestions, setShowApplicationQuestions] = useState(false);
+    const [expandedQuestions, setExpandedQuestions] = useState({});
+
+    // Toggle individual question expansion
+    const toggleQuestionExpansion = (questionIndex) => {
+        setExpandedQuestions(prev => ({
+            ...prev,
+            [questionIndex]: !prev[questionIndex]
+        }));
+    };
 
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
@@ -310,6 +322,176 @@ const JobDetails = () => {
                         ))}
                     </div>
                 </div>
+
+                {/* Application Questions */}
+                {((job.jobQuestions && job.jobQuestions.length > 0) || (job.applicationQuestions && job.applicationQuestions.length > 0)) && (
+                    <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
+                        {/* Main Section Header with Dropdown Toggle */}
+                        <div 
+                            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 -m-2 p-2 rounded transition-colors"
+                            onClick={() => setShowApplicationQuestions(!showApplicationQuestions)}
+                        >
+                            <h3 className="text-xl font-bold text-gray-800">
+                                Application Questions ({(job.jobQuestions?.length || 0) + (job.applicationQuestions?.length || 0)})
+                            </h3>
+                            <div className="flex items-center text-gray-600">
+                                <span className="text-sm mr-2">
+                                    {showApplicationQuestions ? 'Collapse' : 'Expand'}
+                                </span>
+                                {showApplicationQuestions ? 
+                                    <ChevronUp size={20} /> : 
+                                    <ChevronDown size={20} />
+                                }
+                            </div>
+                        </div>
+
+                        {/* Collapsible Content */}
+                        {showApplicationQuestions && (
+                            <div className="mt-6">
+                                <div className="space-y-4">
+                                    {/* Simple Questions */}
+                                    {job.jobQuestions && job.jobQuestions.map((question, index) => {
+                                        const questionKey = `simple-${index}`;
+                                        const isExpanded = expandedQuestions[questionKey];
+                                        
+                                        return (
+                                            <div key={questionKey} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                {/* Question Header */}
+                                                <div 
+                                                    className="p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between"
+                                                    onClick={() => toggleQuestionExpansion(questionKey)}
+                                                >
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-800 font-medium">
+                                                            <span className="text-blue-600 mr-2">Q{index + 1}:</span>
+                                                            {question.length > 80 && !isExpanded ? 
+                                                                `${question.substring(0, 80)}...` : 
+                                                                question
+                                                            }
+                                                        </p>
+                                                        <p className="text-sm text-gray-500 mt-1">Type: Text Response</p>
+                                                    </div>
+                                                    <div className="ml-4 text-gray-600">
+                                                        {isExpanded ? 
+                                                            <ChevronUp size={16} /> : 
+                                                            <ChevronDown size={16} />
+                                                        }
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Question Details */}
+                                                {isExpanded && (
+                                                    <div className="p-4 bg-white border-t border-gray-200">
+                                                        <p className="text-gray-800">{question}</p>
+                                                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                                            <p className="text-sm text-blue-700">
+                                                                This is a text response question. Applicants can provide a detailed written answer.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                    
+                                    {/* Structured Questions with Options */}
+                                    {job.applicationQuestions && job.applicationQuestions.map((questionObj, index) => {
+                                        const questionKey = `structured-${index}`;
+                                        const isExpanded = expandedQuestions[questionKey];
+                                        const questionNumber = (job.jobQuestions?.length || 0) + index + 1;
+                                        
+                                        return (
+                                            <div key={questionKey} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                {/* Question Header */}
+                                                <div 
+                                                    className="p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between"
+                                                    onClick={() => toggleQuestionExpansion(questionKey)}
+                                                >
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-800 font-medium">
+                                                            <span className="text-blue-600 mr-2">Q{questionNumber}:</span>
+                                                            {questionObj.question.length > 80 && !isExpanded ? 
+                                                                `${questionObj.question.substring(0, 80)}...` : 
+                                                                questionObj.question
+                                                            }
+                                                            {questionObj.required && <span className="text-red-500 ml-1">*</span>}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            Type: Multiple Choice {questionObj.required ? '(Required)' : '(Optional)'} 
+                                                            • {questionObj.options?.length || 0} options
+                                                        </p>
+                                                    </div>
+                                                    <div className="ml-4 text-gray-600">
+                                                        {isExpanded ? 
+                                                            <ChevronUp size={16} /> : 
+                                                            <ChevronDown size={16} />
+                                                        }
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Question Details */}
+                                                {isExpanded && (
+                                                    <div className="p-4 bg-white border-t border-gray-200">
+                                                        <p className="text-gray-800 mb-4">{questionObj.question}</p>
+                                                        <div className="ml-4">
+                                                            <p className="text-sm text-gray-600 mb-3 font-medium">Available Options:</p>
+                                                            <ul className="space-y-2">
+                                                                {questionObj.options && questionObj.options.map((option, optIndex) => (
+                                                                    <li key={optIndex} className="text-sm text-gray-700 flex items-center p-2 bg-gray-50 rounded">
+                                                                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></span>
+                                                                        {option}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded">
+                                                            <p className="text-sm text-purple-700">
+                                                                This is a multiple choice question. Applicants must select one of the provided options.
+                                                                {questionObj.required && (
+                                                                    <span className="block mt-1 font-medium">⚠️ This question is required - applicants must answer to submit their application.</span>
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                
+                                {/* Summary */}
+                                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-blue-700 font-medium">
+                                                📊 Question Summary
+                                            </p>
+                                            <p className="text-sm text-blue-600 mt-1">
+                                                Total Questions: <strong>{(job.jobQuestions?.length || 0) + (job.applicationQuestions?.length || 0)}</strong>
+                                                {job.jobQuestions?.length > 0 && (
+                                                    <span className="ml-4">Text Response: <strong>{job.jobQuestions.length}</strong></span>
+                                                )}
+                                                {job.applicationQuestions?.length > 0 && (
+                                                    <span className="ml-4">Multiple Choice: <strong>{job.applicationQuestions.length}</strong></span>
+                                                )}
+                                            </p>
+                                        </div>
+                                        {job.applicationQuestions && job.applicationQuestions.some(q => q.required) && (
+                                            <div className="text-right">
+                                                <p className="text-sm text-red-600 font-medium">
+                                                    <span className="text-red-500">*</span> Required Questions
+                                                </p>
+                                                <p className="text-xs text-red-500 mt-1">
+                                                    Applicants must answer these
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Applicants Section */}
                 <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
