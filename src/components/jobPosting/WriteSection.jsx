@@ -31,6 +31,9 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         health: false
     });
     
+    // Add state for mandatory questions
+    const [mandatoryQuestions, setMandatoryQuestions] = useState(formData.mandatoryQuestions || []);
+    
     // Calculate total cost
     const premiumCost = 750;
     const immediateCost = immediateStartSelected ? 85 : 0;
@@ -1119,6 +1122,15 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
             updatedQuestions.push(question);
         } else {
             updatedQuestions = updatedQuestions.filter(q => q !== question);
+            // Also remove from mandatory questions if unchecked
+            const updatedMandatory = mandatoryQuestions.filter(q => q !== question);
+            setMandatoryQuestions(updatedMandatory);
+            handleChange({
+                target: {
+                    name: 'mandatoryQuestions',
+                    value: updatedMandatory
+                }
+            });
         }
         
         handleChange({
@@ -1129,39 +1141,34 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         });
     };
 
-    // Initialize basic questions on component mount
-    useEffect(() => {
-        if (!formData.jobQuestions || formData.jobQuestions.length === 0) {
-            const allBasicQuestions = basicQuestionsWithOptions.map(q => q.question);
-            handleChange({
-                target: {
-                    name: 'jobQuestions',
-                    value: allBasicQuestions
-                }
-            });
-        } else {
-            // Ensure all basic questions are included
-            const currentQuestions = [...(formData.jobQuestions || [])];
-            const basicQuestionTexts = basicQuestionsWithOptions.map(q => q.question);
-            let updated = false;
-            
-            basicQuestionTexts.forEach(basicQuestion => {
-                if (!currentQuestions.includes(basicQuestion)) {
-                    currentQuestions.push(basicQuestion);
-                    updated = true;
-                }
-            });
-            
-            if (updated) {
-                handleChange({
-                    target: {
-                        name: 'jobQuestions',
-                        value: currentQuestions
-                    }
-                });
+    // Handle mandatory toggle
+    const handleMandatoryToggle = (question, isMandatory) => {
+        let updatedMandatory = [...mandatoryQuestions];
+        
+        if (isMandatory) {
+            if (!updatedMandatory.includes(question)) {
+                updatedMandatory.push(question);
             }
+        } else {
+            updatedMandatory = updatedMandatory.filter(q => q !== question);
         }
-    }, []);
+        
+        setMandatoryQuestions(updatedMandatory);
+        handleChange({
+            target: {
+                name: 'mandatoryQuestions',
+                value: updatedMandatory
+            }
+        });
+    };
+
+    // Initialize basic questions on component mount - removed auto-inclusion
+    useEffect(() => {
+        // Initialize mandatory questions state from formData
+        if (formData.mandatoryQuestions) {
+            setMandatoryQuestions(formData.mandatoryQuestions);
+        }
+    }, [formData.mandatoryQuestions]);
 
     return (
         <div className="flex flex-col lg:flex-row bg-white shadow-lg border-2 border-blue-800">
@@ -1320,7 +1327,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                             <div>
                                 <h3 className="text-lg font-bold text-gray-800">Basic Questions</h3>
                                 <p className="text-gray-500 text-sm">
-                                    Essential questions automatically included in your application form
+                                    Essential questions that you can choose to include in your application form
                                 </p>
                             </div>
                             <div className="flex-shrink-0 ml-4">
@@ -1351,7 +1358,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                         <span className="text-white text-sm font-bold">
                                                             {sectionKey.replace('section', '')}
                                                         </span>
-                                </div>
+                                                    </div>
                                                     <div>
                                                         <h4 className="text-base font-semibold text-gray-800">
                                                             Section {sectionKey.replace('section', '')}: {section.title}
@@ -1378,55 +1385,75 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                             {showSectionDropdowns[sectionKey] && (
                                                 <div className="p-4 space-y-3 border-t border-gray-200">
                                                     {section.questions.map((questionObj, questionIndex) => (
-                                                        <div key={questionIndex} className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center flex-1">
-                                                                    <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center mr-3">
-                                                                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                                        </svg>
+                                                        <div key={questionIndex} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                                                                id={`basic-question-${sectionKey}-${questionIndex}`} 
+                                                                checked={formData.jobQuestions && formData.jobQuestions.includes(questionObj.question)}
+                                                                onChange={(e) => handleQuestionSelect(e, questionObj.question)}
+                                                            />
+                                                            <div className="flex-1">
+                                                                <label htmlFor={`basic-question-${sectionKey}-${questionIndex}`} className="text-gray-700 cursor-pointer text-sm font-medium">
+                                                                    {questionObj.question}
+                                                                </label>
+                                                                <div className="flex items-center justify-between mt-2">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {questionObj.options && questionObj.options.length > 0 ? (
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleQuestionOptions(sectionKey, questionIndex);
+                                                                                }}
+                                                                                className="p-1 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
+                                                                                title="View answer options"
+                                                                            >
+                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        ) : (
+                                                                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                                Candidate will fill from app
+                                                                            </span>
+                                                                        )}
                                                                     </div>
-                                                                    <span className="text-gray-700 font-medium text-sm">
-                                                                        {questionObj.question}
-                                                                    </span>
+                                                                    
+                                                                    {/* Mandatory Toggle Switch */}
+                                                                    {formData.jobQuestions && formData.jobQuestions.includes(questionObj.question) && (
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <span className="text-xs text-gray-600">Make Mandatory:</span>
+                                                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                                                <input 
+                                                                                    type="checkbox" 
+                                                                                    className="sr-only peer"
+                                                                                    checked={mandatoryQuestions.includes(questionObj.question)}
+                                                                                    onChange={(e) => handleMandatoryToggle(questionObj.question, e.target.checked)}
+                                                                                />
+                                                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                                                            </label>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                                {questionObj.options && questionObj.options.length > 0 ? (
-                                                                    <button
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            toggleQuestionOptions(sectionKey, questionIndex);
-                                                                        }}
-                                                                        className="ml-3 p-2 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        title="View answer options"
-                                                                    >
-                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                        </svg>
-                                                                    </button>
-                                                                ) : (
-                                                                    <span className="ml-3 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                                                                        Candidate will fill from app
-                                                                    </span>
+                                                                
+                                                                {/* Question Options Dropdown */}
+                                                                {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
+                                                                    <div className="mt-2">
+                                                                        <div className="bg-white rounded-md p-2 border border-gray-300">
+                                                                            <p className="text-xs font-medium text-gray-700 mb-1">Answer options:</p>
+                                                                            <ul className="space-y-1">
+                                                                                {questionObj.options.map((option, optionIndex) => (
+                                                                                    <li key={optionIndex} className="text-xs text-gray-600 flex items-center">
+                                                                                        <span className="w-1 h-1 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
+                                                                                        {option}
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                            
-                                                            {/* Question Options Dropdown */}
-                                                            {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
-                                                                <div className="mt-3 pl-9 pr-4">
-                                                                    <div className="bg-white rounded-md p-3 border border-gray-300">
-                                                                        <p className="text-xs font-medium text-gray-700 mb-2">Answer options:</p>
-                                                                        <ul className="space-y-1">
-                                                                            {questionObj.options.map((option, optionIndex) => (
-                                                                                <li key={optionIndex} className="text-xs text-gray-600 flex items-center">
-                                                                                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
-                                                                                    {option}
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
-                        </div>
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     ))}
                                                 </div>
@@ -1520,25 +1547,45 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 <label htmlFor={`advanced-question-${sectionKey}-${questionIndex}`} className="text-gray-700 cursor-pointer text-sm font-medium">
                                                                     {questionObj.question}
                                                                 </label>
-                                                                {questionObj.options && questionObj.options.length > 0 ? (
-                                                                    <button
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            toggleQuestionOptions(sectionKey, questionIndex);
-                                                                        }}
-                                                                        className="ml-2 p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
-                                                                        title="View answer options"
-                                                                    >
-                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                        </svg>
-                                                                    </button>
-                                                                ) : (
-                                                                    <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                                                                        Candidate will fill from app
-                                                                    </span>
-                                                                )}
+                                                                <div className="flex items-center justify-between mt-2">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {questionObj.options && questionObj.options.length > 0 ? (
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleQuestionOptions(sectionKey, questionIndex);
+                                                                                }}
+                                                                                className="p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
+                                                                                title="View answer options"
+                                                                            >
+                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        ) : (
+                                                                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                                Candidate will fill from app
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    
+                                                                    {/* Mandatory Toggle Switch */}
+                                                                    {formData.jobQuestions && formData.jobQuestions.includes(questionObj.question) && (
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <span className="text-xs text-gray-600">Make Mandatory:</span>
+                                                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                                                <input 
+                                                                                    type="checkbox" 
+                                                                                    className="sr-only peer"
+                                                                                    checked={mandatoryQuestions.includes(questionObj.question)}
+                                                                                    onChange={(e) => handleMandatoryToggle(questionObj.question, e.target.checked)}
+                                                                                />
+                                                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                                                                            </label>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                                 
                                                                 {/* Question Options Dropdown */}
                                                                 {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
