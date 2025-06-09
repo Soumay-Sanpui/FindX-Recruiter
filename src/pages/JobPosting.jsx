@@ -155,8 +155,11 @@ const JobPosting = () => {
         try {
             // Convert jobQuestions to applicationQuestions format
             const applicationQuestions = formData.jobQuestions?.map(question => {
-                // Define options for each question
-                const questionOptionsMap = {
+                // Use selected options from the form, or fall back to default options
+                const selectedQuestionOptions = formData.selectedOptions?.[question];
+                
+                // Define default options for questions that don't have selected options
+                const defaultOptionsMap = {
                     "Which of the following statements best describes your right to work in Australia?": [
                         "I am an Australian citizen",
                         "I am a permanent resident",
@@ -182,55 +185,18 @@ const JobPosting = () => {
                         "$80,000 - $100,000",
                         "$100,000 - $120,000",
                         "Over $120,000"
-                    ],
-                    "Are you willing to undergo pre-employment medical check?": [
-                        "Yes",
-                        "No",
-                        "Depends on the requirements"
-                    ],
-                    "How much notice are you required to give your current employer?": [
-                        "No notice required",
-                        "1 week",
-                        "2 weeks",
-                        "1 month",
-                        "More than 1 month"
-                    ],
-                    "Do you have a current Police Check (National Police Certificate) for employment?": [
-                        "Yes, current within 12 months",
-                        "Yes, but older than 12 months",
-                        "No, but willing to obtain one",
-                        "No"
-                    ],
-                    "Do you have a current Australian driver's license?": [
-                        "Yes, full license",
-                        "Yes, provisional license",
-                        "Yes, learner's permit",
-                        "No"
-                    ],
-                    "Do you own or have regular access to a car?": [
-                        "Yes, I own a car",
-                        "Yes, I have regular access to a car",
-                        "No, but I can arrange transport",
-                        "No"
-                    ],
-                    "Are you available to work outside holidays?": [
-                        "Yes, always available",
-                        "Yes, with advance notice",
-                        "Limited availability",
-                        "No"
-                    ],
-                    "Are you willing to relocate for this role?": [
-                        "Yes, willing to relocate anywhere",
-                        "Yes, within the same state/region",
-                        "Yes, within the same city",
-                        "No, not willing to relocate"
                     ]
                 };
 
+                // Use selected options if available, otherwise use default options, otherwise use basic Yes/No
+                const questionOptions = selectedQuestionOptions && selectedQuestionOptions.length > 0 
+                    ? selectedQuestionOptions 
+                    : (defaultOptionsMap[question] || ["Yes", "No", "Maybe"]);
+
                 return {
                     question: question,
-                    options: questionOptionsMap[question] || ["Yes", "No", "Maybe"],
-                    required: true
+                    options: questionOptions,
+                    required: formData.mandatoryQuestions?.includes(question) || false
                 };
             }) || [];
 

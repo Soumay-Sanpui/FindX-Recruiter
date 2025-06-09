@@ -34,6 +34,9 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     // Add state for mandatory questions
     const [mandatoryQuestions, setMandatoryQuestions] = useState(formData.mandatoryQuestions || []);
     
+    // Add state for selected question options
+    const [selectedOptions, setSelectedOptions] = useState(formData.selectedOptions || {});
+    
     // Calculate total cost
     const premiumCost = 750;
     const immediateCost = immediateStartSelected ? 85 : 0;
@@ -1151,13 +1154,46 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         });
     };
 
+    // Handle option selection
+    const handleOptionSelect = (question, option, isSelected) => {
+        let updatedOptions = { ...selectedOptions };
+        
+        if (!updatedOptions[question]) {
+            updatedOptions[question] = [];
+        }
+        
+        if (isSelected) {
+            if (!updatedOptions[question].includes(option)) {
+                updatedOptions[question].push(option);
+            }
+        } else {
+            updatedOptions[question] = updatedOptions[question].filter(opt => opt !== option);
+            // If no options are selected for this question, remove the question key
+            if (updatedOptions[question].length === 0) {
+                delete updatedOptions[question];
+            }
+        }
+        
+        setSelectedOptions(updatedOptions);
+        handleChange({
+            target: {
+                name: 'selectedOptions',
+                value: updatedOptions
+            }
+        });
+    };
+
     // Initialize basic questions on component mount - removed auto-inclusion
     useEffect(() => {
         // Initialize mandatory questions state from formData
         if (formData.mandatoryQuestions) {
             setMandatoryQuestions(formData.mandatoryQuestions);
         }
-    }, [formData.mandatoryQuestions]);
+        // Initialize selected options state from formData
+        if (formData.selectedOptions) {
+            setSelectedOptions(formData.selectedOptions);
+        }
+    }, [formData.mandatoryQuestions, formData.selectedOptions]);
 
     return (
         <div className="flex flex-col lg:flex-row bg-white shadow-lg border-2 border-blue-800">
@@ -1347,7 +1383,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                         <span className="text-white text-sm font-bold">
                                                             {sectionKey.replace('section', '')}
                                                         </span>
-                                                    </div>
+                                </div>
                                                     <div>
                                                         <h4 className="text-base font-semibold text-gray-800">
                                                             Section {sectionKey.replace('section', '')}: {section.title}
@@ -1355,7 +1391,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                         <p className="text-sm text-gray-600">
                                                             {section.questions.length} questions
                                                         </p>
-                                                    </div>
+                        </div>
                                                 </div>
                                                 <svg 
                                                     className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
@@ -1368,14 +1404,14 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                 >
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                                 </svg>
-                                            </div>
-                                            
+                    </div>
+                    
                                             {/* Section Questions */}
                                             {showSectionDropdowns[sectionKey] && (
                                                 <div className="p-4 space-y-3 border-t border-gray-200">
                                                     {section.questions.map((questionObj, questionIndex) => (
                                                         <div key={questionIndex} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
-                                                            <input 
+                            <input 
                                                                 type="checkbox" 
                                                                 className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
                                                                 id={`basic-question-${sectionKey}-${questionIndex}`} 
@@ -1427,16 +1463,32 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 {/* Question Options Dropdown */}
                                                                 {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
                                                                     <div className="mt-2">
-                                                                        <div className="bg-white rounded-md p-2 border border-gray-300">
-                                                                            <p className="text-xs font-medium text-gray-700 mb-1">Answer options:</p>
-                                                                            <ul className="space-y-1">
+                                                                        <div className="bg-white rounded-md p-3 border border-gray-300">
+                                                                            <p className="text-xs font-medium text-gray-700 mb-2">Select answer options to show to candidates:</p>
+                                                                            <div className="space-y-2">
                                                                                 {questionObj.options.map((option, optionIndex) => (
-                                                                                    <li key={optionIndex} className="text-xs text-gray-600 flex items-center">
-                                                                                        <span className="w-1 h-1 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
-                                                                                        {option}
-                                                                                    </li>
+                                                                                    <div key={optionIndex} className="flex items-start">
+                                                                                        <input 
+                                                                                            type="checkbox" 
+                                                                                            className="mt-0.5 mr-2 h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                                                                                            id={`basic-option-${sectionKey}-${questionIndex}-${optionIndex}`}
+                                                                                            checked={selectedOptions[questionObj.question] && selectedOptions[questionObj.question].includes(option)}
+                                                                                            onChange={(e) => handleOptionSelect(questionObj.question, option, e.target.checked)}
+                                                                                        />
+                                                                                        <label 
+                                                                                            htmlFor={`basic-option-${sectionKey}-${questionIndex}-${optionIndex}`}
+                                                                                            className="text-xs text-gray-600 cursor-pointer flex-1"
+                                                                                        >
+                                                                                            {option}
+                                                                                        </label>
+                                                                                    </div>
                                                                                 ))}
-                                                                            </ul>
+                                                                            </div>
+                                                                            <div className="mt-2 pt-2 border-t border-gray-200">
+                                                                                <p className="text-xs text-gray-500">
+                                                                                    Selected: {selectedOptions[questionObj.question] ? selectedOptions[questionObj.question].length : 0} / {questionObj.options.length}
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 )}
@@ -1467,13 +1519,13 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                             <div className="flex-shrink-0 ml-4">
                                 <svg 
                                     className={`w-6 h-6 text-gray-600 font-bold transition-transform duration-200 ${showAdvancedQuestions ? 'rotate-180' : ''}`}
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    viewBox="0 0 24 24"
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
                                     strokeWidth="3"
-                                >
+                            >
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
+                            </svg>
                             </div>
                         </div>
                         
@@ -1536,7 +1588,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 </label>
                                                                 <div className="flex items-center space-x-4 mt-2">
                                                                     {questionObj.options && questionObj.options.length > 0 ? (
-                                                                        <button
+                                <button 
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
                                                                                 toggleQuestionOptions(sectionKey, questionIndex);
@@ -1548,7 +1600,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                                             </svg>
-                                                                        </button>
+                                </button>
                                                                     ) : (
                                                                         <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
                                                                             Candidate will fill from app
@@ -1568,23 +1620,39 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                                 />
                                                                                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
                                                                             </label>
-                                                                        </div>
+                        </div>
                                                                     )}
                                                                 </div>
                                                                 
                                                                 {/* Question Options Dropdown */}
                                                                 {questionObj.options && questionObj.options.length > 0 && showQuestionOptions[`${sectionKey}-${questionIndex}`] && (
                                                                     <div className="mt-2">
-                                                                        <div className="bg-white rounded-md p-2 border border-gray-300">
-                                                                            <p className="text-xs font-medium text-gray-700 mb-1">Answer options:</p>
-                                                                            <ul className="space-y-1">
+                                                                        <div className="bg-white rounded-md p-3 border border-gray-300">
+                                                                            <p className="text-xs font-medium text-gray-700 mb-2">Select answer options to show to candidates:</p>
+                                                                            <div className="space-y-2">
                                                                                 {questionObj.options.map((option, optionIndex) => (
-                                                                                    <li key={optionIndex} className="text-xs text-gray-600 flex items-center">
-                                                                                        <span className="w-1 h-1 bg-purple-400 rounded-full mr-2 flex-shrink-0"></span>
-                                                                                        {option}
-                                                                                    </li>
+                                                                                    <div key={optionIndex} className="flex items-start">
+                                                                                        <input 
+                                                                                            type="checkbox" 
+                                                                                            className="mt-0.5 mr-2 h-3 w-3 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" 
+                                                                                            id={`advanced-option-${sectionKey}-${questionIndex}-${optionIndex}`}
+                                                                                            checked={selectedOptions[questionObj.question] && selectedOptions[questionObj.question].includes(option)}
+                                                                                            onChange={(e) => handleOptionSelect(questionObj.question, option, e.target.checked)}
+                                                                                        />
+                                                                                        <label 
+                                                                                            htmlFor={`advanced-option-${sectionKey}-${questionIndex}-${optionIndex}`}
+                                                                                            className="text-xs text-gray-600 cursor-pointer flex-1"
+                                                                                        >
+                                                                                            {option}
+                                                                                        </label>
+                                                                                    </div>
                                                                                 ))}
-                                                                            </ul>
+                                                                            </div>
+                                                                            <div className="mt-2 pt-2 border-t border-gray-200">
+                                                                                <p className="text-xs text-gray-500">
+                                                                                    Selected: {selectedOptions[questionObj.question] ? selectedOptions[questionObj.question].length : 0} / {questionObj.options.length}
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 )}
