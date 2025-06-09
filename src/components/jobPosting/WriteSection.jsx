@@ -5,13 +5,13 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [logoFile, setLogoFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     
-    // Add state variables for pricing elements
+    // pricing elements
     const [premiumSelected, setPremiumSelected] = useState(formData.premiumListing || true);
     const [immediateStartSelected, setImmediateStartSelected] = useState(formData.immediateStart || false);
     const [referencesSelected, setReferencesSelected] = useState(formData.referencesRequired || false);
     const [notificationOption, setNotificationOption] = useState(formData.notificationOption || 'both');
     
-    // Add state variables for dropdown sections
+    // dropdown sections
     const [showBasicQuestions, setShowBasicQuestions] = useState(false);
     const [showAdvancedQuestions, setShowAdvancedQuestions] = useState(false);
     const [showQuestionOptions, setShowQuestionOptions] = useState({});
@@ -381,16 +381,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
       ];
       
-    
-    const advancedQuestions = [
-        "Are you willing to undergo pre-employment medical check?",
-        "Are you available to work on public holidays?",
-        "Are you willing to relocate for this role?",
-        "Are you open to travel for work-related purposes?",
-        "Are you open to shift-based work (e.g., morning/night shifts)?",
-        "What type of work are you looking for?",
-        "Are you currently studying or planning to study soon?"
-    ];
 
     // Advanced questions organized by industry categories
     const advancedQuestionSections = {
@@ -989,7 +979,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
       };
       
-
     // Group questions by sections
     const questionSections = {
         section1: {
@@ -1397,28 +1386,26 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 <label htmlFor={`basic-question-${sectionKey}-${questionIndex}`} className="text-gray-700 cursor-pointer text-sm font-medium">
                                                                     {questionObj.question}
                                                                 </label>
-                                                                <div className="flex items-center justify-between mt-2">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        {questionObj.options && questionObj.options.length > 0 ? (
-                                                                            <button
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    toggleQuestionOptions(sectionKey, questionIndex);
-                                                                                }}
-                                                                                className="p-1 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
-                                                                                title="View answer options"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        ) : (
-                                                                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                                                                                Candidate will fill from app
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
+                                                                <div className="flex items-center space-x-4 mt-2">
+                                                                    {questionObj.options && questionObj.options.length > 0 ? (
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                toggleQuestionOptions(sectionKey, questionIndex);
+                                                                            }}
+                                                                            className="p-1 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
+                                                                            title="View answer options"
+                                                                        >
+                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                            Candidate will fill from app
+                                                                        </span>
+                                                                    )}
                                                                     
                                                                     {/* Mandatory Toggle Switch */}
                                                                     {formData.jobQuestions && formData.jobQuestions.includes(questionObj.question) && (
@@ -1547,28 +1534,26 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 <label htmlFor={`advanced-question-${sectionKey}-${questionIndex}`} className="text-gray-700 cursor-pointer text-sm font-medium">
                                                                     {questionObj.question}
                                                                 </label>
-                                                                <div className="flex items-center justify-between mt-2">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        {questionObj.options && questionObj.options.length > 0 ? (
-                                                                            <button
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    toggleQuestionOptions(sectionKey, questionIndex);
-                                                                                }}
-                                                                                className="p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
-                                                                                title="View answer options"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        ) : (
-                                                                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                                                                                Candidate will fill from app
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
+                                                                <div className="flex items-center space-x-4 mt-2">
+                                                                    {questionObj.options && questionObj.options.length > 0 ? (
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                toggleQuestionOptions(sectionKey, questionIndex);
+                                                                            }}
+                                                                            className="p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
+                                                                            title="View answer options"
+                                                                        >
+                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                            Candidate will fill from app
+                                                                        </span>
+                                                                    )}
                                                                     
                                                                     {/* Mandatory Toggle Switch */}
                                                                     {formData.jobQuestions && formData.jobQuestions.includes(questionObj.question) && (
