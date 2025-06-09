@@ -1600,35 +1600,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         )}
                     </div>
                     
-                    {/* <div className="mb-4">
-                        <p className="text-gray-700 mb-2">Search for more relevant questions by keyword</p>
-                        <div className="relative">
-                            <input 
-                                type="text" 
-                                className="w-full border border-gray-300 p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                                placeholder="E.g. certification, experience, skills"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <svg 
-                                className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            {searchQuery && (
-                                <button 
-                                    className="absolute right-3 top-3 text-blue-600 font-medium"
-                                    onClick={() => setSearchQuery('')}
-                                >
-                                    Tell us what's missing
-                                </button>
-                            )}
-                        </div>
-                    </div> */}
-                    
                     <div className="mb-4 bg-blue-50 p-4 rounded-md border border-blue-100">
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
@@ -1643,18 +1614,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         </div>
                     </div>
                     
-                    {/* <div className="mb-4">
-                        <label className="block text-gray-700 mb-1">
-                            Internal job reference # <span className="text-gray-500 text-sm">(optional)</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                            name="internalReference"
-                            value={formData.internalReference || ''}
-                            onChange={handleInputChange}
-                        />
-                    </div> */}
                 </div>
                 
                 <div className="flex justify-between gap-4 mt-10">
