@@ -17,7 +17,7 @@
 //     }
 // }
 
-const advanceQuestion = {
+export const advanceQuestion = {
 	
 	Accounting: {
 		title: "Accounting",
