@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, X, AlertCircle, DollarSign, MapPin, Briefcase, Globe, BarChart4, Tag, FileText, Clock, Image, Video, List, Info } from 'lucide-react';
+import { Check, X, AlertCircle, DollarSign, MapPin, Briefcase, Globe, BarChart4, Tag, FileText, Clock, Image, Video, List, Info, HelpCircle, CheckCircle } from 'lucide-react';
 
 const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting }) => {
     const formatCurrency = (amount) => {
@@ -157,48 +157,160 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
                 </div>
             )}
 
-            {/* Media Elements */}
-            <div className="mb-8 bg-gray-50 p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Media Elements</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    <div className="flex items-start">
-                        <Image className="mr-3 text-gray-600 mt-1" size={18} />
-                        <div>
-                            <p className="text-sm text-gray-500">Job Banner</p>
-                            {formData.jobBanner ? (
-                                <div className="mt-2">
-                                    <img 
-                                        src={formData.jobBanner} 
-                                        alt="Job Banner" 
-                                        className="h-24 object-cover rounded border border-gray-200" 
-                                    />
+            {/* Selected Questions */}
+            {(formData.jobQuestions && formData.jobQuestions.length > 0) && (
+                <div className="mb-8 bg-blue-50 p-6 rounded-lg">
+                    <h3 className="text-xl font-bold text-blue-800 mb-4">Selected Questions</h3>
+                    <div className="space-y-4">
+                        {formData.jobQuestions.map((question, index) => (
+                            <div key={index} className="bg-white p-4 rounded-md border border-blue-100">
+                                <div className="flex items-start">
+                                    <HelpCircle className="mr-3 text-blue-600 mt-1 flex-shrink-0" size={18} />
+                                    <div className="flex-1">
+                                        <p className="font-medium text-gray-800 mb-2">{question}</p>
+                                        
+                                        {/* Show if question is mandatory */}
+                                        {formData.mandatoryQuestions && formData.mandatoryQuestions.includes(question) && (
+                                            <div className="mb-2">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <AlertCircle size={12} className="mr-1" />
+                                                    Mandatory
+                                                </span>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Show selected options if any */}
+                                        {formData.selectedOptions && formData.selectedOptions[question] && formData.selectedOptions[question].length > 0 ? (
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-2">Answer Options:</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {formData.selectedOptions[question].map((option, optionIndex) => (
+                                                        <span key={optionIndex} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <CheckCircle size={12} className="mr-1" />
+                                                            {option}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                    <FileText size={12} className="mr-1" />
+                                                    Open text response
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            ) : (
-                                <p className="text-gray-500 italic">No banner uploaded</p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                        <Video className="mr-3 text-gray-600 mt-1" size={18} />
-                        <div>
-                            <p className="text-sm text-gray-500">Video Link</p>
-                            {formData.videoLink ? (
-                                <a 
-                                    href={formData.videoLink} 
-                                    target="_blank" 
-                                    rel="noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    {formData.videoLink}
-                                </a>
-                            ) : (
-                                <p className="text-gray-500 italic">No video link provided</p>
-                            )}
+                            </div>
+                        ))}
+                        
+                        {/* Summary stats */}
+                        <div className="mt-4 pt-4 border-t border-blue-200">
+                            <div className="flex flex-wrap gap-4 text-sm text-blue-700">
+                                <span className="flex items-center">
+                                    <List className="mr-1" size={14} />
+                                    {formData.jobQuestions.length} question{formData.jobQuestions.length !== 1 ? 's' : ''} selected
+                                </span>
+                                {formData.mandatoryQuestions && formData.mandatoryQuestions.length > 0 && (
+                                    <span className="flex items-center">
+                                        <AlertCircle className="mr-1" size={14} />
+                                        {formData.mandatoryQuestions.length} mandatory
+                                    </span>
+                                )}
+                                {formData.selectedOptions && Object.keys(formData.selectedOptions).length > 0 && (
+                                    <span className="flex items-center">
+                                        <CheckCircle className="mr-1" size={14} />
+                                        {Object.keys(formData.selectedOptions).length} with predefined options
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Key Selling Points */}
+            {(formData.sellingPoints && formData.sellingPoints.some(point => point && point.trim())) && (
+                <div className="mb-8 bg-purple-50 p-6 rounded-lg">
+                    <h3 className="text-xl font-bold text-purple-800 mb-4">Key Selling Points</h3>
+                    <div className="flex items-start">
+                        <BarChart4 className="mr-3 text-purple-600 mt-1" size={18} />
+                        <div className="flex-1">
+                            <ul className="space-y-2">
+                                {formData.sellingPoints
+                                    .filter(point => point && point.trim())
+                                    .map((point, index) => (
+                                        <li key={index} className="flex items-start">
+                                            <Check className="mr-2 text-purple-600 mt-0.5 flex-shrink-0" size={16} />
+                                            <span className="text-gray-700">{point}</span>
+                                        </li>
+                                    ))
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Company Branding */}
+            {(formData.companyLogo || formData.jobBanner || formData.videoLink) && (
+                <div className="mb-8 bg-green-50 p-6 rounded-lg">
+                    <h3 className="text-xl font-bold text-green-800 mb-4">Company Branding</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        {formData.companyLogo && (
+                            <div className="flex items-start">
+                                <Image className="mr-3 text-green-600 mt-1" size={18} />
+                                <div>
+                                    <p className="text-sm text-gray-500">Company Logo</p>
+                                    <div className="mt-2">
+                                        <img 
+                                            src={formData.companyLogo} 
+                                            alt="Company Logo" 
+                                            className="h-16 object-contain rounded border border-gray-200 bg-white" 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {formData.jobBanner && (
+                            <div className="flex items-start">
+                                <Image className="mr-3 text-green-600 mt-1" size={18} />
+                                <div>
+                                    <p className="text-sm text-gray-500">Job Banner</p>
+                                    <div className="mt-2">
+                                        <img 
+                                            src={formData.jobBanner} 
+                                            alt="Job Banner" 
+                                            className="h-24 object-cover rounded border border-gray-200" 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {formData.videoLink && (
+                            <div className="flex items-start">
+                                <Video className="mr-3 text-green-600 mt-1" size={18} />
+                                <div>
+                                    <p className="text-sm text-gray-500">Video Link</p>
+                                    <a 
+                                        href={formData.videoLink} 
+                                        target="_blank" 
+                                        rel="noreferrer"
+                                        className="text-green-600 hover:underline break-all"
+                                    >
+                                        {formData.videoLink}
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+
 
             {/* Missing Information Alert */}
             {(!formData.jobTitle || !formData.jobLocation || !formData.workspaceOption || 
