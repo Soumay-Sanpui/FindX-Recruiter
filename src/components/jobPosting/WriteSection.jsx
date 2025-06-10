@@ -600,6 +600,45 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         });
     };
 
+    // Validate selected questions have options
+    const validateQuestionsWithOptions = () => {
+        if (!formData.jobQuestions || formData.jobQuestions.length === 0) {
+            return true; // No questions selected, no validation needed
+        }
+
+        const questionsWithoutOptions = [];
+        
+        formData.jobQuestions.forEach(question => {
+            // Find the question object to check if it has options
+            let questionObj = null;
+            
+            // Check in basic questions
+            const allBasicQuestions = Object.values(questionSections).flat().map(section => section.questions).flat();
+            questionObj = allBasicQuestions.find(q => q.question === question);
+            
+            // Check in advanced questions if not found in basic
+            if (!questionObj) {
+                const allAdvancedQuestions = Object.values(filteredAdvancedQuestions).map(section => section.questions).flat();
+                questionObj = allAdvancedQuestions.find(q => q.question === question);
+            }
+            
+            // If question has options but no options are selected
+            if (questionObj && questionObj.options && questionObj.options.length > 0) {
+                if (!selectedOptions[question] || selectedOptions[question].length === 0) {
+                    questionsWithoutOptions.push(question);
+                }
+            }
+        });
+
+        if (questionsWithoutOptions.length > 0) {
+            const questionList = questionsWithoutOptions.map(q => `• ${q}`).join('\n');
+            alert(`Please select answer options for the following questions before continuing:\n\n${questionList}`);
+            return false;
+        }
+
+        return true;
+    };
+
     // Effect to update filtered advanced questions when category changes
     useEffect(() => {
         if (formData.category) {
@@ -1161,7 +1200,11 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         Back to Ad Types
                     </button>
                     <button
-                        onClick={() => handleStageChange('Manage')}
+                        onClick={() => {
+                            if (validateQuestionsWithOptions()) {
+                                handleStageChange('Manage');
+                            }
+                        }}
                         className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                         Continue to Manage

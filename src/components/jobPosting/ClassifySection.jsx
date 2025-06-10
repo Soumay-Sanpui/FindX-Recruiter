@@ -24,14 +24,78 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
     // Get categories from config
     const categories = Object.keys(CONFIG.jobAdIndustries);
 
+    // Function to reconstruct broken subcategories
+    const reconstructSubcategories = (rawSubcategories) => {
+        if (!rawSubcategories || rawSubcategories.length === 0) return [];
+        
+        const reconstructed = [];
+        let currentItem = '';
+        
+        // Keywords that indicate a fragment that should be combined
+        const fragmentIndicators = ['&', '-', '/', 'and'];
+        const completeWords = ['Other', 'Management', 'Analysis', 'Planning', 'Strategy', 'Operations', 'Development', 'Administration', 'Coordination'];
+        
+        for (let i = 0; i < rawSubcategories.length; i++) {
+            const item = rawSubcategories[i] ? rawSubcategories[i].trim() : '';
+            
+            if (!item) continue;
+            
+            // If current item is empty, start new item
+            if (!currentItem) {
+                currentItem = item;
+            } else {
+                // Check if this item should be combined with the previous one
+                const shouldCombine = (
+                    // Previous item ends with connector
+                    fragmentIndicators.some(indicator => currentItem.endsWith(indicator)) ||
+                    // Current item starts with connector
+                    fragmentIndicators.some(indicator => item.startsWith(indicator)) ||
+                    // Previous item is very short and not a complete word
+                    (currentItem.length < 15 && !completeWords.includes(currentItem)) ||
+                    // Current item appears to be a continuation (starts lowercase or is very short)
+                    (item.length < 15 && item.charAt(0) === item.charAt(0).toLowerCase() && !completeWords.includes(item)) ||
+                    // Special cases for common patterns
+                    (currentItem === 'Business Services' && item === 'Corporate Advisory') ||
+                    (currentItem === 'Records Management' && item === 'Document') ||
+                    (currentItem === 'Artificial Intelligence' && item === 'Machine') ||
+                    (currentItem === 'Database Development' && item === 'Administration')
+                );
+                
+                if (shouldCombine) {
+                    currentItem += ' ' + item;
+                } else {
+                    // Finalize current item and start new one
+                    if (currentItem) {
+                        reconstructed.push(currentItem);
+                    }
+                    currentItem = item;
+                }
+            }
+            
+            // If this is the last item, add whatever we have
+            if (i === rawSubcategories.length - 1 && currentItem) {
+                reconstructed.push(currentItem);
+            }
+        }
+        
+        return reconstructed
+            .filter(item => item && item.trim().length > 0)
+            .map(item => item.trim())
+            .filter((item, index, array) => array.indexOf(item) === index); // Remove duplicates
+    };
+
     // Update subcategories when main category changes
     useEffect(() => {
         if (formData.category) {
             const selectedSubcategories = CONFIG.jobAdIndustries[formData.category] || [];
-            setSubcategories(selectedSubcategories);
+            
+            // Reconstruct broken subcategories
+            const cleanedSubcategories = reconstructSubcategories(selectedSubcategories);
+            
+            setSubcategories(cleanedSubcategories);
             
             // Reset subcategory if current selection is not in the new list
-            if (selectedSubcategories.length > 0 && !selectedSubcategories.includes(formData.subcategory)) {
+            if (cleanedSubcategories.length > 0 && !cleanedSubcategories.includes(formData.subcategory)) {
                 handleChange({
                     target: {
                         name: 'subcategory',
