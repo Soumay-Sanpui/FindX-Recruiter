@@ -55,7 +55,7 @@ const categoryMapping = {
 };
 
 // Function to get filtered advance questions based on main category
-export const getAdvanceQuestionsByCategory = (mainCategory) => {
+const getAdvanceQuestionsByCategory = (mainCategory) => {
     if (!mainCategory) {
         return {};
     }
@@ -203,8 +203,4 @@ export const getAdvanceQuestionSections = (mainCategory) => {
     return sections;
 };
 
-export default {
-    getAdvanceQuestionsByCategory,
-    getAdvanceQuestionSections,
-    categoryMapping
-};
+

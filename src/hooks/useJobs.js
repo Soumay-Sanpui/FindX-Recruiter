@@ -10,7 +10,6 @@ export const jobKeys = {
   details: () => [...jobKeys.all, 'detail'],
   detail: (id) => [...jobKeys.details(), id],
   myJobs: () => [...jobKeys.all, 'myJobs'],
-  myApplications: () => [...jobKeys.all, 'myApplications'],
 };
 
 // Get all jobs
@@ -44,15 +43,7 @@ export const useJobDetails = (jobId) => {
   });
 };
 
-// Get my applications
-export const useMyApplications = () => {
-  return useQuery({
-    queryKey: jobKeys.myApplications(),
-    queryFn: () => jobAPI.getMyApplications(),
-    select: (data) => data?.success ? data.applications : [],
-    staleTime: 1 * 60 * 1000, // 1 minute for applications
-  });
-};
+
 
 // Create job mutation
 export const useCreateJob = () => {
@@ -140,22 +131,4 @@ export const useUpdateApplicationStatus = () => {
   });
 };
 
-// Apply for job mutation
-export const useApplyForJob = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (jobId) => jobAPI.applyForJob(jobId),
-    onSuccess: (data, jobId) => {
-      // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: jobKeys.detail(jobId) });
-      queryClient.invalidateQueries({ queryKey: jobKeys.myApplications() });
-      
-      toast.success('Application submitted successfully!');
-    },
-    onError: (error) => {
-      const message = error?.message || 'Failed to submit application';
-      toast.error(message);
-    },
-  });
-}; 
+ 

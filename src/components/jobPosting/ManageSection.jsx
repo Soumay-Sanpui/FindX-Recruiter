@@ -113,36 +113,7 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
                 </div>
             </div>
 
-            {/* Skills and Experience */}
-            {/* <div className="mb-8 bg-purple-50 p-6 rounded-lg">
-                <h3 className="text-xl font-bold text-purple-800 mb-4">Skills</h3>
-                <div className="grid grid-cols-1 gap-x-8 gap-y-4">
-                    <div className="flex items-start">
-                        <List className="mr-3 text-purple-600 mt-1" size={18} />
-                        <div>
-                            <p className="text-sm text-gray-500">Skills</p>
-                            {formData.jobSkills ? (
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                    {typeof formData.jobSkills === 'string' 
-                                        ? formData.jobSkills.split(',').map((skill, index) => (
-                                            <span key={index} className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                                {skill.trim()}
-                                            </span>
-                                        ))
-                                        : formData.jobSkills.map((skill, index) => (
-                                            <span key={index} className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                                {skill}
-                                            </span>
-                                        ))
-                                    }
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 italic">No skills specified</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div> */}
+
 
             {/* Job Description */}
             {formData.jobDescription && (

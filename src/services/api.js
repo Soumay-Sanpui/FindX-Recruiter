@@ -130,23 +130,7 @@ export const jobAPI = {
         }
     },
     
-    applyForJob: async (jobId) => {
-        try {
-            const response = await api.post(`/jobs/${jobId}/apply`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-    
-    getMyApplications: async () => {
-        try {
-            const response = await api.get('/jobs/my/applications');
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
+
 };
 
 export default api; 
