@@ -35,6 +35,9 @@ const JobDetails = () => {
     
     // Application Response dropdown states for each applicant
     const [expandedApplicantResponses, setExpandedApplicantResponses] = useState({});
+    
+    // Applicants section dropdown state
+    const [showApplicantsSection, setShowApplicantsSection] = useState(false);
 
     // Toggle individual question expansion
     const toggleQuestionExpansion = (questionIndex) => {
@@ -322,18 +325,6 @@ const JobDetails = () => {
                     </div>
                 </div>
 
-                {/* Skills & Requirements */}
-                <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Required Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {job.jobSkills && job.jobSkills.map((skill, index) => (
-                            <span key={index} className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded">
-                                {skill}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-
                 {/* Application Questions */}
                 {((job.jobQuestions && job.jobQuestions.length > 0) || (job.applicationQuestions && job.applicationQuestions.length > 0)) && (
                     <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
@@ -506,26 +497,51 @@ const JobDetails = () => {
 
                 {/* Applicants Section */}
                 <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold text-gray-800">
-                            Applicants ({job.applicants?.length || 0})
-                        </h3>
-                        <div className="flex gap-4">
-                            {employer?.messagesAllowed && (
-                                <button
-                                    onClick={() => navigate(`/messages`)}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition flex items-center"
-                                >
-                                    <MessageCircle className="mr-2" size={16} /> 
-                                    View Messages
-                                </button>
-                            )}
+                    {/* Main Section Header with Dropdown Toggle */}
+                    <div 
+                        className="flex items-center justify-between cursor-pointer hover:bg-gray-50 -m-2 p-2 rounded transition-colors mb-6"
+                        onClick={() => setShowApplicantsSection(!showApplicantsSection)}
+                    >
+                        <div className="flex items-center">
+                            <h3 className="text-xl font-bold text-gray-800">
+                                Applicants ({job.applicants?.length || 0})
+                            </h3>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center text-gray-600">
+                                <span className="text-sm mr-2">
+                                    {showApplicantsSection ? 'Collapse' : 'Expand'}
+                                </span>
+                                {showApplicantsSection ? 
+                                    <ChevronUp size={20} /> : 
+                                    <ChevronDown size={20} />
+                                }
+                            </div>
                         </div>
                     </div>
+                    
+                    {/* View Messages Button - Outside of main dropdown */}
+                    {employer?.messagesAllowed && (
+                        <div className="mb-6">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/messages`);
+                                }}
+                                className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition flex items-center"
+                            >
+                                <MessageCircle className="mr-2" size={16} /> 
+                                View Messages
+                            </button>
+                        </div>
+                    )}
 
-                    {job.applicants && job.applicants.length > 0 ? (
-                        <div className="space-y-4">
-                            {job.applicants.map((applicant) => (
+                    {/* Collapsible Applicants Content */}
+                    {showApplicantsSection && (
+                        <>
+                            {job.applicants && job.applicants.length > 0 ? (
+                                <div className="space-y-4">
+                                    {job.applicants.map((applicant) => (
                                 <div key={applicant._id} className="border-2 border-gray-200 hover:border-blue-300 p-4 rounded-lg transition-colors">
                                     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start">
                                         <div className="flex-1">
@@ -755,7 +771,40 @@ const JobDetails = () => {
                                 When candidates apply for this job, they'll appear here
                             </p>
                         </div>
+                            )}
+                        </>
                     )}
+                    
+                    {/* Summary - Always visible */}
+                    <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md shadow-md">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-green-700 font-medium">
+                                    👥 Applicant Summary
+                                </p>
+                                <p className="text-sm text-green-600 mt-1">
+                                    Total Applicants: <strong>{job.applicants?.length || 0}</strong>
+                                    {job.applicants?.length > 0 && (
+                                        <>
+                                            <span className="ml-4">Pending: <strong>{job.applicants.filter(a => a.status === 'Pending').length}</strong></span>
+                                            <span className="ml-4">Reviewed: <strong>{job.applicants.filter(a => a.status === 'Reviewed').length}</strong></span>
+                                            <span className="ml-4">Shortlisted: <strong>{job.applicants.filter(a => a.status === 'Shortlisted').length}</strong></span>
+                                        </>
+                                    )}
+                                </p>
+                            </div>
+                            {job.applicants?.length > 0 && (
+                                <div className="text-right">
+                                    <p className="text-sm text-green-600 font-medium">
+                                        📊 Status Breakdown
+                                    </p>
+                                    <p className="text-xs text-green-500 mt-1">
+                                        Click expand to manage applicants
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
