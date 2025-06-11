@@ -513,7 +513,7 @@ const JobDetails = () => {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation(); // Prevent dropdown toggle
-                                        navigate(`/messages`);
+                                        navigate(`/messages/${job._id}`);
                                     }}
                                     className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition flex items-center"
                                 >
