@@ -32,12 +32,23 @@ const JobDetails = () => {
     // Application Questions dropdown states
     const [showApplicationQuestions, setShowApplicationQuestions] = useState(false);
     const [expandedQuestions, setExpandedQuestions] = useState({});
+    
+    // Application Response dropdown states for each applicant
+    const [expandedApplicantResponses, setExpandedApplicantResponses] = useState({});
 
     // Toggle individual question expansion
     const toggleQuestionExpansion = (questionIndex) => {
         setExpandedQuestions(prev => ({
             ...prev,
             [questionIndex]: !prev[questionIndex]
+        }));
+    };
+
+    // Toggle individual applicant response expansion
+    const toggleApplicantResponseExpansion = (applicantId) => {
+        setExpandedApplicantResponses(prev => ({
+            ...prev,
+            [applicantId]: !prev[applicantId]
         }));
     };
 
@@ -564,7 +575,7 @@ const JobDetails = () => {
                                             )}
                                             
                                             {/* Debug: Show applicant data structure */}
-                                            {(process.env.NODE_ENV === 'development' || window.location.search.includes('debug=true')) && (
+                                            {(window.location.search.includes('debug=true')) && (
                                                 <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
                                                     <h5 className="font-medium text-yellow-700 text-sm mb-2">Debug: Applicant Data</h5>
                                                     <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
@@ -587,24 +598,76 @@ const JobDetails = () => {
                                                 </div>
                                             )}
                                             
-                                            {/* Application Question Responses */}
-                                            {applicant.questionResponses && Array.isArray(applicant.questionResponses) && applicant.questionResponses.length > 0 ? (
-                                                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                                                    <h5 className="font-medium text-blue-700 text-sm mb-2">Application Question Responses</h5>
-                                                    <div className="space-y-2">
-                                                        {applicant.questionResponses.map((response, index) => (
-                                                            <div key={index} className="text-sm">
-                                                                <p className="font-medium text-gray-700 mb-1">
-                                                                    Q{index + 1}: {response.question}
-                                                                </p>
-                                                                <p className="text-blue-600 bg-white px-2 py-1 rounded border">
+                            {/* Application Question Responses */}
+                            {applicant.questionResponses && Array.isArray(applicant.questionResponses) && applicant.questionResponses.length > 0 ? (
+                                <div className="mt-3 bg-blue-50 border border-blue-200 rounded overflow-hidden">
+                                    {/* Response Header with Dropdown Toggle */}
+                                    <div 
+                                        className="p-3 cursor-pointer hover:bg-blue-100 transition-colors flex items-center justify-between"
+                                        onClick={() => toggleApplicantResponseExpansion(applicant._id)}
+                                    >
+                                        <div className="flex items-center">
+                                            <h5 className="font-medium text-blue-700 text-sm">
+                                                Application Question Responses ({applicant.questionResponses.length})
+                                            </h5>
+                                        </div>
+                                        <div className="flex items-center text-blue-600">
+                                            <span className="text-xs mr-2">
+                                                {expandedApplicantResponses[applicant._id] ? 'Collapse' : 'Expand'}
+                                            </span>
+                                            {expandedApplicantResponses[applicant._id] ? 
+                                                <ChevronUp size={16} /> : 
+                                                <ChevronDown size={16} />
+                                            }
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Collapsible Response Content */}
+                                    {expandedApplicantResponses[applicant._id] && (
+                                        <div className="p-3 bg-white border-t border-blue-200">
+                                            <div className="space-y-3">
+                                                {applicant.questionResponses.map((response, index) => (
+                                                    <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                        <div className="p-3 bg-gray-50">
+                                                            <p className="font-medium text-gray-700 text-sm">
+                                                                <span className="text-blue-600 mr-2">Q{index + 1}:</span>
+                                                                {response.question}
+                                                            </p>
+                                                        </div>
+                                                        <div className="p-3 bg-white">
+                                                            <div className="flex items-center">
+                                                                <span className="text-xs text-gray-500 mr-2">Answer:</span>
+                                                                <span className="text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-sm font-medium">
                                                                     {response.selectedOption}
-                                                                </p>
+                                                                </span>
                                                             </div>
-                                                        ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* Response Summary */}
+                                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-xs text-blue-700 font-medium">
+                                                            📋 Response Summary
+                                                        </p>
+                                                        <p className="text-xs text-blue-600 mt-1">
+                                                            Completed: <strong>{applicant.questionResponses.length}</strong> of <strong>{job.applicationQuestions?.length || 0}</strong> questions
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-xs text-green-600 font-medium">
+                                                            ✓ All Answered
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            ) : (
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
                                                 // Show when applicant applied but no question responses are found
                                                 job.applicationQuestions && job.applicationQuestions.length > 0 && (
                                                     <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded">
