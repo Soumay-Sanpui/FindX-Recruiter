@@ -4,8 +4,8 @@ const Timeline = ({currentStage, onStageChange}) => {
     const timelineStages = ['Classify', 'Ad Types', 'Write', 'Manage'];
 
     return (
-        <div className="w-full py-10">
-            <div className="flex justify-center items-center">
+        <div className="sticky top-0 w-full flex justify-center items-center py-10">
+            <div className="w-max border-blue-800 border shadow-md bg-opacity-50 backdrop-blur-sm bg-opacity-50 backdrop-blur-sm py-7  px-10 rounded-full flex justify-center items-center">
                 {timelineStages.map((stage, index) => (
                     <div key={index} className="flex items-center">
                         <button 

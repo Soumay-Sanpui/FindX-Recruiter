@@ -562,6 +562,70 @@ const JobDetails = () => {
                                                     <p className="text-sm text-gray-600">{applicant.blockReason}</p>
                                                 </div>
                                             )}
+                                            
+                                            {/* Debug: Show applicant data structure */}
+                                            {(process.env.NODE_ENV === 'development' || window.location.search.includes('debug=true')) && (
+                                                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                                                    <h5 className="font-medium text-yellow-700 text-sm mb-2">Debug: Applicant Data</h5>
+                                                    <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
+                                                        {JSON.stringify({
+                                                            applicantId: applicant._id,
+                                                            userId: applicant.user?._id,
+                                                            userName: applicant.user?.name,
+                                                            questionResponses: applicant.questionResponses,
+                                                            questionResponsesType: typeof applicant.questionResponses,
+                                                            isArray: Array.isArray(applicant.questionResponses),
+                                                            hasQuestionResponses: !!applicant.questionResponses,
+                                                            questionResponsesLength: applicant.questionResponses?.length || 0,
+                                                            jobHasApplicationQuestions: !!(job.applicationQuestions && job.applicationQuestions.length > 0),
+                                                            applicationQuestionsCount: job.applicationQuestions?.length || 0,
+                                                            appliedOn: applicant.appliedOn,
+                                                            status: applicant.status,
+                                                            hasValidResponses: applicant.questionResponses && Array.isArray(applicant.questionResponses) && applicant.questionResponses.length > 0
+                                                        }, null, 2)}
+                                                    </pre>
+                                                </div>
+                                            )}
+                                            
+                                            {/* Application Question Responses */}
+                                            {applicant.questionResponses && Array.isArray(applicant.questionResponses) && applicant.questionResponses.length > 0 ? (
+                                                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                                    <h5 className="font-medium text-blue-700 text-sm mb-2">Application Question Responses</h5>
+                                                    <div className="space-y-2">
+                                                        {applicant.questionResponses.map((response, index) => (
+                                                            <div key={index} className="text-sm">
+                                                                <p className="font-medium text-gray-700 mb-1">
+                                                                    Q{index + 1}: {response.question}
+                                                                </p>
+                                                                <p className="text-blue-600 bg-white px-2 py-1 rounded border">
+                                                                    {response.selectedOption}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                // Show when applicant applied but no question responses are found
+                                                job.applicationQuestions && job.applicationQuestions.length > 0 && (
+                                                    <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded">
+                                                        <h5 className="font-medium text-orange-700 text-sm mb-2">⚠️ Missing Application Question Responses</h5>
+                                                        <p className="text-sm text-orange-600 mb-2">
+                                                            This job has {job.applicationQuestions.length} application questions, but the applicant's responses were not saved or are empty.
+                                                        </p>
+                                                        <div className="text-xs text-orange-500 space-y-1">
+                                                            <p><strong>Possible causes:</strong></p>
+                                                            <ul className="list-disc list-inside pl-2 space-y-1">
+                                                                <li>Applicant submitted without filling out required questions</li>
+                                                                <li>Questions were added after the application was submitted</li>
+                                                                <li>Technical issue during submission</li>
+                                                            </ul>
+                                                            <p className="mt-2">
+                                                                <strong>Troubleshooting:</strong> Add ?debug=true to URL to see raw data.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )}
                                         </div>
                                         
                                         <div className="mt-4 lg:mt-0 lg:ml-6 flex flex-col items-start lg:items-end">
