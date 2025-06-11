@@ -34,23 +34,73 @@ api.interceptors.response.use(
     }
 );
 
-// Messaging API methods
+// Comprehensive Messaging API methods
 export const messageAPI = {
-    sendMessage: async (messageData) => {
+    // Get employer's conversations
+    getEmployerConversations: async (employerId) => {
         try {
-            const response = await api.post('/messages/send', messageData);
+            const response = await api.get(`/messages/employer/${employerId}/Employer/conversations`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
     },
     
-    getMessagesBetweenUsers: async (employerId, userId) => {
+    // Get conversation history between employer and user for a specific job
+    getConversationHistory: async (employerId, userId, jobId) => {
         try {
-            const response = await api.get(`/messages/${employerId}/${userId}`);
+            const response = await api.get(`/messages/employer/conversation/${employerId}/${userId}/${jobId}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
+        }
+    },
+    
+    // Send message as employer
+    sendMessage: async (messageData) => {
+        try {
+            const response = await api.post('/messages/employer/send', messageData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    // Mark messages as read
+    markMessagesAsRead: async (employerId, userId, jobId) => {
+        try {
+            const response = await api.put('/messages/employer/mark-read', {
+                userId: employerId,
+                partnerId: userId,
+                jobId: jobId
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    // Validate messaging permission
+    validateMessagingPermission: async (employerId, userId, jobId) => {
+        try {
+            const response = await api.post('/messages/validate-permission', {
+                userId: userId,
+                employerId: employerId,
+                jobId: jobId,
+                userType: 'Employer'
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    // Legacy method for backward compatibility
+    getMessagesBetweenUsers: async (employerId, userId, jobId) => {
+        try {
+            return await messageAPI.getConversationHistory(employerId, userId, jobId);
+        } catch (error) {
+            throw error;
         }
     }
 };
@@ -128,9 +178,7 @@ export const jobAPI = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
-    },
-    
-
+    }
 };
 
 export default api; 

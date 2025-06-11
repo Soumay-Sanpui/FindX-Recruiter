@@ -148,10 +148,10 @@ const MyJobs = () => {
                                                 </button>
                                             )}
                                             
-                                            {/* View Messages button - only show if messaging is allowed */}
-                                            {employer?.messagesAllowed && (
+                                            {/* View Messages button - show for all jobs with applicants */}
+                                            {job.applicants?.length > 0 && (
                                                 <button
-                                                    onClick={() => navigate(`/messages`)}
+                                                    onClick={() => navigate(`/messages/${job._id}`)}
                                                     className="bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
                                                 >
                                                     <MessageCircle className="mr-1" size={16} /> 

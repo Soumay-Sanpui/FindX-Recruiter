@@ -104,7 +104,7 @@ const router = createBrowserRouter([
     element: <ErrorBoundary><JobDetails /></ErrorBoundary>,
   },
   {
-    path: "/messages",
+    path: "/messages/:jobId",
     element: <ErrorBoundary><Messages /></ErrorBoundary>,
   },
   {

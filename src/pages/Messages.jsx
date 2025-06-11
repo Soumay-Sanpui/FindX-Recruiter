@@ -4,10 +4,10 @@ import { useEmployerStore } from '../store/employer.store';
 import { useJobDetails } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
 import { Send, ArrowLeft, Search, User, Calendar, RefreshCw } from 'lucide-react';
-import api from '../services/api';
+import api, { messageAPI } from '../services/api';
 
 const Messages = () => {
-    const { employer, isAuthenticated } = useEmployerStore();
+    const { employer, isAuthenticated, setEmployer } = useEmployerStore();
     const navigate = useNavigate();
     const { jobId } = useParams();
     
@@ -65,12 +65,6 @@ const Messages = () => {
             return;
         }
 
-        // Check if messaging is enabled
-        if (!employer?.messagesAllowed) {
-            navigate('/settings', { state: { activeTab: 'messaging' } });
-            return;
-        }
-
         const fetchJobData = async () => {
             if (!jobId || !employer) return;
             
@@ -91,6 +85,9 @@ const Messages = () => {
                     return;
                 }
                 
+                console.log('Job data:', job);
+                console.log('Job applicants:', job.applicants);
+                
                 // Check if the employer owns this job
                 if (job.postedBy._id !== employer._id && job.postedBy !== employer._id) {
                     setError('You do not have permission to view messages for this job');
@@ -104,7 +101,28 @@ const Messages = () => {
                     jobTitle: job.jobTitle
                 }));
                 
+                console.log('Processed applicants:', applicantsWithDetails);
                 setApplicants(applicantsWithDetails);
+                
+                // Auto-enable messaging for this employer if not already enabled
+                if (!employer.messagesAllowed) {
+                    try {
+                        const enableResponse = await api.patch('/employer/enable-messaging', {
+                            employerId: employer._id
+                        });
+                        
+                        if (enableResponse.data && enableResponse.data.success) {
+                            // Update employer in store
+                            setEmployer({
+                                ...employer,
+                                messagesAllowed: true
+                            });
+                            console.log('Messaging enabled for employer');
+                        }
+                    } catch (enableErr) {
+                        console.log('Note: Could not auto-enable messaging, but continuing anyway');
+                    }
+                }
                 
             } catch (err) {
                 console.error('Error fetching job data:', err);
@@ -122,21 +140,52 @@ const Messages = () => {
         if (!selectedApplicant || !employer) return;
         
         if (showLoading) setLoading(true);
+        setError(null);
         
         try {
             const jobIdToUse = selectedApplicant.jobId || jobId;
-            const response = await api.get(`/messages/conversation/${employer._id}/${selectedApplicant.user._id}/${jobIdToUse}`);
             
-            if (response.data && response.data.messages) {
-                setMessages(response.data.messages);
+            console.log('Loading conversation history:', {
+                employerId: employer._id,
+                userId: selectedApplicant.user._id,
+                jobId: jobIdToUse
+            });
+            
+            // Use employer-specific conversation endpoint
+            const response = await api.get(`/messages/employer/conversation/${employer._id}/${selectedApplicant.user._id}/${jobIdToUse}`);
+            
+            console.log('Conversation response:', response.data);
+            
+            if (response.data && response.data.success) {
+                const messages = response.data.messages || [];
+                console.log('Setting messages:', messages);
+                setMessages(messages);
+                
+                // Mark messages as read
+                try {
+                    await api.put('/messages/employer/mark-read', {
+                        userId: employer._id,
+                        partnerId: selectedApplicant.user._id,
+                        jobId: jobIdToUse
+                    });
+                } catch (markReadError) {
+                    console.error('Error marking messages as read:', markReadError);
+                }
                 
                 // Scroll to bottom after loading messages
                 setTimeout(scrollToBottom, 100);
+            } else {
+                console.log('No messages found or invalid response');
+                setMessages([]);
             }
         } catch (err) {
             console.error('Error loading conversation:', err);
-            if (showLoading) {
-                setError('Failed to load conversation');
+            if (err.response?.status === 401) {
+                setError('Authentication failed. Please log in again.');
+            } else if (err.response?.status === 403) {
+                setError('You do not have permission to view these messages.');
+            } else {
+                setError('Failed to load conversation. Please try again.');
             }
         } finally {
             if (showLoading) setLoading(false);
@@ -148,6 +197,7 @@ const Messages = () => {
         if (!newMessage.trim() || !selectedApplicant || !employer) return;
         
         setSendingMessage(true);
+        setError(null);
         
         try {
             // Create message data
@@ -160,22 +210,32 @@ const Messages = () => {
                 jobId: selectedApplicant.jobId || jobId
             };
             
-            // Send via HTTP API
+            console.log('Sending message:', messageData);
+            
+            // Send via direct API call
             const response = await api.post('/messages/employer/send', messageData);
+            
+            console.log('Send message response:', response.data);
             
             if (response.data && response.data.success) {
                 // Clear the input
                 setNewMessage('');
                 
                 // Refresh conversation to show the new message
-                loadConversationHistory(false);
+                await loadConversationHistory(false);
             } else {
                 throw new Error(response.data?.message || 'Failed to send message');
             }
             
         } catch (err) {
             console.error('Error sending message:', err);
-            setError('Failed to send message');
+            if (err.response?.status === 401) {
+                setError('Authentication failed. Please log in again.');
+            } else if (err.response?.status === 403) {
+                setError('You do not have permission to send messages.');
+            } else {
+                setError(err.response?.data?.message || 'Failed to send message. Please try again.');
+            }
         } finally {
             setSendingMessage(false);
         }
@@ -312,41 +372,61 @@ const Messages = () => {
                             {filteredApplicants.length === 0 ? (
                                 <div className="p-6 text-center text-gray-500">
                                     {applicants.length === 0 ? 'No applicants yet' : 'No applicants found'}
+                                    {applicants.length === 0 && (
+                                        <div className="mt-4 text-xs text-gray-400">
+                                            <p>Debug Info:</p>
+                                            <p>Job ID: {jobId}</p>
+                                            <p>Job Details Loaded: {jobDetails ? 'Yes' : 'No'}</p>
+                                            <p>Employer ID: {employer?._id}</p>
+                                            <p>Loading: {loading.toString()}</p>
+                                            <p>Error: {error || 'None'}</p>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
-                                filteredApplicants.map((applicant) => (
-                                    <div 
-                                        key={applicant._id}
-                                        onClick={() => setSelectedApplicant(applicant)}
-                                        className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
-                                    >
-                                        <div className="flex items-center">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                                <User size={20} className="text-blue-600" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {applicant.user?.name || 'Applicant'}
-                                                </p>
-                                                <p className="text-xs text-gray-500 truncate">
-                                                    {applicant.user?.email || ''}
-                                                </p>
-                                                <div className="flex items-center mt-1">
-                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                        applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
-                                                        applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
-                                                        applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
-                                                        applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                        'bg-gray-100 text-gray-800'
-                                                    }`}>
-                                                        {applicant.status}
-                                                    </span>
+                                <>
+                                    {/* Add debug info when there are applicants */}
+                                    <div className="p-2 text-xs text-gray-400 border-b">
+                                        Debug: {applicants.length} total applicants, {filteredApplicants.length} filtered
+                                    </div>
+                                    {filteredApplicants.map((applicant) => (
+                                        <div 
+                                            key={applicant._id}
+                                            onClick={() => setSelectedApplicant(applicant)}
+                                            className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+                                        >
+                                            <div className="flex items-center">
+                                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                    <User size={20} className="text-blue-600" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {applicant.user?.name || 'Applicant'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 truncate">
+                                                        {applicant.user?.email || ''}
+                                                    </p>
+                                                    <div className="flex items-center mt-1">
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                            applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                            applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                            applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
+                                                            applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
+                                                            applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                            {applicant.status}
+                                                        </span>
+                                                    </div>
+                                                    {/* Debug info for each applicant */}
+                                                    <div className="text-xs text-gray-400 mt-1">
+                                                        User ID: {applicant.user?._id || 'Not populated'}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </>
                             )}
                         </div>
                     </div>
@@ -359,21 +439,38 @@ const Messages = () => {
                                     <User size={48} className="mx-auto text-gray-300 mb-4" />
                                     <p className="text-gray-500 text-lg">Select an applicant to view messages</p>
                                     <p className="text-gray-400 text-sm mt-2">Choose from the list on the left to start messaging</p>
+                                    
+                                    {/* Test message functionality */}
+                                    {applicants.length > 0 && (
+                                        <div className="mt-4">
+                                            <button
+                                                onClick={() => setSelectedApplicant(applicants[0])}
+                                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
+                                            >
+                                                Test with first applicant
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
                             <>
                                 {/* Chat Header */}
                                 <div className="p-4 border-b bg-gray-50">
-                                    <div className="flex items-center">
-                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                            <User size={20} className="text-blue-600" />
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <User size={20} className="text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900">
+                                                    {selectedApplicant.user?.name || 'Applicant'}
+                                                </h3>
+                                                <p className="text-sm text-gray-500">{selectedApplicant.user?.email}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">
-                                                {selectedApplicant.user?.name || 'Applicant'}
-                                            </h3>
-                                            <p className="text-sm text-gray-500">{selectedApplicant.user?.email}</p>
+                                        <div className="text-xs text-gray-500">
+                                            {messages.length} message{messages.length !== 1 ? 's' : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -397,19 +494,28 @@ const Messages = () => {
                                                 key={message._id}
                                                 className={`flex ${message.fromModel === 'Employer' ? 'justify-end' : 'justify-start'}`}
                                             >
-                                                <div
-                                                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                                        message.fromModel === 'Employer'
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'bg-gray-200 text-gray-900'
-                                                    }`}
-                                                >
-                                                    <p className="text-sm">{message.content}</p>
-                                                    <p className={`text-xs mt-1 ${
-                                                        message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
+                                                <div className="max-w-xs lg:max-w-md">
+                                                    {/* Sender indicator */}
+                                                    <p className={`text-xs mb-1 ${
+                                                        message.fromModel === 'Employer' ? 'text-right text-blue-600' : 'text-left text-gray-600'
                                                     }`}>
-                                                        {formatTime(message.timestamp || message.createdAt)}
+                                                        {message.fromModel === 'Employer' ? 'You' : (selectedApplicant.user?.name || 'User')}
                                                     </p>
+                                                    
+                                                    <div
+                                                        className={`px-4 py-2 rounded-lg ${
+                                                            message.fromModel === 'Employer'
+                                                                ? 'bg-blue-600 text-white'
+                                                                : 'bg-gray-200 text-gray-900'
+                                                        }`}
+                                                    >
+                                                        <p className="text-sm">{message.content}</p>
+                                                        <p className={`text-xs mt-1 ${
+                                                            message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
+                                                        }`}>
+                                                            {formatTime(message.timestamp || message.createdAt)}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))
