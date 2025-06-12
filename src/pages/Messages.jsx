@@ -25,37 +25,18 @@ const Messages = () => {
     const [refreshing, setRefreshing] = useState(false);
     const messagesEndRef = useRef(null);
     const messageContainerRef = useRef(null);
-    const pollingInterval = useRef(null);
 
     // Scroll to bottom of messages
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Set up polling for messages when applicant is selected
+    // Load initial messages when applicant is selected (no polling)
     useEffect(() => {
         if (selectedApplicant && employer) {
-            // Load initial messages
+            // Load initial messages only
             loadConversationHistory();
-            
-            // Set up polling for new messages every 3 seconds
-            pollingInterval.current = setInterval(() => {
-                loadConversationHistory(false); // Silent refresh
-            }, 3000);
-        } else {
-            // Clear polling when no applicant selected
-            if (pollingInterval.current) {
-                clearInterval(pollingInterval.current);
-                pollingInterval.current = null;
-            }
         }
-
-        return () => {
-            if (pollingInterval.current) {
-                clearInterval(pollingInterval.current);
-                pollingInterval.current = null;
-            }
-        };
     }, [selectedApplicant, employer]);
 
     useEffect(() => {
@@ -244,6 +225,7 @@ const Messages = () => {
     // Manual refresh function
     const handleRefresh = async () => {
         setRefreshing(true);
+        setError(null);
         if (selectedApplicant) {
             await loadConversationHistory(false);
         }
@@ -469,8 +451,18 @@ const Messages = () => {
                                                 <p className="text-sm text-gray-500">{selectedApplicant.user?.email}</p>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-500">
-                                            {messages.length} message{messages.length !== 1 ? 's' : ''}
+                                        <div className="flex items-center space-x-3">
+                                            <div className="text-xs text-gray-500">
+                                                {messages.length} message{messages.length !== 1 ? 's' : ''}
+                                            </div>
+                                            <button
+                                                onClick={handleRefresh}
+                                                disabled={refreshing}
+                                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                                                title="Refresh messages"
+                                            >
+                                                <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

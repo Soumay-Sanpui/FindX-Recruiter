@@ -9,15 +9,15 @@ export const messageKeys = {
   conversation: (employerId, userId) => [...messageKeys.conversations(), { employerId, userId }],
 };
 
-// Get messages between users
+// Get messages between users (no automatic polling)
 export const useMessagesBetweenUsers = (employerId, userId) => {
   return useQuery({
     queryKey: messageKeys.conversation(employerId, userId),
     queryFn: () => messageAPI.getMessagesBetweenUsers(employerId, userId),
     select: (data) => data?.success ? data.messages : [],
     enabled: !!(employerId && userId),
-    staleTime: 30 * 1000, // 30 seconds for real-time messaging
-    refetchInterval: 5000, // Refetch every 5 seconds for live updates
+    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer since no auto-polling
+    // refetchInterval removed - no automatic polling
   });
 };
 
