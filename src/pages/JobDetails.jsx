@@ -509,7 +509,7 @@ const JobDetails = () => {
                             </h3>
                         </div>
                         <div className="flex items-center gap-4">
-                            {employer?.messagesAllowed && (
+                            {employer?.messagesAllowed ? (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation(); // Prevent dropdown toggle
@@ -519,6 +519,18 @@ const JobDetails = () => {
                                 >
                                     <MessageCircle className="mr-2" size={16} /> 
                                     View Messages
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent dropdown toggle
+                                        navigate('/settings');
+                                    }}
+                                    className="bg-gray-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-600 transition flex items-center"
+                                    title="Enable messaging in settings to view messages"
+                                >
+                                    <MessageCircle className="mr-2" size={16} /> 
+                                    Enable Messaging
                                 </button>
                             )}
                             <div className="flex items-center text-gray-600">

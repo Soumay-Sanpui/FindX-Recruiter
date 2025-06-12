@@ -46,6 +46,13 @@ const Messages = () => {
             return;
         }
 
+        // Check if messaging is enabled for this employer
+        if (!employer?.messagesAllowed) {
+            setError('Messaging is not enabled for your account. Please enable messaging in your settings to use this feature.');
+            setLoading(false);
+            return;
+        }
+
         const fetchJobData = async () => {
             if (!jobId || !employer) return;
             
@@ -84,26 +91,6 @@ const Messages = () => {
                 
                 console.log('Processed applicants:', applicantsWithDetails);
                 setApplicants(applicantsWithDetails);
-                
-                // Auto-enable messaging for this employer if not already enabled
-                if (!employer.messagesAllowed) {
-                    try {
-                        const enableResponse = await api.patch('/employer/enable-messaging', {
-                            employerId: employer._id
-                        });
-                        
-                        if (enableResponse.data && enableResponse.data.success) {
-                            // Update employer in store
-                            setEmployer({
-                                ...employer,
-                                messagesAllowed: true
-                            });
-                            console.log('Messaging enabled for employer');
-                        }
-                    } catch (enableErr) {
-                        console.log('Note: Could not auto-enable messaging, but continuing anyway');
-                    }
-                }
                 
             } catch (err) {
                 console.error('Error fetching job data:', err);
@@ -329,6 +316,23 @@ const Messages = () => {
                         </button>
                     )}
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                        <p className="text-red-700">{error}</p>
+                        {error.includes('Messaging is not enabled') && (
+                            <div className="mt-3">
+                                <button
+                                    onClick={() => navigate('/settings')}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm"
+                                >
+                                    Go to Settings to Enable Messaging
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
                     {/* Applicants List - Left Side */}

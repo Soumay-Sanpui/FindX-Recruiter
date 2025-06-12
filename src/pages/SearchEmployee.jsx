@@ -107,7 +107,7 @@ const SearchEmployee = () => {
     
     const startConversation = async (userId) => {
         if (!employer.messagesAllowed) {
-            toast.warning('Messaging is not enabled for your account. Please upgrade your plan to contact candidates.');
+            toast.warning('Messaging is not enabled for your account. Please enable messaging in your settings to contact candidates.');
             return;
         }
         
