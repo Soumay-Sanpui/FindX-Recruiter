@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router';
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+import { setupMockAPI } from './services/mockApi.js';
 import Home from "./pages/Home.jsx";
 import Pricing from "./pages/Pricing.jsx";
 import Contact from "./pages/Contact.jsx";
@@ -14,6 +15,8 @@ import JobDetails from "./pages/JobDetails.jsx";
 import Settings from "./pages/Settings.jsx";
 import Messages from "./pages/Messages.jsx";
 import SearchEmployee from "./pages/SearchEmployee.jsx";
+import Broadcast from "./pages/Broadcast.jsx";
+import BroadcastNav from "./components/BroadcastNav.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 const router = createBrowserRouter([
@@ -89,7 +92,12 @@ const router = createBrowserRouter([
   },
   {
     path: "/employer-dashboard",
-    element: <ErrorBoundary><EmployerDashboard /></ErrorBoundary>,
+    element: (
+      <ErrorBoundary>
+        <EmployerDashboard />
+        <BroadcastNav />
+      </ErrorBoundary>
+    ),
   },
   {
     path: "/post-job",
@@ -112,6 +120,10 @@ const router = createBrowserRouter([
     element: <ErrorBoundary><Settings /></ErrorBoundary>,
   },
   {
+    path: "/broadcast",
+    element: <ErrorBoundary><Broadcast /></ErrorBoundary>,
+  },
+  {
     path: "/search-employee",
     element: (
       <ErrorBoundary>
@@ -128,6 +140,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
+  useEffect(() => {
+    // Initialize mock API for development
+    setupMockAPI();
+  }, []);
+
   return (
     <ErrorBoundary>
       <RouterProvider router={router} />
