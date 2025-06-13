@@ -653,7 +653,17 @@ const config = {
             "Payroll",
             "Compliance",
             "Financial Planning",
-            "Cost Accounting"
+            "Cost Accounting",
+            "Accounts Payable",
+            "Accounts Receivable",
+            "General Ledger",
+            "Financial Statements",
+            "Cash Flow Management",
+            "Internal Controls",
+            "Risk Assessment",
+            "Forensic Accounting",
+            "Management Accounting",
+            "Financial Modeling"
         ],
         "Administration & Office Support": [
             "Office Management",
@@ -665,7 +675,17 @@ const config = {
             "Customer Service",
             "Project Coordination",
             "Document Management",
-            "Business Administration"
+            "Business Administration",
+            "Calendar Management",
+            "Travel Coordination",
+            "Meeting Planning",
+            "Filing Systems",
+            "Reception Duties",
+            "Correspondence",
+            "Database Management",
+            "Inventory Control",
+            "Vendor Relations",
+            "Office Procedures"
         ],
         "Advertising, Arts & Media": [
             "Content Creation",
@@ -677,7 +697,17 @@ const config = {
             "Event Management",
             "Graphic Design",
             "Copywriting",
-            "Marketing Communications"
+            "Marketing Communications",
+            "Video Production",
+            "Photography",
+            "Art Direction",
+            "Campaign Development",
+            "Media Buying",
+            "Public Relations",
+            "Creative Strategy",
+            "Digital Advertising",
+            "Brand Development",
+            "Content Strategy"
         ],
         "Banking & Financial Services": [
             "Financial Analysis",
@@ -689,7 +719,17 @@ const config = {
             "Treasury Operations",
             "Compliance",
             "Portfolio Management",
-            "Financial Services"
+            "Financial Services",
+            "Loan Processing",
+            "Asset Management",
+            "Financial Advisory",
+            "Banking Operations",
+            "Mortgage Services",
+            "Corporate Banking",
+            "Retail Banking",
+            "Financial Products",
+            "Investment Strategy",
+            "Financial Consulting"
         ],
         "Call Centre & Customer Service": [
             "Customer Support",
@@ -701,7 +741,17 @@ const config = {
             "Team Leadership",
             "Problem Resolution",
             "Customer Success",
-            "Service Operations"
+            "Service Operations",
+            "Call Handling",
+            "Customer Retention",
+            "Service Excellence",
+            "Customer Satisfaction",
+            "Help Desk",
+            "Customer Care",
+            "Service Management",
+            "Customer Engagement",
+            "Service Quality",
+            "Customer Communication"
         ],
         "CEO & General Management": [
             "Strategic Planning",
@@ -713,7 +763,17 @@ const config = {
             "Performance Management",
             "Business Transformation",
             "Corporate Governance",
-            "Strategic Initiatives"
+            "Strategic Initiatives",
+            "Organizational Leadership",
+            "Business Strategy",
+            "Executive Management",
+            "Corporate Development",
+            "Strategic Direction",
+            "Business Operations",
+            "Leadership Development",
+            "Corporate Planning",
+            "Business Growth",
+            "Executive Decision Making"
         ],
         "Community Services & Development": [
             "Social Work",
@@ -725,7 +785,17 @@ const config = {
             "Youth Services",
             "Family Services",
             "Community Engagement",
-            "Social Impact"
+            "Social Impact",
+            "Community Programs",
+            "Social Support",
+            "Community Relations",
+            "Social Advocacy",
+            "Community Planning",
+            "Social Policy",
+            "Community Resources",
+            "Social Intervention",
+            "Community Building",
+            "Social Welfare"
         ],
         "Construction": [
             "Project Management",
@@ -737,7 +807,17 @@ const config = {
             "Quality Control",
             "Construction Supervision",
             "Building Services",
-            "Construction Operations"
+            "Construction Operations",
+            "Site Supervision",
+            "Construction Coordination",
+            "Building Inspection",
+            "Construction Scheduling",
+            "Site Safety",
+            "Construction Documentation",
+            "Building Codes",
+            "Construction Estimation",
+            "Site Planning",
+            "Construction Technology"
         ],
         "Consulting & Strategy": [
             "Business Strategy",
@@ -749,7 +829,17 @@ const config = {
             "Digital Transformation",
             "Strategy Development",
             "Business Advisory",
-            "Performance Optimization"
+            "Performance Optimization",
+            "Strategic Consulting",
+            "Business Transformation",
+            "Organizational Development",
+            "Strategic Implementation",
+            "Business Process",
+            "Strategic Analysis",
+            "Consulting Services",
+            "Business Solutions",
+            "Strategic Leadership",
+            "Business Intelligence"
         ],
         "Design & Architecture": [
             "Architectural Design",
@@ -761,7 +851,17 @@ const config = {
             "Design Management",
             "Creative Direction",
             "Visual Design",
-            "Design Strategy"
+            "Design Strategy",
+            "Landscape Design",
+            "Industrial Design",
+            "Web Design",
+            "Design Development",
+            "Design Coordination",
+            "Design Documentation",
+            "Design Concepts",
+            "Design Implementation",
+            "Design Innovation",
+            "Design Technology"
         ],
         "Education & Training": [
             "Curriculum Development",
@@ -773,7 +873,17 @@ const config = {
             "Training & Development",
             "Learning Management",
             "Educational Research",
-            "Student Support"
+            "Student Support",
+            "Instructional Design",
+            "Educational Planning",
+            "Academic Programs",
+            "Student Assessment",
+            "Educational Innovation",
+            "Learning Systems",
+            "Educational Operations",
+            "Academic Services",
+            "Educational Strategy",
+            "Student Development"
         ],
         "Engineering": [
             "Project Management",
@@ -785,7 +895,17 @@ const config = {
             "Engineering Design",
             "Product Development",
             "Technical Analysis",
-            "Engineering Management"
+            "Engineering Management",
+            "System Engineering",
+            "Technical Planning",
+            "Engineering Operations",
+            "Technical Solutions",
+            "Engineering Coordination",
+            "Technical Innovation",
+            "Engineering Services",
+            "Technical Support",
+            "Engineering Strategy",
+            "Technical Implementation"
         ],
         "Farming, Animals & Conservation": [
             "Agricultural Management",
@@ -797,7 +917,17 @@ const config = {
             "Livestock Management",
             "Environmental Conservation",
             "Agricultural Technology",
-            "Farm Planning"
+            "Farm Planning",
+            "Animal Welfare",
+            "Agricultural Production",
+            "Farm Administration",
+            "Agricultural Research",
+            "Environmental Protection",
+            "Agricultural Innovation",
+            "Farm Safety",
+            "Agricultural Services",
+            "Conservation Planning",
+            "Agricultural Development"
         ],
         "Government & Defence": [
             "Public Policy",
@@ -809,7 +939,17 @@ const config = {
             "Defense Strategy",
             "Public Sector Management",
             "Government Compliance",
-            "Defense Planning"
+            "Defense Planning",
+            "Public Affairs",
+            "Government Operations",
+            "Defense Management",
+            "Public Service",
+            "Government Programs",
+            "Defense Technology",
+            "Public Safety",
+            "Government Strategy",
+            "Defense Coordination",
+            "Public Management"
         ],
         "Healthcare & Medical": [
             "Patient Care",
@@ -821,7 +961,17 @@ const config = {
             "Medical Coding",
             "Healthcare Compliance",
             "Patient Services",
-            "Healthcare Analytics"
+            "Healthcare Analytics",
+            "Clinical Support",
+            "Medical Services",
+            "Healthcare Operations",
+            "Patient Safety",
+            "Medical Documentation",
+            "Healthcare Quality",
+            "Clinical Management",
+            "Medical Technology",
+            "Healthcare Planning",
+            "Patient Management"
         ],
         "Hospitality & Tourism": [
             "Hotel Management",
@@ -833,7 +983,17 @@ const config = {
             "Hospitality Operations",
             "Travel Services",
             "Restaurant Management",
-            "Tourism Development"
+            "Tourism Development",
+            "Hotel Operations",
+            "Guest Services",
+            "Hospitality Marketing",
+            "Tourism Planning",
+            "Event Coordination",
+            "Hospitality Technology",
+            "Travel Planning",
+            "Tourism Services",
+            "Hospitality Sales",
+            "Guest Experience"
         ],
         "Human Resources & Recruitment": [
             "Talent Acquisition",
@@ -845,7 +1005,17 @@ const config = {
             "HR Operations",
             "Workforce Planning",
             "Employee Engagement",
-            "HR Strategy"
+            "HR Strategy",
+            "Talent Management",
+            "HR Administration",
+            "Employee Development",
+            "HR Analytics",
+            "Compensation Management",
+            "HR Technology",
+            "Employee Services",
+            "HR Compliance",
+            "Organizational Development",
+            "HR Consulting"
         ],
         "Information & Communication Technology": [
             "Software Development",
@@ -857,7 +1027,17 @@ const config = {
             "System Administration",
             "IT Support",
             "DevOps",
-            "UI/UX Design"
+            "UI/UX Design",
+            "Mobile Development",
+            "Data Analytics",
+            "IT Management",
+            "Software Engineering",
+            "System Integration",
+            "IT Operations",
+            "Technology Consulting",
+            "Digital Solutions",
+            "IT Strategy",
+            "Technology Innovation"
         ],
         "Insurance & Superannuation": [
             "Risk Assessment",
@@ -869,7 +1049,17 @@ const config = {
             "Actuarial Analysis",
             "Insurance Technology",
             "Customer Service",
-            "Insurance Products"
+            "Insurance Products",
+            "Risk Management",
+            "Insurance Sales",
+            "Claims Processing",
+            "Insurance Administration",
+            "Policy Development",
+            "Insurance Analytics",
+            "Risk Analysis",
+            "Insurance Planning",
+            "Insurance Strategy",
+            "Insurance Services"
         ],
         "Legal": [
             "Legal Research",
@@ -881,7 +1071,17 @@ const config = {
             "Legal Operations",
             "Legal Technology",
             "Legal Services",
-            "Legal Strategy"
+            "Legal Strategy",
+            "Legal Administration",
+            "Legal Support",
+            "Legal Writing",
+            "Legal Management",
+            "Legal Consulting",
+            "Legal Planning",
+            "Legal Coordination",
+            "Legal Innovation",
+            "Legal Development",
+            "Legal Implementation"
         ],
         "Manufacturing, Transport & Logistics": [
             "Supply Chain Management",
@@ -893,7 +1093,17 @@ const config = {
             "Production Planning",
             "Warehouse Management",
             "Distribution Management",
-            "Operations Management"
+            "Operations Management",
+            "Logistics Coordination",
+            "Manufacturing Planning",
+            "Supply Chain Optimization",
+            "Transport Coordination",
+            "Logistics Technology",
+            "Manufacturing Technology",
+            "Operations Planning",
+            "Logistics Strategy",
+            "Manufacturing Strategy",
+            "Supply Chain Strategy"
         ],
         "Marketing & Communications": [
             "Digital Marketing",
@@ -905,7 +1115,17 @@ const config = {
             "Market Research",
             "Public Relations",
             "Advertising",
-            "Marketing Strategy"
+            "Marketing Strategy",
+            "Marketing Analytics",
+            "Campaign Management",
+            "Marketing Operations",
+            "Brand Strategy",
+            "Marketing Technology",
+            "Marketing Communications",
+            "Marketing Planning",
+            "Marketing Innovation",
+            "Marketing Development",
+            "Marketing Coordination"
         ],
         "Mining, Resources & Energy": [
             "Resource Management",
@@ -917,7 +1137,17 @@ const config = {
             "Mining Technology",
             "Energy Operations",
             "Resource Development",
-            "Mining Safety"
+            "Mining Safety",
+            "Energy Planning",
+            "Resource Coordination",
+            "Mining Planning",
+            "Energy Technology",
+            "Resource Strategy",
+            "Mining Strategy",
+            "Energy Strategy",
+            "Resource Innovation",
+            "Mining Innovation",
+            "Energy Innovation"
         ],
         "Real Estate & Property": [
             "Property Management",
@@ -929,7 +1159,17 @@ const config = {
             "Property Valuation",
             "Real Estate Technology",
             "Property Services",
-            "Real Estate Strategy"
+            "Real Estate Strategy",
+            "Property Planning",
+            "Real Estate Administration",
+            "Property Coordination",
+            "Real Estate Development",
+            "Property Analysis",
+            "Real Estate Consulting",
+            "Property Innovation",
+            "Real Estate Innovation",
+            "Property Strategy",
+            "Real Estate Planning"
         ],
         "Retail & Consumer Products": [
             "Retail Management",
@@ -941,7 +1181,17 @@ const config = {
             "Store Operations",
             "Retail Planning",
             "Customer Experience",
-            "Retail Strategy"
+            "Retail Strategy",
+            "Retail Sales",
+            "Retail Administration",
+            "Retail Coordination",
+            "Retail Development",
+            "Retail Analytics",
+            "Retail Innovation",
+            "Retail Services",
+            "Retail Operations",
+            "Retail Marketing",
+            "Retail Consulting"
         ],
         "Sales": [
             "Business Development",
@@ -953,7 +1203,17 @@ const config = {
             "Customer Acquisition",
             "Sales Analytics",
             "Team Leadership",
-            "Revenue Growth"
+            "Revenue Growth",
+            "Sales Management",
+            "Sales Planning",
+            "Sales Coordination",
+            "Sales Development",
+            "Sales Technology",
+            "Sales Innovation",
+            "Sales Services",
+            "Sales Administration",
+            "Sales Consulting",
+            "Sales Implementation"
         ],
         "Science & Technology": [
             "Research & Development",
@@ -965,7 +1225,17 @@ const config = {
             "Research Management",
             "Technical Analysis",
             "Scientific Technology",
-            "Research Strategy"
+            "Research Strategy",
+            "Scientific Planning",
+            "Research Coordination",
+            "Scientific Development",
+            "Research Innovation",
+            "Scientific Services",
+            "Research Administration",
+            "Scientific Consulting",
+            "Research Implementation",
+            "Scientific Strategy",
+            "Research Technology"
         ],
         "Sport & Recreation": [
             "Sports Management",
@@ -977,7 +1247,17 @@ const config = {
             "Recreation Services",
             "Sports Development",
             "Fitness Management",
-            "Sports Strategy"
+            "Sports Strategy",
+            "Recreation Management",
+            "Sports Administration",
+            "Recreation Coordination",
+            "Sports Technology",
+            "Recreation Technology",
+            "Sports Innovation",
+            "Recreation Innovation",
+            "Sports Services",
+            "Recreation Development",
+            "Sports Planning"
         ],
         "Trades & Services": [
             "Technical Services",
@@ -989,7 +1269,17 @@ const config = {
             "Service Planning",
             "Technical Operations",
             "Service Delivery",
-            "Technical Strategy"
+            "Technical Strategy",
+            "Service Strategy",
+            "Technical Planning",
+            "Service Coordination",
+            "Technical Coordination",
+            "Service Technology",
+            "Technical Innovation",
+            "Service Innovation",
+            "Technical Development",
+            "Service Development",
+            "Technical Administration"
         ]
     }
 };
