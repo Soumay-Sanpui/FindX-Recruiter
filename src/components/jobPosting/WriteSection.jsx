@@ -722,6 +722,56 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                     </div>
                 </div>
                 
+                {/* Job Keywords Section */}
+                <div className="mb-6">
+                    <label className="block text-gray-700 font-medium mb-2">Job keywords <span className="text-gray-500">(optional)</span></label>
+                    <p className="text-gray-500 text-sm mb-2">Enter relevant keywords to help candidates find your job. Separate keywords with commas.</p>
+                    <input 
+                        type="text" 
+                        className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="e.g. JavaScript, React, Frontend, Remote, Full-time"
+                        name="jobKeywords"
+                        value={Array.isArray(formData.jobKeywords) ? formData.jobKeywords.join(', ') : (formData.jobKeywords || '')}
+                        onChange={(e) => {
+                            const keywordsString = e.target.value;
+                            const keywordsArray = keywordsString.split(',').map(keyword => keyword.trim()).filter(keyword => keyword !== '');
+                            handleChange({
+                                target: {
+                                    name: 'jobKeywords',
+                                    value: keywordsArray
+                                }
+                            });
+                        }}
+                    />
+                    {formData.jobKeywords && Array.isArray(formData.jobKeywords) && formData.jobKeywords.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {formData.jobKeywords.map((keyword, index) => (
+                                <span 
+                                    key={index}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                >
+                                    {keyword}
+                                    <button
+                                        type="button"
+                                        className="ml-2 text-blue-600 hover:text-blue-800"
+                                        onClick={() => {
+                                            const updatedKeywords = formData.jobKeywords.filter((_, i) => i !== index);
+                                            handleChange({
+                                                target: {
+                                                    name: 'jobKeywords',
+                                                    value: updatedKeywords
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
                 {/* Company Logo Section */}
                 <div className="mb-6">
                     <label className="block text-gray-700 font-medium mb-2">Company brand <span className="text-gray-500">(optional)</span></label>
@@ -1015,14 +1065,14 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                             }
                                         </p>
                                         {!formData.category && (
-                                            <button
+                                <button 
                                                 onClick={() => handleStageChange('Classify')}
                                                 className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
-                                            >
+                                >
                                                 Go to Classify Section
-                                            </button>
-                                        )}
-                                    </div>
+                                </button>
+                            )}
+                        </div>
                                 ) : (
                                     <>
                                         {formData.category && (

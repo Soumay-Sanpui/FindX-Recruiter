@@ -29,7 +29,7 @@ const JobPosting = () => {
         showSalaryOnAd: true,
         // Keeping other fields for later stages
         jobSkills: '',
-        jobKeywords: '',
+        jobKeywords: [],
         jobDescription: '',
         jobBanner: '',
         jobIndustry: '',
@@ -121,7 +121,7 @@ const JobPosting = () => {
             to: '',
             showSalaryOnAd: true,
             jobSkills: '',
-            jobKeywords: '',
+            jobKeywords: [],
             jobDescription: '',
             jobBanner: '',
             jobIndustry: '',
@@ -157,7 +157,7 @@ const JobPosting = () => {
             const applicationQuestions = formData.jobQuestions?.map(question => {
                 // Use selected options from the form, or fall back to default options
                 const selectedQuestionOptions = formData.selectedOptions?.[question];
-                
+            
                 // Define default options for questions that don't have selected options
                 const defaultOptionsMap = {
                     "Which of the following statements best describes your right to work in Australia?": [
@@ -205,7 +205,9 @@ const JobPosting = () => {
                 from: Number(formData.from),
                 to: Number(formData.to),
                 jobSkills: formData.jobSkills.split(',').map(skill => skill.trim()),
-                jobKeywords: formData.jobKeywords.split(',').map(keyword => keyword.trim()),
+                jobKeywords: Array.isArray(formData.jobKeywords) 
+                    ? formData.jobKeywords 
+                    : (formData.jobKeywords || '').split(',').map(keyword => keyword.trim()).filter(keyword => keyword !== ''),
                 applicationQuestions: applicationQuestions,
                 postedBy: employer._id
             };

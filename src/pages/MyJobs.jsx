@@ -16,7 +16,7 @@ const MyJobs = () => {
         if (!isAuthenticated) {
             navigate('/employer-login');
         return null;
-    }
+                }
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

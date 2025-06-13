@@ -325,6 +325,26 @@ const JobDetails = () => {
                     </div>
                 </div>
 
+                {/* Job Keywords */}
+                {job.jobKeywords && job.jobKeywords.length > 0 && (
+                    <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">Job Keywords</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {job.jobKeywords.map((keyword, index) => (
+                                <span 
+                                    key={index}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800 border border-blue-200"
+                                >
+                                    {keyword}
+                                </span>
+                            ))}
+                        </div>
+                        <p className="text-sm text-gray-500 mt-3">
+                            These keywords help candidates find this job posting through search.
+                        </p>
+                    </div>
+                )}
+
                 {/* Application Questions */}
                 {((job.jobQuestions && job.jobQuestions.length > 0) || (job.applicationQuestions && job.applicationQuestions.length > 0)) && (
                     <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
