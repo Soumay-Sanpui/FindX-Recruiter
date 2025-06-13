@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PricingSummary from './PricingSummary';
 import { getAdvanceQuestionSections } from '../../store/jobCategory.store.js';
+import CONFIG from '../../../config/config.js';
+import {Sparkles} from 'lucide-react';
 
 const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [logoFile, setLogoFile] = useState(null);
@@ -387,7 +389,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
           ]
         }
       ];
-      
 
     // Effect to update filtered advanced questions when category changes
     useEffect(() => {
@@ -725,26 +726,112 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 {/* Job Keywords Section */}
                 <div className="mb-6">
                     <label className="block text-gray-700 font-medium mb-2">Job keywords <span className="text-gray-500">(optional)</span></label>
-                    <p className="text-gray-500 text-sm mb-2">Enter relevant keywords to help candidates find your job. Separate keywords with commas.</p>
-                    <input 
-                        type="text" 
-                        className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                        placeholder="e.g. JavaScript, React, Frontend, Remote, Full-time"
-                        name="jobKeywords"
-                        value={Array.isArray(formData.jobKeywords) ? formData.jobKeywords.join(', ') : (formData.jobKeywords || '')}
-                        onChange={(e) => {
-                            const keywordsString = e.target.value;
-                            const keywordsArray = keywordsString.split(',').map(keyword => keyword.trim()).filter(keyword => keyword !== '');
-                            handleChange({
-                                target: {
-                                    name: 'jobKeywords',
-                                    value: keywordsArray
+                    <p className="text-gray-500 text-sm mb-2">Add relevant keywords to help candidates find your job. You can add multiple keywords separated by commas.</p>
+                    <div className="flex gap-2 mb-2">
+                        <input 
+                            type="text" 
+                            className="w-2/3 border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            placeholder="e.g. JavaScript, React, Frontend"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (searchQuery.trim()) {
+                                        // Check if input contains commas
+                                        if (searchQuery.includes(',')) {
+                                            // Split by comma and add multiple keywords
+                                            const newKeywords = searchQuery
+                                                .split(',')
+                                                .map(keyword => keyword.trim())
+                                                .filter(keyword => keyword !== '');
+                                            const updatedKeywords = [...(formData.jobKeywords || []), ...newKeywords];
+                                            handleChange({
+                                                target: {
+                                                    name: 'jobKeywords',
+                                                    value: updatedKeywords
+                                                }
+                                            });
+                                        } else {
+                                            // Add single keyword
+                                            const updatedKeywords = [...(formData.jobKeywords || []), searchQuery.trim()];
+                                            handleChange({
+                                                target: {
+                                                    name: 'jobKeywords',
+                                                    value: updatedKeywords
+                                                }
+                                            });
+                                        }
+                                        setSearchQuery('');
+                                    }
                                 }
-                            });
-                        }}
-                    />
+                            }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (searchQuery.trim()) {
+                                    // Check if input contains commas
+                                    if (searchQuery.includes(',')) {
+                                        // Split by comma and add multiple keywords
+                                        const newKeywords = searchQuery
+                                            .split(',')
+                                            .map(keyword => keyword.trim())
+                                            .filter(keyword => keyword !== '');
+                                        const updatedKeywords = [...(formData.jobKeywords || []), ...newKeywords];
+                                        handleChange({
+                                            target: {
+                                                name: 'jobKeywords',
+                                                value: updatedKeywords
+                                            }
+                                        });
+                                    } else {
+                                        // Add single keyword
+                                        const updatedKeywords = [...(formData.jobKeywords || []), searchQuery.trim()];
+                                        handleChange({
+                                            target: {
+                                                name: 'jobKeywords',
+                                                value: updatedKeywords
+                                            }
+                                        });
+                                    }
+                                    setSearchQuery('');
+                                }
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                            Add
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (formData.category && CONFIG.categoryKeywords[formData.category]) {
+                                    const suggestedKeywords = CONFIG.categoryKeywords[formData.category];
+                                    // Filter out keywords that are already added
+                                    const newKeywords = suggestedKeywords.filter(
+                                        keyword => !formData.jobKeywords?.includes(keyword)
+                                    );
+                                    if (newKeywords.length > 0) {
+                                        const updatedKeywords = [...(formData.jobKeywords || []), ...newKeywords];
+                                        handleChange({
+                                            target: {
+                                                name: 'jobKeywords',
+                                                value: updatedKeywords
+                                            }
+                                        });
+                                    }
+                                }
+                            }}
+                            disabled={!formData.category || !CONFIG.categoryKeywords[formData.category]}
+                            className="flex items-center justify-center gap-4 px-4 py-2 bg-gradient-to-br from-blue-600 to-blue-300 hover:scale-110 ml-4 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={!formData.category ? "Select a category first" : !CONFIG.categoryKeywords[formData.category] ? "No suggested keywords for this category" : "Generate keywords based on category"}
+                        >
+                            <Sparkles />
+                            Auto Generate
+                        </button>
+                    </div>
                     {formData.jobKeywords && Array.isArray(formData.jobKeywords) && formData.jobKeywords.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                             {formData.jobKeywords.map((keyword, index) => (
                                 <span 
                                     key={index}
