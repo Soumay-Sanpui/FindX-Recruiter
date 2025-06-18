@@ -53,12 +53,14 @@ const SearchEmployee = () => {
     // Keep suggested users as fallback (not actively used but available)
     const { 
         data: suggestedUsers = [], 
-        isLoading: suggestedLoading 
+        isLoading: suggestedLoading,
+        error: suggestedError 
     } = useSuggestedUsers();
     
     const { 
         data: userProfile, 
-        isLoading: profileLoading 
+        isLoading: profileLoading,
+        error: profileError 
     } = useUserProfile(selectedUserId);
     
     // Derived state
@@ -73,6 +75,19 @@ const SearchEmployee = () => {
         localStorage.removeItem('employer');
         navigate('/employer-login');
     };
+    
+    // Handle errors
+    useEffect(() => {
+        if (searchError) {
+            toast.error(searchError.message || 'Failed to search users. Please try again.');
+        }
+        if (suggestedError) {
+            toast.error(suggestedError.message || 'Failed to load suggested users.');
+        }
+        if (profileError) {
+            toast.error(profileError.message || 'Failed to load user profile.');
+        }
+    }, [searchError, suggestedError, profileError]);
     
     useEffect(() => {
         if (!token) {
@@ -638,6 +653,19 @@ const SearchEmployee = () => {
             {loading ? (
                 <div className="flex justify-center my-10">
                     <Loader />
+                </div>
+            ) : searchError ? (
+                <div className="bg-red-50 border border-red-200 p-8 text-center rounded-lg">
+                    <h3 className="text-lg font-medium text-red-700 mb-2">Search Error</h3>
+                    <p className="text-red-600 mb-4">
+                        {searchError.message || 'Failed to search users. Please try again.'}
+                    </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                        Retry
+                    </button>
                 </div>
             ) : viewingProfile ? (
                 renderUserProfile()

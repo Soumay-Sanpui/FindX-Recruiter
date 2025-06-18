@@ -50,20 +50,41 @@ export const useSearchUsers = (searchParams, enabled = true) => {
       if (workEnv?.length) queryParams.append('workEnv', workEnv.join(','));
       queryParams.append('page', page.toString());
       
-      const response = await axios.get(`${CONFIG.apiUrl}/usersearch?${queryParams}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      return response.data;
+      try {
+        const response = await axios.get(`${CONFIG.apiUrl}/user-search?${queryParams}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!response.data.success) {
+          throw new Error(response.data.message || 'Search failed');
+        }
+        
+        return response.data;
+      } catch (error) {
+        console.error('Search users error:', error);
+        if (error.response?.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem('employerToken');
+          localStorage.removeItem('employer');
+          throw new Error('Authentication expired. Please log in again.');
+        }
+        throw error;
+      }
     },
     select: (data) => ({
       users: data?.users || [],
       totalPages: data?.totalPages || 1,
       currentPage: data?.currentPage || 1,
       totalUsers: data?.totalUsers || 0,
+      count: data?.count || 0,
     }),
     enabled: enabled && !!token,
     staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: (failureCount, error) => {
+      // Don't retry on auth errors
+      if (error?.response?.status === 401) return false;
+      return failureCount < 2;
+    },
   });
 };
 
@@ -74,14 +95,33 @@ export const useSuggestedUsers = () => {
   return useQuery({
     queryKey: [...employerKeys.users(), 'suggested'],
     queryFn: async () => {
-      const response = await axios.get(`${CONFIG.apiUrl}/usersearch/suggested`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      return response.data;
+      try {
+        const response = await axios.get(`${CONFIG.apiUrl}/user-search/suggested`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!response.data.success) {
+          throw new Error(response.data.message || 'Failed to fetch suggested users');
+        }
+        
+        return response.data;
+      } catch (error) {
+        console.error('Suggested users error:', error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem('employerToken');
+          localStorage.removeItem('employer');
+          throw new Error('Authentication expired. Please log in again.');
+        }
+        throw error;
+      }
     },
     select: (data) => data?.users || [],
     enabled: !!token,
     staleTime: 10 * 60 * 1000, // 10 minutes for suggested users
+    retry: (failureCount, error) => {
+      if (error?.response?.status === 401) return false;
+      return failureCount < 2;
+    },
   });
 };
 
@@ -92,13 +132,32 @@ export const useUserProfile = (userId) => {
   return useQuery({
     queryKey: employerKeys.userProfile(userId),
     queryFn: async () => {
-      const response = await axios.get(`${CONFIG.apiUrl}/usersearch/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      return response.data;
+      try {
+        const response = await axios.get(`${CONFIG.apiUrl}/user-search/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!response.data.success) {
+          throw new Error(response.data.message || 'Failed to fetch user profile');
+        }
+        
+        return response.data;
+      } catch (error) {
+        console.error('User profile error:', error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem('employerToken');
+          localStorage.removeItem('employer');
+          throw new Error('Authentication expired. Please log in again.');
+        }
+        throw error;
+      }
     },
     select: (data) => data?.success ? data.user : null,
     enabled: !!(userId && token),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error) => {
+      if (error?.response?.status === 401) return false;
+      return failureCount < 2;
+    },
   });
 }; 
