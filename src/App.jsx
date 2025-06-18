@@ -2,10 +2,14 @@ import React, { useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router';
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
-import { setupMockAPI } from './services/mockApi.js';
 import Home from "./pages/Home.jsx";
 import Pricing from "./pages/Pricing.jsx";
 import Contact from "./pages/Contact.jsx";
+import HowItWorks from "./pages/HowItWorks.jsx";
+import Features from "./pages/Features.jsx";
+import FAQ from "./pages/FAQ.jsx";
+import Terms from "./pages/Terms.jsx";
+import Privacy from "./pages/Privacy.jsx";
 import EmployerSignup from "./pages/EmployerSignup.jsx";
 import EmployerLogin from "./pages/EmployerLogin.jsx";
 import EmployerDashboard from "./pages/EmployerDashboard.jsx";
@@ -136,13 +140,83 @@ const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     )
+  },
+  {
+    path: "/how-it-works",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <HowItWorks />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/features",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Features />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/faq",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <FAQ />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/terms",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Terms />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/privacy",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Privacy />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
   }
 ]);
 
 const App = () => {
   useEffect(() => {
     // Initialize mock API for development
-    setupMockAPI();
+    // setupMockAPI();
   }, []);
 
   return (
