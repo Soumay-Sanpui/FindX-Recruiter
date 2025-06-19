@@ -4,6 +4,8 @@ import { useEmployerStore } from '../store/employer.store';
 import { useJobDetails, useUpdateApplicationStatus, useUpdateJobStatus } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
 import { ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, MessageCircle, Globe, Edit, ToggleLeft, ToggleRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'react-toastify';
+import CONFIG from '../../config/config.js';
 
 const JobDetails = () => {
     const { jobId } = useParams();
@@ -140,11 +142,48 @@ const JobDetails = () => {
             return;
         }
         
-        updateApplicationStatus(
-            selectedApplicant._id, 
-            'Interview',
-            { interviewDetails }
-        );
+        // Use the new interview invitation API
+        const invitationData = {
+            jobId: job._id,
+            applicantId: selectedApplicant.user._id || selectedApplicant.user,
+            applicationId: selectedApplicant._id,
+            interviewDetails: {
+                date: interviewDetails.date,
+                time: interviewDetails.time,
+                location: interviewDetails.location || 'TBD',
+                notes: interviewDetails.notes,
+                interviewType: 'video-call', // Default to video call
+                duration: 60 // Default duration
+            }
+        };
+        
+        // Call the new interview invitation API
+        fetch(`${CONFIG.apiUrl}/interviews/send-invitation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('employerToken')}`
+            },
+            body: JSON.stringify(invitationData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toast.success('Interview invitation sent successfully!');
+                // Also update the application status using the existing mutation
+                updateApplicationStatus(
+                    selectedApplicant._id, 
+                    'Interview',
+                    { interviewDetails }
+                );
+            } else {
+                toast.error(data.message || 'Failed to send interview invitation');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending interview invitation:', error);
+            toast.error('Failed to send interview invitation');
+        });
     };
 
     const handleRejectCandidate = () => {

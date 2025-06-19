@@ -22,6 +22,7 @@ import SearchEmployee from "./pages/SearchEmployee.jsx";
 import Broadcast from "./pages/Broadcast.jsx";
 import BroadcastNav from "./components/BroadcastNav.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import InterviewManagement from './pages/InterviewManagement';
 
 const router = createBrowserRouter([
   {
@@ -210,7 +211,11 @@ const router = createBrowserRouter([
         </div>
       </ErrorBoundary>
     ),
-  }
+  },
+  {
+    path: "/interview-management",
+    element: <ErrorBoundary><InterviewManagement /></ErrorBoundary>,
+  },
 ]);
 
 const App = () => {
