@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { useMyPostedJobs } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
-import { Plus, Briefcase, MapPin, DollarSign, Clock, Users, MessageCircle } from 'lucide-react';
+import { Plus, Briefcase, MapPin, DollarSign, Clock, Users, MessageCircle, Calendar } from 'lucide-react';
 
 const MyJobs = () => {
     const { employer, isAuthenticated } = useEmployerStore();
@@ -41,12 +41,20 @@ const MyJobs = () => {
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">My Posted Jobs</h1>
                         <p className="text-gray-500">Manage and track all your job postings</p>
                     </div>
-                    <button 
-                        onClick={() => navigate('/post-job')}
-                        className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                        <Plus className="mr-2" size={20} /> Post a New Job
-                    </button>
+                    <div className="flex gap-3">
+                        <button 
+                            onClick={() => navigate('/interview-management')}
+                            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                        >
+                            <Calendar className="mr-2" size={20} /> View Interviews
+                        </button>
+                        <button 
+                            onClick={() => navigate('/post-job')}
+                            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                            <Plus className="mr-2" size={20} /> Post a New Job
+                        </button>
+                    </div>
                 </div>
 
                 {loading ? (

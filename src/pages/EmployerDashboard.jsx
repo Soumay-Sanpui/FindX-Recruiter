@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
-import { Plus, Users, SquarePen, ChartBar, Briefcase } from 'lucide-react';
+import { Plus, Users, SquarePen, ChartBar, Briefcase, Calendar } from 'lucide-react';
 import DHeader from '../components/dashboard/DHeader';
 
 const EmployerDashboard = () => {
@@ -79,12 +79,15 @@ const EmployerDashboard = () => {
                 {/* Actions Section */}
                 <div className="mt-8 bg-white p-6 shadow-md border border-blue-800">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                         <button onClick={() => navigate('/post-job')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Plus className="mr-2" /> Post a New Job
                         </button>
                         <button onClick={() => navigate('/search-employee')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Users className="mr-2" /> Search Candidates
+                        </button>
+                        <button onClick={() => navigate('/interview-management')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
+                            <Calendar className="mr-2" /> View Interviews
                         </button>
                         <button className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <SquarePen className="mr-2" /> Edit Profile
