@@ -11,11 +11,11 @@ const BroadcastNav = () => {
       <button
         onClick={handleBroadcastClick}
         className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-colors duration-200 flex items-center space-x-2 group"
-        title="Broadcast to FindX users"
+        title="Send email broadcast to FindX users"
       >
         <Bell className="h-6 w-6" />
         <span className="hidden group-hover:block text-sm whitespace-nowrap pr-2">
-          Send Broadcast
+          Send Email Broadcast
         </span>
       </button>
     </div>

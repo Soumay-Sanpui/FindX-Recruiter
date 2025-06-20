@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Users, Bell, CheckCircle, AlertCircle, Loader, Target, MapPin, Clock, BarChart3, Filter, Settings, Globe, Briefcase, Star, Calendar, Zap } from 'lucide-react';
+import { broadcastAPI } from '../services/api';
 
 const Broadcast = () => {
   const [message, setMessage] = useState({
@@ -73,42 +74,27 @@ const Broadcast = () => {
     setStatus(null);
 
     try {
-      const response = await fetch('/api/broadcast-notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('employerToken')}`,
-        },
-        body: JSON.stringify({
-          title: message.title,
-          body: message.body,
-          type: message.type,
-          data: {
-            broadcast_type: message.type,
-            timestamp: new Date().toISOString(),
-            screen: 'home'
-          }
-        }),
+      const result = await broadcastAPI.sendEmail({
+        title: message.title,
+        body: message.body,
+        type: message.type
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setStatus({ 
-          type: 'success', 
-          message: `Broadcast sent successfully to ${result.sentCount || 'all'} users!` 
-        });
-        setSentCount(result.sentCount || 0);
-        // Reset form
-        setMessage({ title: '', body: '', type: 'general' });
-      } else {
-        throw new Error(result.message || 'Failed to send broadcast');
-      }
+      setStatus({ 
+        type: 'success', 
+        message: `Broadcast email sent successfully to ${result.sentCount || result.recipients || 'all'} users!` 
+      });
+      setSentCount(result.sentCount || result.recipients || 0);
+      // Reset form
+      setMessage({ title: '', body: '', type: 'general' });
+      
+      // Refresh stats after successful send
+      fetchBroadcastStats();
     } catch (error) {
       console.error('Broadcast error:', error);
       setStatus({ 
         type: 'error', 
-        message: error.message || 'Failed to send broadcast. Please try again.' 
+        message: error.message || 'Failed to send broadcast email. Please try again.' 
       });
     } finally {
       setIsLoading(false);
@@ -126,15 +112,41 @@ const Broadcast = () => {
     { id: 'analytics', label: 'Analytics', icon: BarChart3 }
   ];
 
+  const [broadcastStats, setBroadcastStats] = useState({
+    totalUsers: 0,
+    usersWithEmails: 0,
+    emailDeliveryRate: 0
+  });
+
+  // Fetch broadcast statistics
+  const fetchBroadcastStats = async () => {
+    try {
+      const result = await broadcastAPI.getStats();
+      if (result.success) {
+        setBroadcastStats(result.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch broadcast stats:', error);
+    }
+  };
+
+  // Fetch stats on component mount
+  React.useEffect(() => {
+    fetchBroadcastStats();
+  }, []);
+
   const estimatedReach = () => {
-    // Mock calculation based on targeting
-    let base = 15420; // Total users
+    // Use real user count from backend
+    let base = broadcastStats.usersWithEmails || 0;
+    
+    // Apply targeting filters (simplified calculation)
     if (targeting.location.enabled) base *= 0.3;
     if (targeting.skills.enabled) base *= 0.4;
     if (targeting.experience.enabled) base *= 0.6;
     if (targeting.language.enabled) base *= 0.7;
     if (targeting.jobPreferences.enabled) base *= 0.5;
     if (targeting.activity.enabled) base *= 0.8;
+    
     return Math.floor(base);
   };
 
@@ -827,8 +839,8 @@ const Broadcast = () => {
                     <div className="text-sm text-blue-800">Estimated Reach</div>
                   </div>
                   <div className="bg-green-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-green-600">87%</div>
-                    <div className="text-sm text-green-800">Delivery Rate</div>
+                    <div className="text-2xl font-bold text-green-600">{broadcastStats.emailDeliveryRate}%</div>
+                    <div className="text-sm text-green-800">Email Delivery Rate</div>
                   </div>
                   <div className="bg-purple-50 rounded-lg p-4">
                     <div className="text-2xl font-bold text-purple-600">23%</div>
@@ -841,20 +853,20 @@ const Broadcast = () => {
                     <h4 className="font-medium text-gray-900 mb-3">Audience Breakdown</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Active Users (30 days)</span>
-                        <span>12,340</span>
+                        <span>Total Users</span>
+                        <span>{broadcastStats.totalUsers.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>New Users (7 days)</span>
-                        <span>1,890</span>
+                        <span>Users with Emails</span>
+                        <span>{broadcastStats.usersWithEmails.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Premium Users</span>
-                        <span>3,240</span>
+                        <span>Email Deliverable</span>
+                        <span>{broadcastStats.usersWithEmails.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Push Enabled</span>
-                        <span>13,120</span>
+                        <span>Delivery Rate</span>
+                        <span>{broadcastStats.emailDeliveryRate}%</span>
                       </div>
                     </div>
                   </div>
@@ -893,9 +905,9 @@ const Broadcast = () => {
                     <span>Estimated reach: {estimatedReach().toLocaleString()} users</span>
                   </div>
                   <div className="flex items-center space-x-4 text-xs text-gray-400">
-                    <span>📱 87% delivery rate</span>
-                    <span>👁️ 23% open rate</span>
-                    <span>📊 4.7% click rate</span>
+                    <span>📧 {broadcastStats.emailDeliveryRate}% email delivery rate</span>
+                    <span>👁️ ~25% open rate</span>
+                    <span>📊 ~5% click rate</span>
                   </div>
                 </div>
                 <button
@@ -911,7 +923,7 @@ const Broadcast = () => {
                   ) : (
                     <>
                       <Send className="h-4 w-4" />
-                      <span>Send Broadcast</span>
+                      <span>Send Email Broadcast</span>
                     </>
                   )}
                 </button>
