@@ -77,7 +77,7 @@ const Header = () => {
                         ) : (
                             <div className="relative" ref={dropdownRef}>
                                 <div 
-                                    className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold bg-gradient-to-br ${config.gradients[nameInitials]} p-4 border rounded-full cursor-pointer hover:opacity-90 transition-opacity duration-200`}
+                                    className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold text-white bg-gradient-to-br from-blue-700 to-teal-100 hover:bg-gradient-to-tl transition-colors duration-500 ease-out p-4 rounded-full cursor-pointer hover:opacity-90`}
                                     onClick={() => setShowDropdown(!showDropdown)}
                                 >
                                     <p>{nameInitials}</p>

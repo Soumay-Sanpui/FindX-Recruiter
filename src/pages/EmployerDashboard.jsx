@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
-import { Plus, Users, SquarePen, ChartBar, Briefcase, Calendar } from 'lucide-react';
+import { Plus, Users, SquarePen, ChartBar, Briefcase, Calendar, CreditCard } from 'lucide-react';
 import DHeader from '../components/dashboard/DHeader';
 
 const EmployerDashboard = () => {
@@ -88,6 +88,9 @@ const EmployerDashboard = () => {
                         </button>
                         <button onClick={() => navigate('/interview-management')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <Calendar className="mr-2" /> View Interviews
+                        </button>
+                        <button onClick={() => navigate('/payment-history')} className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
+                            <CreditCard className="mr-2" /> Payment History
                         </button>
                         <button className="bg-gray-200 hover:bg-blue-700 hover:text-white text-secondary py-3 px-4 transition flex items-center justify-center">
                             <SquarePen className="mr-2" /> Edit Profile

@@ -54,7 +54,7 @@ export const useCreateJob = () => {
     onSuccess: (data) => {
       // Invalidate and refetch jobs
       queryClient.invalidateQueries({ queryKey: jobKeys.all });
-      toast.success('Job posted successfully!');
+      // Don't show toast here since we handle it in the component after payment
     },
     onError: (error) => {
       const message = error?.message || 'Failed to create job';

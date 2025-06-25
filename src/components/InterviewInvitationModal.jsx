@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, Video, Phone, User, X, Send } from 'lucide-react';
 import { toast } from 'react-toastify';
 import CONFIG from '../../config/config.js';
+import api from '../../services/api.js';
 
 const InterviewInvitationModal = ({ 
   isOpen, 
@@ -22,6 +23,7 @@ const InterviewInvitationModal = ({
     requirements: ['']
   });
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,13 +37,7 @@ const InterviewInvitationModal = ({
 
     try {
       const token = localStorage.getItem('employerToken');
-      const response = await fetch(`${CONFIG.apiUrl}/interviews/send-invitation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+              const response = await api.post('/interviews/send-invitation', {
           jobId: job._id,
           applicantId: applicant.user._id || applicant.user,
           applicationId: applicant._id,
@@ -49,21 +45,19 @@ const InterviewInvitationModal = ({
             ...interviewDetails,
             requirements: interviewDetails.requirements.filter(req => req.trim() !== '')
           }
-        })
-      });
+        });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         toast.success('Interview invitation sent successfully!');
-        onSuccess && onSuccess();
+        onSuccess?.(response.data);
         onClose();
       } else {
-        toast.error(data.message || 'Failed to send interview invitation');
+        throw new Error(response.data.message || 'Failed to send invitation');
       }
     } catch (error) {
       console.error('Error sending interview invitation:', error);
-      toast.error('Failed to send interview invitation');
+      setError(error.message || 'Network error occurred');
+      toast.error(error.message || 'Failed to send interview invitation');
     } finally {
       setSending(false);
     }

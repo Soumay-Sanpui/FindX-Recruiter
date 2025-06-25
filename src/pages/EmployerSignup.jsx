@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import CONFIG from '../../config/config';
+import api from '../services/api';
 import ToastBanner from '../components/ToastBanner';
 import { useEmployerStore } from '../store/employer.store';
 
@@ -59,7 +58,7 @@ const EmployerSignup = () => {
     const handleSubmit = async(e) => {
         e.preventDefault();
         setIsLoading(true);
-        await axios.post(`${CONFIG.apiUrl}/employer/createAccount`, formData)
+        await api.post('/employer/createAccount', formData)
             .then((response) => {
                 setSuccess(true);
                 setRegisterdName(response.data.employer?.companyName || formData.companyName);

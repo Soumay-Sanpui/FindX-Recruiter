@@ -5,6 +5,8 @@ import DHeader from '../components/dashboard/DHeader';
 import { Save, LogOut, User, Lock, Bell, MessageSquare, ChevronDown, DollarSign } from 'lucide-react';
 import api from '../services/api';
 import { employerAPI } from '../services/api';
+import paymentService, { PRICING_CONFIG, PaymentUtils } from '../services/paymentService';
+import PaymentCheckout from '../components/PaymentCheckout';
 
 const Settings = () => {
     const { employer, setEmployer, logout } = useEmployerStore();
@@ -48,6 +50,9 @@ const Settings = () => {
         currentPlan: employer?.pricingPlan || 'Standard',
         earlyBirdPricing: employer?.earlyBirdPricing || true
     });
+
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState(null);
 
     useEffect(() => {
         if (employer) {
@@ -164,23 +169,44 @@ const Settings = () => {
     };
 
     const handlePlanUpgrade = async (newPlan) => {
-        setSaving(true);
-        setSuccess('');
-        setError('');
+        // Get plan details
+        const planDetails = PaymentUtils.getPlanDetails(newPlan) || PRICING_CONFIG.STANDARD;
         
+        // Prepare payment data
+        const paymentData = {
+            planId: newPlan,
+            planName: planDetails.name,
+            amount: planDetails.price,
+            currency: 'usd',
+            jobData: { title: 'Plan Upgrade' }
+        };
+
+        setSelectedPlan(paymentData);
+        setShowPaymentModal(true);
+    };
+
+    const handlePaymentSuccess = async (paymentIntent) => {
         try {
-            const response = await employerAPI.updatePricingPlan(newPlan, employer._id);
-            
-            if (response.success) {
-                setEmployer({ ...employer, pricingPlan: newPlan });
-                setPricingSettings({ ...pricingSettings, currentPlan: newPlan });
-                setSuccess('Pricing plan updated successfully');
-            }
+            // Update employer's plan after successful payment
+            setEmployer({ ...employer, pricingPlan: selectedPlan.planId });
+            setPricingSettings({ ...pricingSettings, currentPlan: selectedPlan.planId });
+            setSuccess(`Successfully upgraded to ${selectedPlan.planName}!`);
+            setShowPaymentModal(false);
+            setSelectedPlan(null);
         } catch (err) {
-            setError('Failed to update pricing plan. Please try again.');
-        } finally {
-            setSaving(false);
+            setError('Payment succeeded but failed to update account. Please contact support.');
         }
+    };
+
+    const handlePaymentError = (error) => {
+        setError(`Payment failed: ${error.message}`);
+        setShowPaymentModal(false);
+        setSelectedPlan(null);
+    };
+
+    const handlePaymentCancel = () => {
+        setShowPaymentModal(false);
+        setSelectedPlan(null);
     };
 
     // The pricing plans data for the UI
@@ -871,6 +897,33 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Payment Modal */}
+            {showPaymentModal && selectedPlan && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-md w-full max-h-screen overflow-y-auto">
+                        <div className="p-4 border-b">
+                            <h2 className="text-xl font-bold text-gray-800">
+                                Upgrade to {selectedPlan.planName}
+                            </h2>
+                            <button
+                                onClick={handlePaymentCancel}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <PaymentCheckout
+                                paymentData={selectedPlan}
+                                onSuccess={handlePaymentSuccess}
+                                onError={handlePaymentError}
+                                onCancel={handlePaymentCancel}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

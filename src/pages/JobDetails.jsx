@@ -5,7 +5,7 @@ import { useJobDetails, useUpdateApplicationStatus, useUpdateJobStatus } from '.
 import DHeader from '../components/dashboard/DHeader';
 import { ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Award, Users, CheckCircle, XCircle, AlertCircle, Calendar, Ban, MessageCircle, Globe, Edit, ToggleLeft, ToggleRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'react-toastify';
-import CONFIG from '../../config/config.js';
+import api from '../services/api';
 
 const JobDetails = () => {
     const { jobId } = useParams();
@@ -158,17 +158,9 @@ const JobDetails = () => {
         };
         
         // Call the new interview invitation API
-        fetch(`${CONFIG.apiUrl}/interviews/send-invitation`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('employerToken')}`
-            },
-            body: JSON.stringify(invitationData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+        api.post('/interviews/send-invitation', invitationData)
+        .then(response => {
+            if (response.data.success) {
                 toast.success('Interview invitation sent successfully!');
                 // Also update the application status using the existing mutation
                 updateApplicationStatus(
@@ -177,7 +169,7 @@ const JobDetails = () => {
                     { interviewDetails }
                 );
             } else {
-                toast.error(data.message || 'Failed to send interview invitation');
+                toast.error(response.data.message || 'Failed to send interview invitation');
             }
         })
         .catch(error => {

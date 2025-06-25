@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { employerAPI } from '../services/api';
-import axios from 'axios';
-import CONFIG from '../../config/config';
+import api from '../services/api';
 import { toast } from 'react-toastify';
 
 // Query keys for employer operations
@@ -51,9 +50,7 @@ export const useSearchUsers = (searchParams, enabled = true) => {
       queryParams.append('page', page.toString());
       
       try {
-        const response = await axios.get(`${CONFIG.apiUrl}/user-search?${queryParams}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get(`/user-search?${queryParams}`);
         
         if (!response.data.success) {
           throw new Error(response.data.message || 'Search failed');
@@ -96,9 +93,7 @@ export const useSuggestedUsers = () => {
     queryKey: [...employerKeys.users(), 'suggested'],
     queryFn: async () => {
       try {
-        const response = await axios.get(`${CONFIG.apiUrl}/user-search/suggested`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/user-search/suggested');
         
         if (!response.data.success) {
           throw new Error(response.data.message || 'Failed to fetch suggested users');
@@ -133,9 +128,7 @@ export const useUserProfile = (userId) => {
     queryKey: employerKeys.userProfile(userId),
     queryFn: async () => {
       try {
-        const response = await axios.get(`${CONFIG.apiUrl}/user-search/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get(`/user-search/${userId}`);
         
         if (!response.data.success) {
           throw new Error(response.data.message || 'Failed to fetch user profile');

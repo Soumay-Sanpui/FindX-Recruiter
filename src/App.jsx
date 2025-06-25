@@ -23,6 +23,8 @@ import Broadcast from "./pages/Broadcast.jsx";
 import BroadcastNav from "./components/BroadcastNav.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import InterviewManagement from './pages/InterviewManagement';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentHistory from './pages/PaymentHistory';
 
 const router = createBrowserRouter([
   {
@@ -215,6 +217,14 @@ const router = createBrowserRouter([
   {
     path: "/interview-management",
     element: <ErrorBoundary><InterviewManagement /></ErrorBoundary>,
+  },
+  {
+    path: "/payment-success",
+    element: <ErrorBoundary><PaymentSuccess /></ErrorBoundary>,
+  },
+  {
+    path: "/payment-history",
+    element: <ErrorBoundary><PaymentHistory /></ErrorBoundary>,
   },
 ]);
 

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import axios from 'axios';
-import CONFIG from '../../config/config';
+import api from '../services/api';
 import { useEmployerStore } from '../store/employer.store';
 import { Link } from 'react-router';
 import { motion } from 'framer-motion';
@@ -26,7 +25,7 @@ const EmployerLogin = () => {
         setIsLoading(true);
         setError('');
         
-        axios.post(`${CONFIG.apiUrl}/employer/login`, formData)
+        api.post('/employer/login', formData)
             .then((response) => {
                 console.log('Login successful:', response.data);
                 

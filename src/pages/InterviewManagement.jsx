@@ -18,7 +18,7 @@ import {
   Eye
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import CONFIG from '../../config/config.js';
+import api from '../services/api';
 
 const InterviewManagement = () => {
   const { employer, isAuthenticated } = useEmployerStore();
@@ -45,19 +45,12 @@ const InterviewManagement = () => {
 
   const fetchInvitations = async () => {
     try {
-      const token = localStorage.getItem('employerToken');
-      const response = await fetch(`${CONFIG.apiUrl}/interviews/sent-invitations`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.get('/interviews/sent-invitations');
 
-      const data = await response.json();
-      if (data.success) {
-        setInvitations(data.invitations || []);
+      if (response.data.success) {
+        setInvitations(response.data.invitations || []);
       } else {
-        toast.error(data.message || 'Failed to fetch invitations');
+        toast.error(response.data.message || 'Failed to fetch invitations');
       }
     } catch (error) {
       console.error('Error fetching invitations:', error);
@@ -76,24 +69,15 @@ const InterviewManagement = () => {
     }
 
     try {
-      const token = localStorage.getItem('employerToken');
-      const response = await fetch(`${CONFIG.apiUrl}/interviews/${selectedInvitation._id}/reschedule-response`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(rescheduleData),
-      });
+      const response = await api.put(`/interviews/${selectedInvitation._id}/reschedule-response`, rescheduleData);
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.data.success) {
         toast.success(`Reschedule request ${rescheduleData.action}d successfully`);
         setShowRescheduleModal(false);
         setSelectedInvitation(null);
         fetchInvitations();
       } else {
-        toast.error(data.message || 'Failed to respond to reschedule request');
+        toast.error(response.data.message || 'Failed to respond to reschedule request');
       }
     } catch (error) {
       console.error('Error responding to reschedule:', error);
@@ -103,22 +87,15 @@ const InterviewManagement = () => {
 
   const cancelInvitation = async (invitationId, reason = '') => {
     try {
-      const token = localStorage.getItem('employerToken');
-      const response = await fetch(`${CONFIG.apiUrl}/interviews/${invitationId}/cancel`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ reason }),
+      const response = await api.delete(`/interviews/${invitationId}/cancel`, {
+        data: { reason }
       });
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.data.success) {
         toast.success('Interview invitation cancelled successfully');
         fetchInvitations();
       } else {
-        toast.error(data.message || 'Failed to cancel invitation');
+        toast.error(response.data.message || 'Failed to cancel invitation');
       }
     } catch (error) {
       console.error('Error cancelling invitation:', error);

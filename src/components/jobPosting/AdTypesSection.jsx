@@ -94,7 +94,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                                     </div>
                                     <div className="flex items-start text-gray-700">
                                         <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                                        <span>SEEK exclusively sends your ad to high-fit candidates</span>
+                                        <span>FindX exclusively sends your ad to high-fit candidates</span>
                                         <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
                                     </div>
                                     <div className="flex items-start text-gray-700">
