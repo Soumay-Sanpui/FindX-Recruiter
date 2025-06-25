@@ -75,18 +75,18 @@ const Broadcast = () => {
 
     try {
       const result = await broadcastAPI.sendEmail({
-        title: message.title,
-        body: message.body,
+          title: message.title,
+          body: message.body,
         type: message.type
       });
 
-      setStatus({ 
-        type: 'success', 
+        setStatus({ 
+          type: 'success', 
         message: `Broadcast email sent successfully to ${result.sentCount || result.recipients || 'all'} users!` 
-      });
+        });
       setSentCount(result.sentCount || result.recipients || 0);
-      // Reset form
-      setMessage({ title: '', body: '', type: 'general' });
+        // Reset form
+        setMessage({ title: '', body: '', type: 'general' });
       
       // Refresh stats after successful send
       fetchBroadcastStats();
