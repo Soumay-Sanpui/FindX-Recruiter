@@ -60,36 +60,18 @@ class PaymentService {
     // Create payment intent for job posting
     async createJobPostingPayment(paymentData) {
         try {
-            // Check if this is a mock payment
-            if (paymentData.employerId && paymentData.planId && paymentData.amount) {
-                const response = await api.post('/payments/create-job-posting-payment', {
-                    planId: paymentData.planId,
-                    amount: paymentData.amount,
-                    currency: paymentData.currency || 'usd',
-                    employerId: paymentData.employerId,
-                    jobData: paymentData.jobData,
-                    addOns: paymentData.addOns || []
-                });
+            const response = await api.post('/payments/create-job-posting-payment', {
+                planId: paymentData.planId,
+                amount: paymentData.amount,
+                currency: paymentData.currency || 'usd',
+                employerId: paymentData.employerId,
+                jobData: paymentData.jobData,
+                addOns: paymentData.addOns || []
+            });
 
-                return response.data;
-            } else {
-                throw new Error('Missing required payment data');
-            }
+            return response.data;
         } catch (error) {
             console.error('Error creating job posting payment:', error);
-            
-            // For development mode, we can still proceed if the basic data is there
-            if (paymentData.employerId && paymentData.amount) {
-                console.warn('Payment service error, but allowing development mode continuation');
-                return {
-                    success: true,
-                    client_secret: 'mock_client_secret_for_development',
-                    paymentIntentId: 'mock_pi_' + Date.now(),
-                    amount: paymentData.amount,
-                    mock: true
-                };
-            }
-            
             throw error.response?.data || error.message;
         }
     }
@@ -97,16 +79,6 @@ class PaymentService {
     // Handle payment success
     async handlePaymentSuccess(paymentIntentId) {
         try {
-            // Don't try to confirm mock payments with the backend
-            if (paymentIntentId && paymentIntentId.startsWith('pi_mock_')) {
-                console.log('Mock payment success, skipping backend confirmation');
-                return {
-                    success: true,
-                    message: 'Mock payment confirmed',
-                    mock: true
-                };
-            }
-
             const response = await api.post('/payments/confirm-success', {
                 paymentIntentId
             });
@@ -114,16 +86,6 @@ class PaymentService {
             return response.data;
         } catch (error) {
             console.error('Error handling payment success:', error);
-            
-            // For mock payments, allow success even if backend fails
-            if (paymentIntentId && paymentIntentId.startsWith('pi_mock_')) {
-                return {
-                    success: true,
-                    message: 'Mock payment processed',
-                    mock: true
-                };
-            }
-            
             throw error.response?.data || error.message;
         }
     }

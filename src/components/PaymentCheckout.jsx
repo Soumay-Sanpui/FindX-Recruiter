@@ -60,7 +60,6 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
     const [paymentError, setPaymentError] = useState(null);
     const [clientSecret, setClientSecret] = useState(null);
     const [cardComplete, setCardComplete] = useState(false);
-    const [isMockPayment, setIsMockPayment] = useState(false);
     const { employer } = useEmployerStore();
 
     // Create payment intent when component mounts
@@ -74,7 +73,6 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
 
                 if (response.success) {
                     setClientSecret(response.client_secret);
-                    setIsMockPayment(response.mock || false);
                 } else {
                     setPaymentError('Failed to initialize payment');
                 }
@@ -92,42 +90,12 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        if (!stripe || !elements || !clientSecret) {
+            return;
+        }
+
         setIsProcessing(true);
         setPaymentError(null);
-
-        // Handle mock payments differently
-        if (isMockPayment || (clientSecret && clientSecret.includes('mock'))) {
-            // Simulate payment processing delay for mock payments
-            setTimeout(async () => {
-                try {
-                    const mockPaymentIntent = {
-                        id: 'pi_mock_' + Date.now(),
-                        status: 'succeeded',
-                        amount: paymentData?.amount || 4900,
-                        currency: 'usd',
-                        metadata: {
-                            type: 'job_posting_mock'
-                        }
-                    };
-                    
-                    await paymentService.handlePaymentSuccess(mockPaymentIntent.id);
-                    toast.success('Mock payment completed successfully!');
-                    onSuccess?.(mockPaymentIntent);
-                } catch (error) {
-                    console.error('Mock payment error:', error);
-                    setPaymentError('Mock payment failed');
-                    onError?.(error);
-                }
-                setIsProcessing(false);
-            }, 2000);
-            return;
-        }
-
-        // Handle real Stripe payments
-        if (!stripe || !elements || !clientSecret) {
-            setIsProcessing(false);
-            return;
-        }
 
         const cardElement = elements.getElement(CardElement);
 
@@ -193,14 +161,9 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                             <CreditCard size={32} className="text-white" />
                         </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-center mb-2">
-                        {isMockPayment || (clientSecret && clientSecret.includes('mock')) ? 'Demo Payment' : 'Secure Payment'}
-                    </h2>
+                    <h2 className="text-2xl font-bold text-center mb-2">Secure Payment</h2>
                     <p className="text-blue-100 text-center">
-                        {isMockPayment || (clientSecret && clientSecret.includes('mock')) 
-                            ? 'Development mode - no real payment will be processed'
-                            : 'Complete your job posting payment'
-                        }
+                        Complete your job posting payment
                     </p>
                 </div>
 
@@ -236,40 +199,25 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                 {/* Payment Form */}
                 <div className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Show different UI for mock vs real payments */}
-                        {isMockPayment || (clientSecret && clientSecret.includes('mock')) ? (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div className="flex items-center text-blue-800">
-                                    <Shield size={16} className="mr-2 flex-shrink-0" />
-                                    <div>
-                                        <p className="font-medium">Development Mode</p>
-                                        <p className="text-blue-600 text-sm">This is a test payment. No real money will be charged.</p>
-                                    </div>
-                                </div>
+                        {/* Card Input */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Card Information
+                            </label>
+                            <div className="border-2 border-gray-200 rounded-lg p-4 focus-within:border-blue-500 transition-colors">
+                                <CardElement 
+                                    options={CARD_ELEMENT_OPTIONS}
+                                    onChange={(event) => {
+                                        setCardComplete(event.complete);
+                                        if (event.error) {
+                                            setPaymentError(event.error.message);
+                                        } else {
+                                            setPaymentError(null);
+                                        }
+                                    }}
+                                />
                             </div>
-                        ) : (
-                            <>
-                                {/* Card Input */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Card Information
-                                    </label>
-                                    <div className="border-2 border-gray-200 rounded-lg p-4 focus-within:border-blue-500 transition-colors">
-                                        <CardElement 
-                                            options={CARD_ELEMENT_OPTIONS}
-                                            onChange={(event) => {
-                                                setCardComplete(event.complete);
-                                                if (event.error) {
-                                                    setPaymentError(event.error.message);
-                                                } else {
-                                                    setPaymentError(null);
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                        </div>
 
                         {/* Payment Error */}
                         {paymentError && (
@@ -289,18 +237,8 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                             <div className="flex items-center text-sm text-green-700">
                                 <Shield size={16} className="mr-2 flex-shrink-0" />
                                 <div>
-                                    <p className="font-medium">
-                                        {isMockPayment || (clientSecret && clientSecret.includes('mock'))
-                                            ? 'Development Environment'
-                                            : 'Your payment is secure'
-                                        }
-                                    </p>
-                                    <p className="text-green-600">
-                                        {isMockPayment || (clientSecret && clientSecret.includes('mock'))
-                                            ? 'Test mode - no real charges will occur'
-                                            : 'Protected by 256-bit SSL encryption'
-                                        }
-                                    </p>
+                                    <p className="font-medium">Your payment is secure</p>
+                                    <p className="text-green-600">Protected by 256-bit SSL encryption</p>
                                 </div>
                             </div>
                         </div>
@@ -317,21 +255,18 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                             </button>
                             <button
                                 type="submit"
-                                disabled={isProcessing || (!isMockPayment && !clientSecret?.includes('mock') && (!stripe || !cardComplete))}
+                                disabled={!stripe || isProcessing || !clientSecret || !cardComplete}
                                 className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium flex items-center justify-center"
                             >
                                 {isProcessing ? (
                                     <>
                                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                        {isMockPayment || (clientSecret && clientSecret.includes('mock')) ? 'Processing Test...' : 'Processing...'}
+                                        Processing...
                                     </>
                                 ) : (
                                     <>
                                         <Lock size={16} className="mr-2" />
-                                        {isMockPayment || (clientSecret && clientSecret.includes('mock')) 
-                                            ? `Test Pay ${PaymentUtils.formatCurrency(paymentData?.amount || 0)}`
-                                            : `Pay ${PaymentUtils.formatCurrency(paymentData?.amount || 0)}`
-                                        }
+                                        Pay {PaymentUtils.formatCurrency(paymentData?.amount || 0)}
                                     </>
                                 )}
                             </button>
@@ -343,10 +278,7 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                 <div className="px-6 py-4 bg-gray-50 rounded-b-2xl">
                     <div className="flex items-center justify-center text-xs text-gray-500">
                         <Lock size={12} className="mr-1" />
-                        {isMockPayment || (clientSecret && clientSecret.includes('mock'))
-                            ? 'Development Mode • No real payments processed'
-                            : 'Powered by Stripe • Your data is encrypted and secure'
-                        }
+                        Powered by Stripe • Your data is encrypted and secure
                     </div>
                 </div>
             </div>
@@ -366,7 +298,7 @@ const PaymentCheckout = ({ paymentData, onSuccess, onError, onCancel }) => {
                     </div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Payment Unavailable</h2>
                     <p className="text-gray-600 mb-6">
-                        Payment processing is currently unavailable. Please contact support for assistance.
+                        Payment processing is currently unavailable. Please configure your Stripe keys to enable payments.
                     </p>
                     <button
                         onClick={onCancel}
