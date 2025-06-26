@@ -9,7 +9,8 @@ const DHeader = ({ employer }) => {
     const { logout } = useEmployerStore();
     
     const navLinks = [
-        { name: 'Dashboard', path: '/employer-dashboard', icon: <Home size={18} /> },
+        { name: 'Home', path: '/', icon: <Home size={18} /> },
+        { name: 'Dashboard', path: '/employer-dashboard', icon: <User size={18} /> },
         { name: 'My Jobs', path: '/my-jobs', icon: <Briefcase size={18} /> },
         { name: 'Post a Job', path: '/post-job', icon: <PlusCircle size={18} /> },
         { name: 'Settings', path: '/settings', icon: <Settings size={18} /> },
