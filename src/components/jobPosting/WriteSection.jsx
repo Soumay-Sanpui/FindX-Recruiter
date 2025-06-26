@@ -601,6 +601,34 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         });
     };
 
+    // Handle select all options for a question
+    const handleSelectAllOptions = (question, allOptions) => {
+        let updatedOptions = { ...selectedOptions };
+        updatedOptions[question] = [...allOptions];
+        
+        setSelectedOptions(updatedOptions);
+        handleChange({
+            target: {
+                name: 'selectedOptions',
+                value: updatedOptions
+            }
+        });
+    };
+
+    // Handle deselect all options for a question
+    const handleDeselectAllOptions = (question) => {
+        let updatedOptions = { ...selectedOptions };
+        delete updatedOptions[question];
+        
+        setSelectedOptions(updatedOptions);
+        handleChange({
+            target: {
+                name: 'selectedOptions',
+                value: updatedOptions
+            }
+        });
+    };
+
     // Validate selected questions have options
     const validateQuestionsWithOptions = () => {
         if (!formData.jobQuestions || formData.jobQuestions.length === 0) {
@@ -1027,19 +1055,47 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 </label>
                                                                 <div className="flex items-center space-x-4 mt-2">
                                                                     {questionObj.options && questionObj.options.length > 0 ? (
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                toggleQuestionOptions(sectionKey, questionIndex);
-                                                                            }}
-                                                                            className="p-1 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
-                                                                            title="View answer options"
-                                                                        >
-                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                            </svg>
-                                                                        </button>
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleQuestionOptions(sectionKey, questionIndex);
+                                                                                }}
+                                                                                className="p-1 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
+                                                                                title="View answer options"
+                                                                            >
+                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                            </button>
+                                                                            {formData.jobQuestions && formData.jobQuestions.includes(questionObj.question) && (
+                                                                                <>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleSelectAllOptions(questionObj.question, questionObj.options);
+                                                                                        }}
+                                                                                        className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                                                                                        title="Select all answer options"
+                                                                                    >
+                                                                                        Select All
+                                                                                    </button>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleDeselectAllOptions(questionObj.question);
+                                                                                        }}
+                                                                                        className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                                                                                        title="Deselect all answer options"
+                                                                                    >
+                                                                                        Deselect All
+                                                                                    </button>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
                                                                     ) : (
                                                                         <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
                                                                             Candidate will fill from app
@@ -1075,7 +1131,8 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                                             type="checkbox" 
                                                                                             className="mt-0.5 mr-2 h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
                                                                                             id={`basic-option-${sectionKey}-${questionIndex}-${optionIndex}`}
-                                                                                            checked={selectedOptions[questionObj.question] && selectedOptions[questionObj.question].includes(option)}
+                                                                                            key={`basic-option-${sectionKey}-${questionIndex}-${optionIndex}-${selectedOptions[questionObj.question] ? selectedOptions[questionObj.question].includes(option) : false}`}
+                                                                                            checked={selectedOptions[questionObj.question] ? selectedOptions[questionObj.question].includes(option) : false}
                                                                                             onChange={(e) => handleOptionSelect(questionObj.question, option, e.target.checked)}
                                                                                         />
                                                                                         <label 
@@ -1231,19 +1288,47 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                 </label>
                                                                 <div className="flex items-center space-x-4 mt-2">
                                                                     {questionObj.options && questionObj.options.length > 0 ? (
-                                <button 
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                toggleQuestionOptions(sectionKey, questionIndex);
-                                                                            }}
-                                                                            className="p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
-                                                                            title="View answer options"
-                                                                        >
-                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                            </svg>
-                                </button>
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleQuestionOptions(sectionKey, questionIndex);
+                                                                                }}
+                                                                                className="p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
+                                                                                title="View answer options"
+                                                                            >
+                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                            </button>
+                                                                            {formData.jobQuestions && formData.jobQuestions.includes(questionObj.question) && (
+                                                                                <>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleSelectAllOptions(questionObj.question, questionObj.options);
+                                                                                        }}
+                                                                                        className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
+                                                                                        title="Select all answer options"
+                                                                                    >
+                                                                                        Select All
+                                                                                    </button>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleDeselectAllOptions(questionObj.question);
+                                                                                        }}
+                                                                                        className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                                                                                        title="Deselect all answer options"
+                                                                                    >
+                                                                                        Deselect All
+                                                                                    </button>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
                                                                     ) : (
                                                                         <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
                                                                             Candidate will fill from app
@@ -1279,7 +1364,8 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                                                                             type="checkbox" 
                                                                                             className="mt-0.5 mr-2 h-3 w-3 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" 
                                                                                             id={`advanced-option-${sectionKey}-${questionIndex}-${optionIndex}`}
-                                                                                            checked={selectedOptions[questionObj.question] && selectedOptions[questionObj.question].includes(option)}
+                                                                                            key={`advanced-option-${sectionKey}-${questionIndex}-${optionIndex}-${selectedOptions[questionObj.question] ? selectedOptions[questionObj.question].includes(option) : false}`}
+                                                                                            checked={selectedOptions[questionObj.question] ? selectedOptions[questionObj.question].includes(option) : false}
                                                                                             onChange={(e) => handleOptionSelect(questionObj.question, option, e.target.checked)}
                                                                                         />
                                                                                         <label 
