@@ -1,7 +1,6 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Link, useNavigate} from 'react-router';
 import {useEmployerStore} from "../store/employer.store.js";
-import config from "../../config/config.js"
 
 const Header = () => {
     const {employer, logout} = useEmployerStore();
@@ -10,6 +9,24 @@ const Header = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
+
+    const dropDownOptions = [
+    {
+        title: 'Dashboard',
+        link: '/employer-dashboard',
+    },
+    {
+        title: 'Settings',
+        link: '/settings',
+    },
+    {
+        title: 'Messages',
+        link: '/messages',
+    },
+    {
+        title: 'Company Profile',
+        link: '/settings',
+    }];
 
     useEffect(() => {
         if (employer) {
@@ -76,25 +93,24 @@ const Header = () => {
                             </div>
                         ) : (
                             <div className="relative" ref={dropdownRef}>
-                                <div 
+                                <div
                                     className={`flex items-center justify-center w-[2vw] h-[2vw] font-poppins font-bold text-white bg-gradient-to-br from-blue-700 to-teal-100 hover:bg-gradient-to-tl transition-colors duration-500 ease-out p-4 rounded-full cursor-pointer hover:opacity-90`}
                                     onClick={() => setShowDropdown(!showDropdown)}
                                 >
                                     <p>{nameInitials}</p>
                                 </div>
-                                
+
                                 {showDropdown && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
-                                        <Link to="/employer-dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Dashboard
-                                        </Link>
-                                        <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Settings
-                                        </Link>
-                                        <Link to="/messages" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Messages
-                                        </Link>
-                                        <button 
+                                        {/*<Link to="/employer-dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">*/}
+                                        {
+                                            dropDownOptions.map((option, index) => (
+                                                <Link key={index} to={option.link} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                    {option.title}
+                                                </Link>
+                                            ))
+                                        }
+                                        <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t"
                                         >

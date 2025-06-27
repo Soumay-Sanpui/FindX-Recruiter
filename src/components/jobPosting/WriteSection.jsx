@@ -3,10 +3,12 @@ import PricingSummary from './PricingSummary';
 import { getAdvanceQuestionSections } from '../../store/jobCategory.store.js';
 import CONFIG from '../../../config/config.js';
 import {Sparkles} from 'lucide-react';
+import {useEmployerStore} from "../../store/employer.store.js";
 
 const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [logoFile, setLogoFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const {employer} = useEmployerStore();
     
     // pricing elements
     const [premiumSelected, setPremiumSelected] = useState(formData.premiumListing || true);
@@ -668,6 +670,15 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         return true;
     };
 
+    // Handle use company logo
+    const handleUseCompanyLogo = () => {
+        if(employer && employer.companyLogo) {
+            setLogoFile(employer.companyLogo);
+        } else {
+            alert('Unable to fetch company logo !');
+        }
+    }
+
     // Effect to update filtered advanced questions when category changes
     useEffect(() => {
         if (formData.category) {
@@ -919,12 +930,17 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="text-center">
+                            <div className="text-center flex flex-col gap-2">
                                 <p className="text-gray-500 mb-2">Cover image can be added from the uploads page, after payment.</p>
-                                <label className="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700">
-                                    Add logo
-                                    <input type="file" className="hidden" onChange={handleLogoUpload} />
-                                </label>
+                                <div className={"flex gap-4 items-center justify-center"}>
+                                    <label className="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700">
+                                        Add logo
+                                    <input type="file" className="hidden" onChange={handleLogoUpload}/>
+                                    </label>
+                                    <button onClick={handleUseCompanyLogo} className="bg-gradient-to-br from-blue-700 to-blue-500 font-semibold text-white px-4 py-2 cursor-pointer hover:bg-blue-700">
+                                        Use company logo
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

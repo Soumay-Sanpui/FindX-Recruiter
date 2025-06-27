@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchUsers, useSuggestedUsers, useUserProfile } from '../hooks/useEmployer';
-import { AiOutlineSearch, AiOutlineUser, AiOutlineLink} from 'react-icons/ai';
+import { AiOutlineSearch, AiOutlineUser, AiOutlineLink, AiOutlineSetting} from 'react-icons/ai';
 import { FaGraduationCap, FaMapMarkerAlt, FaLanguage } from 'react-icons/fa';
-import { MdOutlineMessage, MdFilterList } from 'react-icons/md';
+import { MdOutlineMessage, MdFilterList, MdClose } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import Loader from '../components/Loader.jsx';
 import { toast } from 'react-toastify';
@@ -24,6 +24,11 @@ const SearchEmployee = () => {
     const [viewingProfile, setViewingProfile] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
     
+    // Pagination settings state
+    const [showPaginationSettings, setShowPaginationSettings] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(12);
+    const [paginationStyle, setPaginationStyle] = useState('numbered'); // 'numbered' or 'simple'
+    
     // Check if employer is logged in
     const token = localStorage.getItem('employerToken');
     const employer = JSON.parse(localStorage.getItem('employer')) || {};
@@ -37,7 +42,8 @@ const SearchEmployee = () => {
         qualifications,
         jobTypes,
         workEnv,
-        page: currentPage
+        page: currentPage,
+        limit: itemsPerPage
     };
     
     // Use React Query hooks
@@ -47,8 +53,11 @@ const SearchEmployee = () => {
     const { 
         data: searchData = { users: [], totalPages: 1, currentPage: 1, totalUsers: 0 }, 
         isLoading: searchLoading, 
-        error: searchError 
+        error: searchError,
+        isFetching: searchFetching
     } = useSearchUsers(searchParams, !!token);
+    
+
     
     // Keep suggested users as fallback (not actively used but available)
     const { 
@@ -67,6 +76,7 @@ const SearchEmployee = () => {
     const users = searchData.users;
     const totalPages = searchData.totalPages;
     const loading = searchLoading || profileLoading;
+    const isPaginating = searchFetching && !searchLoading;
     
     // Centralized function to handle token expiry
     const handleTokenExpiry = () => {
@@ -160,37 +170,94 @@ const SearchEmployee = () => {
     
     const changePage = (page) => {
         setCurrentPage(page);
-        handleSearch();
+        // React Query will automatically refetch when currentPage changes - no need to call handleSearch
     };
     
     const renderPagination = () => {
         if (totalPages <= 1) return null;
         
-        return (
-            <div className="flex justify-center mt-6">
-                <nav className="flex items-center gap-2">
+        if (paginationStyle === 'simple') {
+            return (
+                <div className="flex justify-between items-center mt-6">
                     <button 
                         onClick={() => changePage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-3 py-1 border rounded ${currentPage === 1 ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
+                        className={`px-4 py-2 border rounded ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-50'}`}
+                    >
+                        Previous
+                    </button>
+                    
+                    <span className="text-gray-600">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    
+                    <button 
+                        onClick={() => changePage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 border rounded ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-50'}`}
+                    >
+                        Next
+                    </button>
+                </div>
+            );
+        }
+        
+        // Numbered pagination with smart truncation
+        const getPageNumbers = () => {
+            const delta = 2;
+            const range = [];
+            const rangeWithDots = [];
+            
+            for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                range.push(i);
+            }
+            
+            if (currentPage - delta > 2) {
+                rangeWithDots.push(1, '...');
+            } else {
+                rangeWithDots.push(1);
+            }
+            
+            rangeWithDots.push(...range);
+            
+            if (currentPage + delta < totalPages - 1) {
+                rangeWithDots.push('...', totalPages);
+            } else if (totalPages > 1) {
+                rangeWithDots.push(totalPages);
+            }
+            
+            return rangeWithDots.filter((page, index, array) => array.indexOf(page) === index);
+        };
+        
+        return (
+            <div className="flex justify-center mt-6">
+                <nav className="flex items-center gap-1">
+                    <button 
+                        onClick={() => changePage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-2 border rounded ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-50'}`}
                     >
                         Prev
                     </button>
                     
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                        <button
-                            key={page}
-                            onClick={() => changePage(page)}
-                            className={`px-3 py-1 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-50'}`}
-                        >
-                            {page}
-                        </button>
+                    {getPageNumbers().map((page, index) => (
+                        page === '...' ? (
+                            <span key={index} className="px-3 py-2 text-gray-400">...</span>
+                        ) : (
+                            <button
+                                key={page}
+                                onClick={() => changePage(page)}
+                                className={`px-3 py-2 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-50 border'}`}
+                            >
+                                {page}
+                            </button>
+                        )
                     ))}
                     
                     <button 
                         onClick={() => changePage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-3 py-1 border rounded ${currentPage === totalPages ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
+                        className={`px-3 py-2 border rounded ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-50'}`}
                     >
                         Next
                     </button>
@@ -279,6 +346,100 @@ const SearchEmployee = () => {
         </div>
     );
     
+    const renderPaginationSettings = () => {
+        if (!showPaginationSettings) return null;
+        
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Pagination Settings</h3>
+                        <button
+                            onClick={() => setShowPaginationSettings(false)}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <MdClose size={24} />
+                        </button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Items per page
+                            </label>
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    setItemsPerPage(Number(e.target.value));
+                                    setCurrentPage(1); // Reset to first page
+                                }}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                            >
+                                <option value={6}>6 per page</option>
+                                <option value={12}>12 per page</option>
+                                <option value={24}>24 per page</option>
+                                <option value={36}>36 per page</option>
+                                <option value={48}>48 per page</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Pagination style
+                            </label>
+                            <div className="space-y-2">
+                                <div className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        id="numbered"
+                                        value="numbered"
+                                        checked={paginationStyle === 'numbered'}
+                                        onChange={(e) => setPaginationStyle(e.target.value)}
+                                        className="mr-2"
+                                    />
+                                    <label htmlFor="numbered" className="text-sm">
+                                        Numbered (1 2 3 ... 10)
+                                    </label>
+                                </div>
+                                <div className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        id="simple"
+                                        value="simple"
+                                        checked={paginationStyle === 'simple'}
+                                        onChange={(e) => setPaginationStyle(e.target.value)}
+                                        className="mr-2"
+                                    />
+                                    <label htmlFor="simple" className="text-sm">
+                                        Simple (Previous / Next)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end mt-6 space-x-3">
+                        <button
+                            onClick={() => setShowPaginationSettings(false)}
+                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => {
+                                setShowPaginationSettings(false);
+                                toast.success('Pagination settings updated!');
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            Apply Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderUserProfile = () => {
         if (!userProfile) return null;
         
@@ -673,10 +834,20 @@ const SearchEmployee = () => {
                 <>
                     {users.length > 0 ? (
                         <>
-                            <h2 className="text-xl font-semibold mb-4">
-                                {hasSearchCriteria ? `Search Results (${users.length})` : `All Candidates (${users.length})`}
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-semibold">
+                                    {hasSearchCriteria ? `Search Results (${searchData.totalUsers || users.length})` : `All Candidates (${searchData.totalUsers || users.length})`}
+                                    {isPaginating && <span className="text-sm text-gray-500 ml-2">(Loading...)</span>}
+                                </h2>
+                                <button
+                                    onClick={() => setShowPaginationSettings(true)}
+                                    className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                                    title="Pagination Settings"
+                                >
+                                    <AiOutlineSetting size={20} />
+                                </button>
+                            </div>
+                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${isPaginating ? 'opacity-50 pointer-events-none' : ''}`}>
                                 {users.map(user => renderUserCard(user))}
                             </div>
                             {renderPagination()}
@@ -697,6 +868,9 @@ const SearchEmployee = () => {
                     )}
                 </>
             )}
+            
+            {/* Pagination Settings Modal */}
+            {renderPaginationSettings()}
         </div>
     );
 };

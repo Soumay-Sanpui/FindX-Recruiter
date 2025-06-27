@@ -37,7 +37,7 @@ export const useSearchUsers = (searchParams, enabled = true) => {
   return useQuery({
     queryKey: employerKeys.userSearch(searchParams),
     queryFn: async () => {
-      const { keyword, skills, location, languages, qualifications, jobTypes, workEnv, page = 1 } = searchParams;
+      const { keyword, skills, location, languages, qualifications, jobTypes, workEnv, page = 1, limit = 12 } = searchParams;
       
       const queryParams = new URLSearchParams();
       if (keyword) queryParams.append('keyword', keyword);
@@ -48,6 +48,7 @@ export const useSearchUsers = (searchParams, enabled = true) => {
       if (jobTypes?.length) queryParams.append('jobTypes', jobTypes.join(','));
       if (workEnv?.length) queryParams.append('workEnv', workEnv.join(','));
       queryParams.append('page', page.toString());
+      queryParams.append('limit', limit.toString());
       
       try {
         const response = await api.get(`/user-search?${queryParams}`);
@@ -70,10 +71,10 @@ export const useSearchUsers = (searchParams, enabled = true) => {
     },
     select: (data) => ({
       users: data?.users || [],
-      totalPages: data?.totalPages || 1,
-      currentPage: data?.currentPage || 1,
-      totalUsers: data?.totalUsers || 0,
-      count: data?.count || 0,
+      totalPages: data?.totalPages || Math.ceil((data?.totalUsers || 0) / (data?.limit || 12)) || 1,
+      currentPage: data?.currentPage || data?.page || 1,
+      totalUsers: data?.totalUsers || data?.count || (data?.users?.length || 0),
+      count: data?.count || (data?.users?.length || 0),
     }),
     enabled: enabled && !!token,
     staleTime: 2 * 60 * 1000, // 2 minutes
