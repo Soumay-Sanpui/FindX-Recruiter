@@ -211,4 +211,53 @@ export const broadcastAPI = {
     }
 };
 
+// Contact API methods
+export const contactAPI = {
+    submitContactForm: async (contactData) => {
+        try {
+            const response = await api.post('/contact/submit', contactData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    // Admin methods (for future use)
+    getAllContacts: async (params = {}) => {
+        try {
+            const response = await api.get('/contact/admin/all', { params });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getContactById: async (contactId) => {
+        try {
+            const response = await api.get(`/contact/admin/${contactId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    updateContactStatus: async (contactId, statusData) => {
+        try {
+            const response = await api.put(`/contact/admin/${contactId}/status`, statusData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getContactDashboard: async () => {
+        try {
+            const response = await api.get('/contact/admin/dashboard');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
 export default api; 
