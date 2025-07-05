@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { useJobDetails } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
-import { Send, ArrowLeft, Search, User, Calendar, RefreshCw } from 'lucide-react';
+import { Send, ArrowLeft, Search, User, Calendar, RefreshCw, Bell, MessageCircle } from 'lucide-react';
 import api, { messageAPI } from '../services/api';
 
 const Messages = () => {
@@ -23,22 +23,172 @@ const Messages = () => {
     const [sendingMessage, setSendingMessage] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [refreshing, setRefreshing] = useState(false);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+    const [applicantUnreadCounts, setApplicantUnreadCounts] = useState({});
+    const [unreadMessageIds, setUnreadMessageIds] = useState(new Set());
     const messagesEndRef = useRef(null);
     const messageContainerRef = useRef(null);
 
-    // Scroll to bottom of messages
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    // Cache for conversations to avoid repeated API calls
+    const [conversationCache, setConversationCache] = useState(new Map());
+    const [lastDataFetch, setLastDataFetch] = useState(0);
 
-    // Load initial messages when applicant is selected (no polling)
+    // Scroll to bottom of messages
+    const scrollToBottom = useCallback(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, []);
+
+    // Load unread message counts for all applicants
+    const loadUnreadCounts = useCallback(async () => {
+        if (!employer?._id || applicants.length === 0) return;
+        
+        try {
+            const response = await messageAPI.getUnreadMessageCount(employer._id);
+            if (response.success) {
+                setTotalUnreadCount(response.unreadCount || 0);
+                
+                // Load individual unread counts for each applicant
+                const unreadCounts = {};
+                for (const applicant of applicants) {
+                    try {
+                        const conversationResponse = await messageAPI.getConversationHistory(
+                            employer._id, 
+                            applicant.user._id, 
+                            applicant.jobId || jobId
+                        );
+                        
+                        if (conversationResponse.success) {
+                            const unreadMessages = conversationResponse.messages?.filter(msg => 
+                                !msg.read && msg.fromModel === 'User'
+                            ) || [];
+                            unreadCounts[applicant.user._id] = unreadMessages.length;
+                        }
+                    } catch (error) {
+                        console.error(`Error loading unread count for applicant ${applicant.user._id}:`, error);
+                    }
+                }
+                
+                setApplicantUnreadCounts(unreadCounts);
+            }
+        } catch (error) {
+            console.error('Error loading unread counts:', error);
+        }
+    }, [employer, applicants, jobId]);
+
+    // Load unread counts when applicants change
+    useEffect(() => {
+        if (applicants.length > 0) {
+            loadUnreadCounts();
+        }
+    }, [applicants, loadUnreadCounts]);
+
+    // Optimized applicant filtering with useMemo
+    const filteredApplicants = useMemo(() => {
+        if (!searchTerm) return applicants;
+        
+        const term = searchTerm.toLowerCase();
+        return applicants.filter(applicant => 
+            applicant.user?.name?.toLowerCase().includes(term) ||
+            applicant.user?.email?.toLowerCase().includes(term)
+        );
+    }, [applicants, searchTerm]);
+
+    // Load conversation history with caching and unread detection
+    const loadConversationHistory = useCallback(async (applicant, showLoading = true) => {
+        if (!applicant || !employer) return;
+        
+        const cacheKey = `${employer._id}-${applicant.user._id}-${applicant.jobId || jobId}`;
+        const now = Date.now();
+        const CACHE_DURATION = 30 * 1000; // 30 seconds cache
+        
+        // Check cache first
+        if (conversationCache.has(cacheKey)) {
+            const cached = conversationCache.get(cacheKey);
+            if (now - cached.timestamp < CACHE_DURATION) {
+                setMessages(cached.messages);
+                setUnreadMessageIds(cached.unreadMessageIds);
+                setTimeout(scrollToBottom, 100);
+                return;
+            }
+        }
+        
+        if (showLoading) setLoadingMessages(true);
+        setError(null);
+        
+        try {
+            const jobIdToUse = applicant.jobId || jobId;
+            
+            // Load conversation first to get unread messages
+            const conversationResponse = await api.get(`/messages/employer/conversation/${employer._id}/${applicant.user._id}/${jobIdToUse}`);
+            
+            if (conversationResponse.data?.success) {
+                const newMessages = conversationResponse.data.messages || [];
+                
+                // Identify unread messages (messages from User that are unread)
+                const unreadIds = new Set();
+                newMessages.forEach(msg => {
+                    if (!msg.read && msg.fromModel === 'User') {
+                        unreadIds.add(msg._id);
+                    }
+                });
+                
+                setMessages(newMessages);
+                setUnreadMessageIds(unreadIds);
+                
+                // Update cache
+                setConversationCache(prev => new Map(prev).set(cacheKey, {
+                    messages: newMessages,
+                    unreadMessageIds: unreadIds,
+                    timestamp: now
+                }));
+                
+                // Update unread counts
+                setApplicantUnreadCounts(prev => ({
+                    ...prev,
+                    [applicant.user._id]: unreadIds.size
+                }));
+                
+                // Mark messages as read AFTER displaying them (in background)
+                if (unreadIds.size > 0) {
+                    setTimeout(() => {
+                        api.put('/messages/employer/mark-read', {
+                            userId: employer._id,
+                            partnerId: applicant.user._id,
+                            jobId: jobIdToUse
+                        }).catch(console.error);
+                    }, 2000); // 2 second delay to show unread status
+                }
+                
+                // Scroll to bottom after loading messages
+                setTimeout(scrollToBottom, 100);
+            } else {
+                console.log('No messages found or invalid response');
+                setMessages([]);
+                setUnreadMessageIds(new Set());
+            }
+        } catch (err) {
+            console.error('Error loading conversation:', err);
+            if (err.response?.status === 401) {
+                setError('Authentication failed. Please log in again.');
+            } else if (err.response?.status === 403) {
+                setError('You do not have permission to view these messages.');
+            } else {
+                setError('Failed to load conversation. Please try again.');
+            }
+        } finally {
+            if (showLoading) setLoadingMessages(false);
+        }
+    }, [employer, jobId, conversationCache, scrollToBottom]);
+
+    // Load initial messages when applicant is selected
     useEffect(() => {
         if (selectedApplicant && employer) {
-            // Load initial messages only
-            loadConversationHistory();
+            loadConversationHistory(selectedApplicant);
         }
-    }, [selectedApplicant, employer]);
+    }, [selectedApplicant, employer, loadConversationHistory]);
 
+    // Main data loading effect with optimizations
     useEffect(() => {
         // Check if the user is authenticated
         if (!isAuthenticated) {
@@ -56,11 +206,19 @@ const Messages = () => {
         const fetchJobData = async () => {
             if (!jobId || !employer) return;
             
+            const now = Date.now();
+            const CACHE_DURATION = 60 * 1000; // 1 minute cache
+            
+            // Check if we need to refetch data
+            if (applicants.length > 0 && (now - lastDataFetch) < CACHE_DURATION) {
+                return; // Use cached data
+            }
+            
             setLoading(true);
             setError(null);
             
             try {
-                // Fetch job details if not already loaded
+                // Use job details from React Query if available, otherwise fetch
                 let job = jobDetails?.job;
                 
                 if (!job) {
@@ -73,24 +231,23 @@ const Messages = () => {
                     return;
                 }
                 
-                console.log('Job data:', job);
-                console.log('Job applicants:', job.applicants);
-                
                 // Check if the employer owns this job
                 if (job.postedBy._id !== employer._id && job.postedBy !== employer._id) {
                     setError('You do not have permission to view messages for this job');
                     return;
                 }
                 
-                // Extract applicants with user details
-                const applicantsWithDetails = job.applicants.map(applicant => ({
-                    ...applicant,
-                    jobId: job._id,
-                    jobTitle: job.jobTitle
-                }));
+                // Process applicants with user details
+                const applicantsWithDetails = job.applicants
+                    .filter(applicant => applicant.user && applicant.user._id) // Filter out invalid applicants
+                    .map(applicant => ({
+                        ...applicant,
+                        jobId: job._id,
+                        jobTitle: job.jobTitle
+                    }));
                 
-                console.log('Processed applicants:', applicantsWithDetails);
                 setApplicants(applicantsWithDetails);
+                setLastDataFetch(now);
                 
             } catch (err) {
                 console.error('Error fetching job data:', err);
@@ -101,74 +258,16 @@ const Messages = () => {
         };
 
         fetchJobData();
-    }, [isAuthenticated, navigate, employer, jobId, jobDetails]);
+    }, [isAuthenticated, navigate, employer, jobId, jobDetails, applicants.length, lastDataFetch]);
 
-    // Load conversation history between employer and selected applicant
-    const loadConversationHistory = async (showLoading = true) => {
-        if (!selectedApplicant || !employer) return;
-        
-        if (showLoading) setLoading(true);
-        setError(null);
-        
-        try {
-            const jobIdToUse = selectedApplicant.jobId || jobId;
-            
-            console.log('Loading conversation history:', {
-                employerId: employer._id,
-                userId: selectedApplicant.user._id,
-                jobId: jobIdToUse
-            });
-            
-            // Use employer-specific conversation endpoint
-            const response = await api.get(`/messages/employer/conversation/${employer._id}/${selectedApplicant.user._id}/${jobIdToUse}`);
-            
-            console.log('Conversation response:', response.data);
-            
-            if (response.data && response.data.success) {
-                const messages = response.data.messages || [];
-                console.log('Setting messages:', messages);
-                setMessages(messages);
-                
-                // Mark messages as read
-                try {
-                    await api.put('/messages/employer/mark-read', {
-                        userId: employer._id,
-                        partnerId: selectedApplicant.user._id,
-                        jobId: jobIdToUse
-                    });
-                } catch (markReadError) {
-                    console.error('Error marking messages as read:', markReadError);
-                }
-                
-                // Scroll to bottom after loading messages
-                setTimeout(scrollToBottom, 100);
-            } else {
-                console.log('No messages found or invalid response');
-                setMessages([]);
-            }
-        } catch (err) {
-            console.error('Error loading conversation:', err);
-            if (err.response?.status === 401) {
-                setError('Authentication failed. Please log in again.');
-            } else if (err.response?.status === 403) {
-                setError('You do not have permission to view these messages.');
-            } else {
-                setError('Failed to load conversation. Please try again.');
-            }
-        } finally {
-            if (showLoading) setLoading(false);
-        }
-    };
-
-    // Handle sending a new message
-    const handleSendMessage = async () => {
+    // Optimized message sending with better error handling
+    const handleSendMessage = useCallback(async () => {
         if (!newMessage.trim() || !selectedApplicant || !employer) return;
         
         setSendingMessage(true);
         setError(null);
         
         try {
-            // Create message data
             const messageData = {
                 from: employer._id,
                 to: selectedApplicant.user._id,
@@ -178,19 +277,45 @@ const Messages = () => {
                 jobId: selectedApplicant.jobId || jobId
             };
             
-            console.log('Sending message:', messageData);
-            
-            // Send via direct API call
             const response = await api.post('/messages/employer/send', messageData);
-            
-            console.log('Send message response:', response.data);
             
             if (response.data && response.data.success) {
                 // Clear the input
                 setNewMessage('');
                 
-                // Refresh conversation to show the new message
-                await loadConversationHistory(false);
+                // Add message to local state immediately for better UX
+                const newMsg = {
+                    _id: Date.now().toString(), // Temporary ID
+                    ...messageData,
+                    createdAt: new Date().toISOString(),
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+                
+                setMessages(prev => [...prev, newMsg]);
+                
+                // Update cache
+                const cacheKey = `${employer._id}-${selectedApplicant.user._id}-${selectedApplicant.jobId || jobId}`;
+                setConversationCache(prev => {
+                    const newCache = new Map(prev);
+                    const cached = newCache.get(cacheKey);
+                    if (cached) {
+                        newCache.set(cacheKey, {
+                            messages: [...cached.messages, newMsg],
+                            unreadMessageIds: cached.unreadMessageIds,
+                            timestamp: Date.now()
+                        });
+                    }
+                    return newCache;
+                });
+                
+                // Scroll to bottom
+                setTimeout(scrollToBottom, 100);
+                
+                // Refresh conversation in background to get the actual message ID
+                setTimeout(() => {
+                    loadConversationHistory(selectedApplicant, false);
+                }, 1000);
             } else {
                 throw new Error(response.data?.message || 'Failed to send message');
             }
@@ -207,48 +332,111 @@ const Messages = () => {
         } finally {
             setSendingMessage(false);
         }
-    };
+    }, [newMessage, selectedApplicant, employer, jobId, loadConversationHistory, scrollToBottom]);
 
-    // Manual refresh function
-    const handleRefresh = async () => {
+    // Manual refresh function with cache invalidation
+    const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         setError(null);
-        if (selectedApplicant) {
-            await loadConversationHistory(false);
+        
+        // Clear cache for current conversation
+        if (selectedApplicant && employer) {
+            const cacheKey = `${employer._id}-${selectedApplicant.user._id}-${selectedApplicant.jobId || jobId}`;
+            setConversationCache(prev => {
+                const newCache = new Map(prev);
+                newCache.delete(cacheKey);
+                return newCache;
+            });
+            
+            await loadConversationHistory(selectedApplicant, false);
         }
+        
+        // Refresh unread counts
+        await loadUnreadCounts();
+        
         setRefreshing(false);
-    };
+    }, [selectedApplicant, employer, jobId, loadConversationHistory, loadUnreadCounts]);
 
     // Handle key press in message input
-    const handleKeyPress = (e) => {
+    const handleKeyPress = useCallback((e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
         }
-    };
+    }, [handleSendMessage]);
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-        });
-    };
-
-    const formatTime = (dateString) => {
+    // Optimized date formatting with memoization
+    const formatTime = useCallback((dateString) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit' 
         });
-    };
+    }, []);
 
-    // Filter applicants based on search term
-    const filteredApplicants = applicants.filter(applicant => 
-        applicant.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        applicant.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Optimized applicant selection
+    const handleApplicantSelect = useCallback((applicant) => {
+        setSelectedApplicant(applicant);
+        setMessages([]); // Clear messages immediately for better UX
+        setUnreadMessageIds(new Set());
+    }, []);
+
+    // Mark all messages as read
+    const handleMarkAllAsRead = useCallback(async () => {
+        if (!employer?._id) return;
+        
+        try {
+            await messageAPI.markAllMessagesAsRead(employer._id);
+            setTotalUnreadCount(0);
+            setApplicantUnreadCounts({});
+            setUnreadMessageIds(new Set());
+            
+            // Refresh current conversation if any
+            if (selectedApplicant) {
+                await loadConversationHistory(selectedApplicant, false);
+            }
+        } catch (error) {
+            console.error('Error marking all messages as read:', error);
+        }
+    }, [employer, selectedApplicant, loadConversationHistory]);
+
+    // Mark current conversation as read
+    const handleMarkAsRead = useCallback(async () => {
+        if (!selectedApplicant || !employer || unreadMessageIds.size === 0) return;
+        
+        try {
+            const jobIdToUse = selectedApplicant.jobId || jobId;
+            
+            await api.put('/messages/employer/mark-read', {
+                userId: employer._id,
+                partnerId: selectedApplicant.user._id,
+                jobId: jobIdToUse
+            });
+            
+            // Clear unread messages
+            setUnreadMessageIds(new Set());
+            
+            // Update applicant unread counts
+            setApplicantUnreadCounts(prev => ({
+                ...prev,
+                [selectedApplicant.user._id]: 0
+            }));
+            
+            // Update total unread count
+            setTotalUnreadCount(prev => Math.max(0, prev - unreadMessageIds.size));
+            
+            // Clear cache to force refresh
+            const cacheKey = `${employer._id}-${selectedApplicant.user._id}-${jobIdToUse}`;
+            setConversationCache(prev => {
+                const newCache = new Map(prev);
+                newCache.delete(cacheKey);
+                return newCache;
+            });
+            
+        } catch (error) {
+            console.error('Error marking messages as read:', error);
+        }
+    }, [selectedApplicant, employer, jobId, unreadMessageIds.size]);
 
     if (jobLoading) {
         return (
@@ -300,22 +488,58 @@ const Messages = () => {
                             <ArrowLeft size={20} />
                         </button>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
+                            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+                                Messages
+                                {totalUnreadCount > 0 && (
+                                    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                        {totalUnreadCount}
+                                    </span>
+                                )}
+                            </h1>
                             <p className="text-gray-600">{jobDetails?.job?.jobTitle}</p>
                         </div>
                     </div>
                     
-                    {selectedApplicant && (
-                        <button
-                            onClick={handleRefresh}
-                            disabled={refreshing}
-                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-blue-400"
-                        >
-                            <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                            Refresh
-                        </button>
-                    )}
+                    <div className="flex items-center space-x-3">
+                        {totalUnreadCount > 0 && (
+                            <button
+                                onClick={handleMarkAllAsRead}
+                                className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                            >
+                                <MessageCircle size={16} className="mr-2" />
+                                Mark All Read
+                            </button>
+                        )}
+                        
+                        {selectedApplicant && (
+                            <button
+                                onClick={handleRefresh}
+                                disabled={refreshing}
+                                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-blue-400"
+                            >
+                                <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                                {totalUnreadCount > 0 ? 'Reload' : 'Refresh'}
+                            </button>
+                        )}
+                    </div>
                 </div>
+
+                {/* Unread Messages Alert */}
+                {totalUnreadCount > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="flex items-center">
+                            <Bell className="text-blue-600 mr-2" size={20} />
+                            <div>
+                                <p className="text-blue-800 font-medium">
+                                    You have {totalUnreadCount} unread message{totalUnreadCount !== 1 ? 's' : ''}
+                                </p>
+                                <p className="text-blue-600 text-sm">
+                                    Select an applicant to view their messages or click "Mark All Read" to clear all notifications.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Error Display */}
                 {error && (
@@ -355,64 +579,56 @@ const Messages = () => {
                         </div>
                         
                         <div className="flex-1 overflow-y-auto">
-                            {filteredApplicants.length === 0 ? (
+                            {loading ? (
+                                <div className="p-6 text-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                    <p className="mt-3 text-gray-600">Loading applicants...</p>
+                                </div>
+                            ) : filteredApplicants.length === 0 ? (
                                 <div className="p-6 text-center text-gray-500">
                                     {applicants.length === 0 ? 'No applicants yet' : 'No applicants found'}
-                                    {applicants.length === 0 && (
-                                        <div className="mt-4 text-xs text-gray-400">
-                                            <p>Debug Info:</p>
-                                            <p>Job ID: {jobId}</p>
-                                            <p>Job Details Loaded: {jobDetails ? 'Yes' : 'No'}</p>
-                                            <p>Employer ID: {employer?._id}</p>
-                                            <p>Loading: {loading.toString()}</p>
-                                            <p>Error: {error || 'None'}</p>
-                                        </div>
-                                    )}
                                 </div>
                             ) : (
-                                <>
-                                    {/* Add debug info when there are applicants */}
-                                    <div className="p-2 text-xs text-gray-400 border-b">
-                                        Debug: {applicants.length} total applicants, {filteredApplicants.length} filtered
-                                    </div>
-                                    {filteredApplicants.map((applicant) => (
-                                        <div 
-                                            key={applicant._id}
-                                            onClick={() => setSelectedApplicant(applicant)}
-                                            className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
-                                        >
-                                            <div className="flex items-center">
-                                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                                    <User size={20} className="text-blue-600" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
+                                filteredApplicants.map((applicant) => (
+                                    <div 
+                                        key={applicant._id}
+                                        onClick={() => handleApplicantSelect(applicant)}
+                                        className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+                                    >
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <User size={20} className="text-blue-600" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between">
                                                     <p className="text-sm font-medium text-gray-900 truncate">
                                                         {applicant.user?.name || 'Applicant'}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 truncate">
-                                                        {applicant.user?.email || ''}
-                                                    </p>
-                                                    <div className="flex items-center mt-1">
-                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                            applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                            applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
-                                                            applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
-                                                            applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
-                                                            applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                            'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                            {applicant.status}
+                                                    {applicantUnreadCounts[applicant.user._id] > 0 && (
+                                                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                                            {applicantUnreadCounts[applicant.user._id]}
                                                         </span>
-                                                    </div>
-                                                    {/* Debug info for each applicant */}
-                                                    <div className="text-xs text-gray-400 mt-1">
-                                                        User ID: {applicant.user?._id || 'Not populated'}
-                                                    </div>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {applicant.user?.email || ''}
+                                                </p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                        applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                        applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
+                                                        applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
+                                                        applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                        'bg-gray-100 text-gray-800'
+                                                    }`}>
+                                                        {applicant.status}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
-                                </>
+                                    </div>
+                                ))
                             )}
                         </div>
                     </div>
@@ -425,18 +641,6 @@ const Messages = () => {
                                     <User size={48} className="mx-auto text-gray-300 mb-4" />
                                     <p className="text-gray-500 text-lg">Select an applicant to view messages</p>
                                     <p className="text-gray-400 text-sm mt-2">Choose from the list on the left to start messaging</p>
-                                    
-                                    {/* Test message functionality */}
-                                    {applicants.length > 0 && (
-                                        <div className="mt-4">
-                                            <button
-                                                onClick={() => setSelectedApplicant(applicants[0])}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
-                                            >
-                                                Test with first applicant
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -449,8 +653,13 @@ const Messages = () => {
                                                 <User size={20} className="text-blue-600" />
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-gray-900">
+                                                <h3 className="font-semibold text-gray-900 flex items-center">
                                                     {selectedApplicant.user?.name || 'Applicant'}
+                                                    {applicantUnreadCounts[selectedApplicant.user._id] > 0 && (
+                                                        <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                                            {applicantUnreadCounts[selectedApplicant.user._id]} unread
+                                                        </span>
+                                                    )}
                                                 </h3>
                                                 <p className="text-sm text-gray-500">{selectedApplicant.user?.email}</p>
                                             </div>
@@ -459,6 +668,15 @@ const Messages = () => {
                                             <div className="text-xs text-gray-500">
                                                 {messages.length} message{messages.length !== 1 ? 's' : ''}
                                             </div>
+                                            {unreadMessageIds.size > 0 && (
+                                                <button
+                                                    onClick={handleMarkAsRead}
+                                                    className="text-xs bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700 transition-colors"
+                                                    title="Mark all as read"
+                                                >
+                                                    Mark as Read
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={handleRefresh}
                                                 disabled={refreshing}
@@ -476,7 +694,7 @@ const Messages = () => {
                                     ref={messageContainerRef}
                                     className="flex-1 overflow-y-auto p-4 space-y-4"
                                 >
-                                    {loading ? (
+                                    {loadingMessages ? (
                                         <div className="flex justify-center items-center h-32">
                                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                                         </div>
@@ -485,36 +703,56 @@ const Messages = () => {
                                             <p className="text-gray-500">No messages yet. Start the conversation!</p>
                                         </div>
                                     ) : (
-                                        messages.map((message) => (
-                                            <div
-                                                key={message._id}
-                                                className={`flex ${message.fromModel === 'Employer' ? 'justify-end' : 'justify-start'}`}
-                                            >
-                                                <div className="max-w-xs lg:max-w-md">
-                                                    {/* Sender indicator */}
-                                                    <p className={`text-xs mb-1 ${
-                                                        message.fromModel === 'Employer' ? 'text-right text-blue-600' : 'text-left text-gray-600'
-                                                    }`}>
-                                                        {message.fromModel === 'Employer' ? 'You' : (selectedApplicant.user?.name || 'User')}
-                                                    </p>
-                                                    
-                                                    <div
-                                                        className={`px-4 py-2 rounded-lg ${
-                                                            message.fromModel === 'Employer'
-                                                                ? 'bg-blue-600 text-white'
-                                                                : 'bg-gray-200 text-gray-900'
-                                                        }`}
-                                                    >
-                                                        <p className="text-sm">{message.content}</p>
-                                                        <p className={`text-xs mt-1 ${
-                                                            message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
-                                                        }`}>
-                                                            {formatTime(message.timestamp || message.createdAt)}
+                                        <>
+                                            {/* Unread Messages Banner */}
+                                            {unreadMessageIds.size > 0 && (
+                                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                                                    <div className="flex items-center justify-center">
+                                                        <Bell className="text-yellow-600 mr-2" size={16} />
+                                                        <p className="text-yellow-800 font-medium text-sm">
+                                                            Unread Messages ({unreadMessageIds.size})
                                                         </p>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))
+                                            )}
+                                            
+                                            {messages.map((message) => (
+                                                <div
+                                                    key={message._id}
+                                                    className={`flex ${message.fromModel === 'Employer' ? 'justify-end' : 'justify-start'}`}
+                                                >
+                                                    <div className="max-w-xs lg:max-w-md">
+                                                        <p className={`text-xs mb-1 ${
+                                                            message.fromModel === 'Employer' ? 'text-right text-blue-600' : 'text-left text-gray-600'
+                                                        }`}>
+                                                            {message.fromModel === 'Employer' ? 'You' : (selectedApplicant.user?.name || 'User')}
+                                                            {unreadMessageIds.has(message._id) && (
+                                                                <span className="ml-2 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
+                                                                    NEW
+                                                                </span>
+                                                            )}
+                                                        </p>
+                                                        
+                                                        <div
+                                                            className={`px-4 py-2 rounded-lg ${
+                                                                message.fromModel === 'Employer'
+                                                                    ? 'bg-blue-600 text-white'
+                                                                    : unreadMessageIds.has(message._id)
+                                                                        ? 'bg-yellow-100 text-gray-900 border-2 border-yellow-300'
+                                                                        : 'bg-gray-200 text-gray-900'
+                                                            }`}
+                                                        >
+                                                            <p className="text-sm">{message.content}</p>
+                                                            <p className={`text-xs mt-1 ${
+                                                                message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
+                                                            }`}>
+                                                                {formatTime(message.timestamp || message.createdAt)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </>
                                     )}
                                     <div ref={messagesEndRef} />
                                 </div>

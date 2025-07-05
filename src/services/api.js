@@ -80,6 +80,36 @@ export const messageAPI = {
         }
     },
     
+    // Get unread message count for employer
+    getUnreadMessageCount: async (employerId) => {
+        try {
+            const response = await api.get(`/messages/employer/${employerId}/unread-count`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    // Get unread messages for employer
+    getUnreadMessages: async (employerId, limit = 10) => {
+        try {
+            const response = await api.get(`/messages/employer/${employerId}/unread?limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    // Mark all messages as read for employer
+    markAllMessagesAsRead: async (employerId) => {
+        try {
+            const response = await api.put(`/messages/employer/mark-all-read/${employerId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
     // Validate messaging permission
     validateMessagingPermission: async (employerId, userId, jobId) => {
         try {
