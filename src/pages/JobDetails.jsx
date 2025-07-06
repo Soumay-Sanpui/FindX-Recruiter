@@ -282,8 +282,36 @@ const JobDetails = () => {
                 <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
                     <div className="flex flex-col lg:flex-row justify-between items-start">
                         <div className="flex-1">
+                            {/* Company Logo and Title Section */}
                             <div className="flex items-start justify-between mb-4">
-                                <h2 className="text-2xl font-bold text-gray-800">{job.jobTitle}</h2>
+                                <div className="flex items-start gap-4">
+                                    {/* Company Logo */}
+                                    {(job.companyLogo || job.postedBy?.companyLogo) && (
+                                        <div className="flex-shrink-0">
+                                            <img 
+                                                src={job.companyLogo || job.postedBy?.companyLogo} 
+                                                alt={job.postedBy?.companyName || 'Company Logo'}
+                                                className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    
+                                    {/* Job Title and Company Info */}
+                                    <div className="flex-1">
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{job.jobTitle}</h2>
+                                        {job.postedBy?.companyName && (
+                                            <p className="text-lg text-gray-600 mb-1">{job.postedBy.companyName}</p>
+                                        )}
+                                        <p className="text-sm text-gray-500">
+                                            Posted on {formatDate(job.createdAt)}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {/* Status and Actions */}
                                 <div className="flex items-center gap-4">
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${job.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                         {job.status}
@@ -333,10 +361,7 @@ const JobDetails = () => {
                                         {job.currency} {formatCurrency(job.from)} - {formatCurrency(job.to)} {job.jobSalaryType}
                                     </span>
                                 </div>
-                                <div className="flex items-center text-gray-600">
-                                    <Clock size={18} className="mr-3 text-blue-600" />
-                                    <span>Posted on {formatDate(job.createdAt)}</span>
-                                </div>
+
                             </div>
 
                             {job.jobBanner && (

@@ -79,17 +79,17 @@ const Settings = () => {
         setError('');
         
         try {
-            // This would be an actual API call in a real application
-            // const response = await api.put(`/employer/updateProfile`, profileData);
+            const response = await employerAPI.updateProfile(profileData);
             
-            // Simulating API call success
-            setTimeout(() => {
+            if (response.success) {
                 setEmployer({ ...employer, ...profileData });
                 setSuccess('Profile updated successfully');
-                setSaving(false);
-            }, 1000);
+            } else {
+                setError(response.message || 'Failed to update profile');
+            }
         } catch (err) {
-            setError('Failed to update profile. Please try again.');
+            setError(err.message || 'Failed to update profile. Please try again.');
+        } finally {
             setSaving(false);
         }
     };

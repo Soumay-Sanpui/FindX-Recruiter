@@ -673,9 +673,15 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     // Handle use company logo
     const handleUseCompanyLogo = () => {
         if(employer && employer.companyLogo) {
-            setLogoFile(employer.companyLogo);
+            setLogoFile(null); // Clear any file selection
+            handleChange({
+                target: {
+                    name: 'companyLogo',
+                    value: employer.companyLogo
+                }
+            });
         } else {
-            alert('Unable to fetch company logo !');
+            alert('Unable to fetch company logo! Please make sure you have set a company logo in your profile settings.');
         }
     }
 
@@ -900,50 +906,55 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 
                 {/* Company Logo Section */}
                 <div className="mb-6">
-                    <label className="block text-gray-700 font-medium mb-2">Company brand <span className="text-gray-500">(optional)</span></label>
-                    <p className="text-gray-500 text-sm mb-2">Create your first brand by uploading your company logo.</p>
-                    <div className="border border-gray-300 p-4 flex items-center justify-center h-32 bg-gray-100">
-                        {logoFile || formData.companyLogo ? (
-                            <div className="text-center">
-                                {logoFile ? (
-                                <p>{logoFile.name}</p>
-                                ) : (
-                                    <img 
-                                        src={formData.companyLogo} 
-                                        alt="Company Logo" 
-                                        className="h-24 object-contain" 
-                                    />
-                                )}
-                                <button 
-                                    className="text-blue-600 hover:text-blue-800 text-sm mt-2"
-                                    onClick={() => {
-                                        setLogoFile(null);
-                                        handleChange({
-                                            target: {
-                                                name: 'companyLogo',
-                                                value: ''
-                                            }
-                                        });
-                                    }}
-                                >
-                                    Remove
-                                </button>
+                    <label className="block text-gray-700 font-medium mb-2">Company Logo <span className="text-gray-500">(optional)</span></label>
+                    <p className="text-gray-500 text-sm mb-2">Enter your logo URL or use your company logo.</p>
+                    
+                    {/* Logo Preview */}
+                    {formData.companyLogo && (
+                        <div className="border border-gray-300 p-4 flex items-center justify-center h-32 bg-gray-50 mb-4">
+                            <img 
+                                src={formData.companyLogo} 
+                                alt="Company Logo" 
+                                className="h-24 max-w-32 object-contain" 
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'block';
+                                }}
+                            />
+                            <div style={{display: 'none'}} className="text-red-500 text-sm">
+                                Error loading image
                             </div>
-                        ) : (
-                            <div className="text-center flex flex-col gap-2">
-                                <p className="text-gray-500 mb-2">Cover image can be added from the uploads page, after payment.</p>
-                                <div className={"flex gap-4 items-center justify-center"}>
-                                    <label className="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700">
-                                        Add logo
-                                    <input type="file" className="hidden" onChange={handleLogoUpload}/>
-                                    </label>
-                                    <button onClick={handleUseCompanyLogo} className="bg-gradient-to-br from-blue-700 to-blue-500 font-semibold text-white px-4 py-2 cursor-pointer hover:bg-blue-700">
-                                        Use company logo
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                        </div>
+                    )}
+                    
+                    {/* Logo URL Input */}
+                    <div className="mb-4">
+                        <input
+                            type="url"
+                            className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter logo URL (e.g., https://example.com/logo.png)"
+                            value={formData.companyLogo || ''}
+                            onChange={(e) => {
+                                handleChange({
+                                    target: {
+                                        name: 'companyLogo',
+                                        value: e.target.value
+                                    }
+                                });
+                            }}
+                        />
                     </div>
+                    
+                    {/* Use Company Logo Button */}
+                    {employer && employer.companyLogo && (
+                        <button 
+                            type="button"
+                            onClick={handleUseCompanyLogo} 
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                        >
+                            Use My Company Logo
+                        </button>
+                    )}
                 </div>
                 
                 {/* Job Banner Section */}

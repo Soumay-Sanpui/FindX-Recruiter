@@ -147,6 +147,15 @@ export const employerAPI = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+    
+    updateProfile: async (profileData) => {
+        try {
+            const response = await api.put('/employer/updateProfile', profileData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
 };
 

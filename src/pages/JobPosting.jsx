@@ -95,6 +95,16 @@ const JobPosting = () => {
         if(!employer) navigate("/employer-login");
     }, []);
 
+    // Auto-populate employer's company logo only once when employer data is first available
+    useEffect(() => {
+        if (employer && employer.companyLogo && formData.companyLogo === '') {
+            setFormData(prevState => ({
+                ...prevState,
+                companyLogo: employer.companyLogo
+            }));
+        }
+    }, [employer]); // Only depend on employer, not formData.companyLogo
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prevState => ({

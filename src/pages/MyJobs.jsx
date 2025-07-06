@@ -83,7 +83,29 @@ const MyJobs = () => {
                             <div key={job._id} className="bg-white p-6 shadow-lg border border-gray-200 hover:border-blue-500 transition-all">
                                 <div className="flex flex-col md:flex-row justify-between">
                                     <div className="flex-1">
-                                        <h2 className="text-xl font-bold text-gray-800 mb-3">{job.jobTitle}</h2>
+                                        <div className="flex items-start gap-4 mb-3">
+                                            {/* Company Logo */}
+                                            {(job.companyLogo || employer?.companyLogo) && (
+                                                <div className="flex-shrink-0">
+                                                    <img 
+                                                        src={job.companyLogo || employer?.companyLogo} 
+                                                        alt={employer?.companyName || 'Company Logo'}
+                                                        className="w-12 h-12 object-cover rounded-lg border border-gray-200 shadow-sm"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                            
+                                            {/* Job Title */}
+                                            <div className="flex-1">
+                                                <h2 className="text-xl font-bold text-gray-800">{job.jobTitle}</h2>
+                                                {employer?.companyName && (
+                                                    <p className="text-sm text-gray-600 mt-1">{employer.companyName}</p>
+                                                )}
+                                            </div>
+                                        </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                                             <div className="flex items-center text-gray-600">
                                                 <MapPin size={16} className="mr-2 text-blue-600" />
