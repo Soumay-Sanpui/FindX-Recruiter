@@ -46,15 +46,19 @@ const JobPosting = () => {
         companyLogo: '',
         jobQuestions: [],
         internalReference: '',
-        premiumListing: false,
+        premiumListing: true,
         immediateStart: false,
         referencesRequired: false,
-        notificationOption: 'both'
+        notificationOption: 'both',
+        shortDescription: '',
+        showShortDescription: false,
+        mandatoryQuestions: [],
+        selectedOptions: {},
     });
 
     // Payment data configuration
     const getPaymentData = () => {
-        const basePrice = 4900; // $49.00 in cents (early bird price)
+        const basePrice = 4900;
         let totalAmount = basePrice;
         
         // Add-on pricing
@@ -95,7 +99,6 @@ const JobPosting = () => {
         if(!employer) navigate("/employer-login");
     }, []);
 
-    // Auto-populate employer's company logo only once when employer data is first available
     useEffect(() => {
         if (employer && employer.companyLogo && formData.companyLogo === '') {
             setFormData(prevState => ({
@@ -103,7 +106,7 @@ const JobPosting = () => {
                 companyLogo: employer.companyLogo
             }));
         }
-    }, [employer]); // Only depend on employer, not formData.companyLogo
+    }, [employer]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -121,13 +124,13 @@ const JobPosting = () => {
         }
     };
 
-    const handleBannerChange = (e) => {
-        const { value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            jobBanner: value
-        }));
-    };
+    // const handleBannerChange = (e) => {
+    //     const { value } = e.target;
+    //     setFormData(prevState => ({
+    //         ...prevState,
+    //         jobBanner: value
+    //     }));
+    // };
 
     const validateClassifySection = () => {
         const errors = {};
@@ -148,15 +151,12 @@ const JobPosting = () => {
     };
     
     const handleStageChange = (stage) => {
-        // If moving away from Classify, validate that section first
         if (currentStage === 'Classify' && stage !== 'Classify') {
             if (!validateClassifySection()) {
                 alert('Please complete all required fields in the Classify section before proceeding.');
                 return;
             }
         }
-        
-        // If validation passes or moving to a previous section, update the stage
         setCurrentStage(stage);
     };
 
@@ -186,10 +186,14 @@ const JobPosting = () => {
             companyLogo: '',
             jobQuestions: [],
             internalReference: '',
-            premiumListing: false,
+            premiumListing: true,
             immediateStart: false,
             referencesRequired: false,
-            notificationOption: 'both'
+            notificationOption: 'both',
+            shortDescription: '',
+            showShortDescription: false,
+            mandatoryQuestions: [],
+            selectedOptions: {},
         });
         setFormErrors({});
         setShowPayment(false);
@@ -287,7 +291,11 @@ const JobPosting = () => {
                 applicationQuestions: applicationQuestions,
                 postedBy: employer._id,
                 isPaid: true, // Mark as paid since payment was successful
-                status: 'Open' // Set status to open since it's paid
+                status: 'Open', // Set status to open since it's paid
+                // Process short description - only include if showShortDescription is true and shortDescription has content
+                shortDescription: formData.showShortDescription && formData.shortDescription ? 
+                    formData.shortDescription.split(',').map(point => point.trim()).filter(point => point !== '') : 
+                    null
             };
             
             // Remove the old jobQuestions field

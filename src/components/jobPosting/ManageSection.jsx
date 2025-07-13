@@ -1,10 +1,23 @@
-import React from 'react';
-import { Check, X, AlertCircle, DollarSign, MapPin, Briefcase, Globe, BarChart4, Tag, FileText, Clock, Image, Video, List, Info, HelpCircle, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, X, AlertCircle, DollarSign, MapPin, Briefcase, Globe, BarChart4, Tag, FileText, Clock, Image, Video, List, Info, HelpCircle, CheckCircle, Smartphone, X as CloseIcon } from 'lucide-react';
 
 const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting }) => {
+    const [showMobilePreview, setShowMobilePreview] = useState(false);
+    
     const formatCurrency = (amount) => {
         if (!amount) return '';
         return new Intl.NumberFormat('en-US').format(amount);
+    };
+
+    // Format salary display for mobile preview
+    const formatSalary = () => {
+        if (!formData.currency || !formData.from || !formData.to) return 'Salary not specified';
+        return `${formData.currency} ${Number(formData.from).toLocaleString()} - ${Number(formData.to).toLocaleString()} ${formData.payType}`;
+    };
+
+    // Format time ago for mobile preview
+    const getTimeAgo = () => {
+        return 'Just posted';
     };
 
     return (
@@ -12,6 +25,14 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Review Job Details</h2>
                 <p className="text-gray-500">Review all details before posting your job</p>
+                <button
+                    type="button"
+                    onClick={() => setShowMobilePreview(true)}
+                    className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    <Smartphone className="mr-2" size={16} />
+                    Preview Mobile Card
+                </button>
             </div>
 
             {/* Job Summary Card */}
@@ -331,6 +352,123 @@ const ManageSection = ({ formData, handleStageChange, handleSubmit, isSubmitting
                     {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
                 </button>
             </div>
+
+            {/* Mobile Preview Modal */}
+            {showMobilePreview && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-sm w-full max-h-screen overflow-y-auto">
+                        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-gray-800">Mobile App Preview</h3>
+                            <button
+                                onClick={() => setShowMobilePreview(false)}
+                                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <CloseIcon size={20} className="text-gray-600" />
+                            </button>
+                        </div>
+                        
+                        <div className="p-4">
+                            <div className="bg-gray-100 p-4 rounded-lg mb-4">
+                                <p className="text-sm text-gray-600 text-center mb-2">How your job will appear on mobile</p>
+                                
+                                {/* Mobile Job Card Preview */}
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-xs mx-auto">
+                                    {/* Premium badge */}
+                                    {formData.premiumListing && (
+                                        <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-3 py-1">
+                                            <p className="text-white text-xs font-semibold text-center">✨ Premium Listing</p>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="p-4">
+                                        {/* Save icon positioned at top right */}
+                                        <div className="absolute top-4 right-4 z-10">
+                                            <div className="p-1">
+                                                <div className="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Header: Logo + Title + Company + Actions */}
+                                        <div className="flex-col gap-2 items-start">
+                                            {formData.companyLogo && (
+                                                <img
+                                                    src={formData.companyLogo}
+                                                    className="w-14 h-14 rounded-xl mr-3 border border-gray-200 object-cover"
+                                                    alt="Company Logo"
+                                                />
+                                            )}
+                                            <div className="flex-1">
+                                                <p className="text-lg font-bold text-gray-900 leading-tight w-[50vw]">
+                                                    {formData.jobTitle || 'Job Title'}
+                                                </p>
+                                                <p className="text-sm text-gray-600 mt-1">Company Name</p>
+                                                <p className="text-xs text-gray-500 mt-1">{getTimeAgo()}</p>
+                                            </div>
+                                            <div className="flex-row items-center space-x-2">
+                                                {formData.immediateStart && (
+                                                    <div className="bg-red-100 px-2 py-1 rounded-full">
+                                                        <p className="text-red-600 text-xs font-medium">Urgent</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Category and Subcategory */}
+                                        <div className="flex-row items-center mt-3 space-x-2">
+                                            <div className="bg-blue-50 px-3 py-1 rounded-full">
+                                                <p className="text-blue-700 text-xs font-medium">{formData.category || 'Category'}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Short Description */}
+                                        {formData.showShortDescription && formData.shortDescription && (
+                                            <div className="mt-3">
+                                                {formData.shortDescription.split(',').map((point, index) => (
+                                                    <div key={index} className="flex-row items-start mb-1">
+                                                        <p className="text-blue-600 mr-2 mt-0.5">•</p>
+                                                        <p className="text-sm text-gray-700 flex-1">{point.trim()}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Location + Workspace + Type */}
+                                        <div className="mt-4 space-y-2">
+                                            <div className="flex-row items-center">
+                                                <div className="w-3.5 h-3.5 bg-gray-500 rounded-full mr-2"></div>
+                                                <p className="ml-2 text-sm text-gray-700">{formData.jobLocation || 'Location'}</p>
+                                                <p className="ml-3 text-xs font-medium">{formData.workspaceOption || 'Workspace'}</p>
+                                            </div>
+
+                                            <div className="flex-row items-center justify-between">
+                                                <div className="flex-row items-center">
+                                                    <p className="ml-2 text-sm text-gray-700 font-medium">{formatSalary()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* X Icon at bottom */}
+                                        <div className="mt-4 flex-row justify-end items-center">
+                                            <div className="p-2">
+                                                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="text-center">
+                                <button
+                                    onClick={() => setShowMobilePreview(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                                >
+                                    Close Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

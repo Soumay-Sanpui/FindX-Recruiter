@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PricingSummary from './PricingSummary';
+// import PricingSummary from './PricingSummary';
 import { getAdvanceQuestionSections } from '../../store/jobCategory.store.js';
 import CONFIG from '../../../config/config.js';
 import {Sparkles} from 'lucide-react';
@@ -36,13 +36,8 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         health: false
     });
     
-    // Add state for mandatory questions
     const [mandatoryQuestions, setMandatoryQuestions] = useState(formData.mandatoryQuestions || []);
-    
-    // Add state for selected question options
     const [selectedOptions, setSelectedOptions] = useState(formData.selectedOptions || {});
-    
-    // State for filtered advanced questions based on selected category
     const [filteredAdvancedQuestions, setFilteredAdvancedQuestions] = useState({});
     
     // Calculate total cost
@@ -52,9 +47,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
     const totalCost = premiumCost + immediateCost + referencesCost + notificationCost;
 
-    // Updated basic questions with options from the Common question first set.txt
     const basicQuestionsWithOptions = [
-        // 🔹 SECTION 1: WORK RIGHTS & LEGAL ELIGIBILITY
         {
           question: "What best describes your right to work in Australia?",
           options: [
@@ -71,7 +64,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         {
           question: "Are you legally allowed to work with children or vulnerable people?",
           options: [
-            "Yes – I have a current Working with Children Check (WWCC)",
+            "Yes - I have a current Working with Children Check (WWCC)",
             "No – but I'm willing to obtain one",
             "No – and I'm not planning to work in such roles"
           ]
@@ -189,26 +182,26 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         {
           question: "Are you currently studying or planning to study soon?",
           options: [
-            "Yes – I'm studying part-time",
-            "Yes – I'm studying full-time",
-            "No – but planning to enrol soon",
+            "Yes - I'm studying part-time",
+            "Yes - I'm studying full-time",
+            "No - but planning to enrol soon",
             "No"
           ]
         },
         {
           question: "Do you have experience working in remote or hybrid environments?",
           options: [
-            "Yes – fully remote",
-            "Yes – hybrid (some days in office, some remote)",
-            "No – only onsite/in-person roles",
-            "No – but I'm open to it"
+            "Yes - fully remote",
+            "Yes - hybrid (some days in office, some remote)",
+            "No - only onsite/in-person roles",
+            "No - but I'm open to it"
           ]
         },
         {
           question: "Are you open to completing additional training if the role requires it?",
           options: [
-            "Yes – open to ongoing professional development",
-            "Yes – if it's job-relevant and provided by the employer",
+            "Yes - open to ongoing professional development",
+            "Yes - if it's job-relevant and provided by the employer",
             "No"
           ]
         },
@@ -229,28 +222,28 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         {
           question: "Do you have any industry-specific certifications?",
           options: [
-            "Yes – [please specify]",
-            "No – but I'm working towards it",
+            "Yes - [please specify]",
+            "No - but I'm working towards it",
             "No"
           ]
         },
         {
           question: "Have you completed any safety training or certifications (e.g., First Aid, White Card)?",
           options: [
-            "Yes – First Aid",
-            "Yes – White Card",
-            "Yes – Other (please specify)",
-            "No – but I'm planning to",
+            "Yes - First Aid",
+            "Yes - White Card",
+            "Yes - Other (please specify)",
+            "No - but I'm planning to",
             "No"
           ]
         },
         {
           question: "Do you have a forklift or heavy vehicle licence?",
           options: [
-            "Yes – Forklift licence",
-            "Yes – Heavy Rigid (HR) licence",
-            "Yes – Multi Combination (MC) or other",
-            "No – but I'm willing to get licensed",
+            "Yes - Forklift licence",
+            "Yes - Heavy Rigid (HR) licence",
+            "Yes - Multi Combination (MC) or other",
+            "No - but I'm willing to get licensed",
             "No"
           ]
         },
@@ -392,7 +385,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
       ];
 
-    // Effect to update filtered advanced questions when category changes
     useEffect(() => {
         if (formData.category) {
             const filtered = getAdvanceQuestionSections(formData.category);
@@ -402,7 +394,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
     }, [formData.category]);
       
-    // Group questions by sections
     const questionSections = {
         section1: {
             title: "Work Rights & Legal Eligibility",
@@ -426,7 +417,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
     };
 
-    // Toggle section dropdown visibility
     const toggleSectionDropdown = (sectionKey) => {
         setShowSectionDropdowns(prev => ({
             ...prev,
@@ -434,7 +424,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }));
     };
 
-    // Toggle advanced section dropdown visibility
     const toggleAdvancedSectionDropdown = (sectionKey) => {
         setShowAdvancedSectionDropdowns(prev => ({
             ...prev,
@@ -442,7 +431,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }));
     };
 
-    // Toggle question options visibility
     const toggleQuestionOptions = (sectionKey, questionIndex) => {
         const key = `${sectionKey}-${questionIndex}`;
         setShowQuestionOptions(prev => ({
@@ -451,23 +439,23 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }));
     };
 
-    const handleLogoUpload = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setLogoFile(e.target.files[0]);
+    // const handleLogoUpload = (e) => {
+    //     if (e.target.files && e.target.files[0]) {
+    //         setLogoFile(e.target.files[0]);
             
-            // Update the formData with the logo file
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                handleChange({
-                    target: {
-                        name: 'companyLogo',
-                        value: event.target.result
-                    }
-                });
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    };
+    //         // Update the formData with the logo file
+    //         const reader = new FileReader();
+    //         reader.onload = (event) => {
+    //             handleChange({
+    //                 target: {
+    //                     name: 'companyLogo',
+    //                     value: event.target.result
+    //                 }
+    //             });
+    //         };
+    //         reader.readAsDataURL(e.target.files[0]);
+    //     }
+    // };
     
     // Helper function to handle textarea and input changes
     const handleInputChange = (e) => {
@@ -475,7 +463,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         handleChange({ target: { name, value } });
     };
     
-    // Handle pricing option changes
     const handlePricingChange = (option, value) => {
         switch(option) {
             case 'premium':
@@ -525,7 +512,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }
     };
 
-    // Handle question selection
     const handleQuestionSelect = (e, question) => {
         const isChecked = e.target.checked;
         let updatedQuestions = [...(formData.jobQuestions || [])];
@@ -718,19 +704,20 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 
                 {/* Job Description Section */}
                 <div className="mb-6">
-                    <label className="block text-gray-700 font-medium mb-2">Job description</label>
+                    <label htmlFor="jobDescription" className="block text-gray-700 font-medium mb-2">Job description</label>
                     <textarea 
                         className="w-full border border-gray-300 p-3 h-32 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="Enter detailed job description here"
                         name="jobDescription"
                         value={formData.jobDescription || ''}
                         onChange={handleInputChange}
+                        id="jobDescription"
                     />
                 </div>
                 
                 {/* Job Summary Section */}
                 <div className="mb-6">
-                    <label className="block text-gray-700 font-medium mb-2">Job summary</label>
+                    <label htmlFor="jobSummary" className="block text-gray-700 font-medium mb-2">Job summary</label>
                     <p className="text-gray-500 text-sm mb-2">Write a compelling statement about your role in white to more candidates.</p>
                     <textarea 
                         className="w-full border border-gray-300 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500" 
@@ -738,12 +725,64 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         name="jobSummary"
                         value={formData.jobSummary || ''}
                         onChange={handleInputChange}
+                        id="jobSummary"
                     />
                 </div>
-                
+
+                {/* Job Short Description Section */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                        <label htmlFor="shortDescription" className="block text-gray-700 font-medium mb-2">Job short description</label>
+                        <p className="text-gray-500 text-sm mb-2">Write a short comma separated (,) list of key points about your role.</p>
+                        </div>
+                        <button
+                            type="button"
+                            className={`relative inline-flex items-center h-6 rounded-full w-11 ${formData.showShortDescription ? 'bg-blue-600' : 'bg-gray-200'}`}
+                            onClick={() => handleChange({
+                                target: {
+                                    name: 'showShortDescription',
+                                    value: !formData.showShortDescription,
+                                    type: 'checkbox',
+                                    checked: !formData.showShortDescription
+                                }
+                            })}
+                        >
+                            <span className="sr-only">{formData.showShortDescription ? 'Hide' : 'Show'}</span>
+                            <span
+                                className={`inline-block w-4 h-4 transform transition-transform bg-white rounded-full ${formData.showShortDescription ? 'translate-x-6' : 'translate-x-1'}`}
+                            />
+                        </button>
+                    </div>
+                    <textarea 
+                        id="shortDescription"
+                        className="w-full border border-gray-300 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Enter job short description here (e.g., Flexible hours, Remote work, Competitive salary)"
+                        name="shortDescription"
+                        value={formData.shortDescription || ''}
+                        onChange={handleInputChange}
+                    />
+                </div>
+
+                {/* Job Short Description Preview */}
+                {formData.showShortDescription && formData.shortDescription && (
+                    <div className="mb-6">
+                        <label htmlFor="shortDescriptionPreview" className="block text-gray-700 font-medium mb-2">Job short description preview</label>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                            {formData.shortDescription.split(',').map((point, index) => (
+                                <div key={index} className="flex items-start mb-2 last:mb-0">
+                                    <span className="text-blue-600 mr-2 mt-1">•</span>
+                                    <span className="text-gray-700 text-sm">{point.trim()}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+
                 {/* Key Selling Points Section */}
                 <div className="mb-6">
-                    <label className="block text-gray-700 font-medium mb-2">Key selling points <span className="text-gray-500">(optional)</span></label>
+                    <label htmlFor="sellingPoints" className="block text-gray-700 font-medium mb-2">Key selling points <span className="text-gray-500">(optional)</span></label>
                     <p className="text-gray-500 text-sm mb-2">Enter 3 key selling points to attract candidates to view your role.</p>
                     <div className="space-y-2">
                         {[0, 1, 2].map((index) => (
