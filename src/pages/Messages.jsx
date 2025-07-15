@@ -241,10 +241,10 @@ const Messages = () => {
                 const applicantsWithDetails = job.applicants
                     .filter(applicant => applicant.user && applicant.user._id) // Filter out invalid applicants
                     .map(applicant => ({
-                        ...applicant,
-                        jobId: job._id,
-                        jobTitle: job.jobTitle
-                    }));
+                    ...applicant,
+                    jobId: job._id,
+                    jobTitle: job.jobTitle
+                }));
                 
                 setApplicants(applicantsWithDetails);
                 setLastDataFetch(now);
@@ -259,7 +259,7 @@ const Messages = () => {
 
         fetchJobData();
     }, [isAuthenticated, navigate, employer, jobId, jobDetails, applicants.length, lastDataFetch]);
-
+                
     // Optimized message sending with better error handling
     const handleSendMessage = useCallback(async () => {
         if (!newMessage.trim() || !selectedApplicant || !employer) return;
@@ -510,17 +510,17 @@ const Messages = () => {
                                 Mark All Read
                             </button>
                         )}
-                        
-                        {selectedApplicant && (
-                            <button
-                                onClick={handleRefresh}
-                                disabled={refreshing}
-                                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-blue-400"
-                            >
-                                <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    
+                    {selectedApplicant && (
+                        <button
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-blue-400"
+                        >
+                            <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                                 {totalUnreadCount > 0 ? 'Reload' : 'Refresh'}
-                            </button>
-                        )}
+                        </button>
+                    )}
                     </div>
                 </div>
 
@@ -590,16 +590,16 @@ const Messages = () => {
                                 </div>
                             ) : (
                                 filteredApplicants.map((applicant) => (
-                                    <div 
-                                        key={applicant._id}
+                                        <div 
+                                            key={applicant._id}
                                         onClick={() => handleApplicantSelect(applicant)}
-                                        className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
-                                    >
-                                        <div className="flex items-center">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                                <User size={20} className="text-blue-600" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
+                                            className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedApplicant?._id === applicant._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+                                        >
+                                            <div className="flex items-center">
+                                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                    <User size={20} className="text-blue-600" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between">
                                                     <p className="text-sm font-medium text-gray-900 truncate">
                                                         {applicant.user?.name || 'Applicant'}
@@ -610,20 +610,20 @@ const Messages = () => {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-gray-500 truncate">
-                                                    {applicant.user?.email || ''}
-                                                </p>
-                                                <div className="flex items-center mt-1">
-                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                        applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
-                                                        applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
-                                                        applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
-                                                        applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                        'bg-gray-100 text-gray-800'
-                                                    }`}>
-                                                        {applicant.status}
-                                                    </span>
+                                                    <p className="text-xs text-gray-500 truncate">
+                                                        {applicant.user?.email || ''}
+                                                    </p>
+                                                    <div className="flex items-center mt-1">
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                            applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                            applicant.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                            applicant.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
+                                                            applicant.status === 'Interview' ? 'bg-purple-100 text-purple-800' :
+                                                            applicant.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                            {applicant.status}
+                                                        </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -717,40 +717,40 @@ const Messages = () => {
                                             )}
                                             
                                             {messages.map((message) => (
-                                                <div
-                                                    key={message._id}
-                                                    className={`flex ${message.fromModel === 'Employer' ? 'justify-end' : 'justify-start'}`}
-                                                >
-                                                    <div className="max-w-xs lg:max-w-md">
-                                                        <p className={`text-xs mb-1 ${
-                                                            message.fromModel === 'Employer' ? 'text-right text-blue-600' : 'text-left text-gray-600'
-                                                        }`}>
-                                                            {message.fromModel === 'Employer' ? 'You' : (selectedApplicant.user?.name || 'User')}
+                                            <div
+                                                key={message._id}
+                                                className={`flex ${message.fromModel === 'Employer' ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div className="max-w-xs lg:max-w-md">
+                                                    <p className={`text-xs mb-1 ${
+                                                        message.fromModel === 'Employer' ? 'text-right text-blue-600' : 'text-left text-gray-600'
+                                                    }`}>
+                                                        {message.fromModel === 'Employer' ? 'You' : (selectedApplicant.user?.name || 'User')}
                                                             {unreadMessageIds.has(message._id) && (
                                                                 <span className="ml-2 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
                                                                     NEW
                                                                 </span>
                                                             )}
-                                                        </p>
-                                                        
-                                                        <div
-                                                            className={`px-4 py-2 rounded-lg ${
-                                                                message.fromModel === 'Employer'
-                                                                    ? 'bg-blue-600 text-white'
+                                                    </p>
+                                                    
+                                                    <div
+                                                        className={`px-4 py-2 rounded-lg ${
+                                                            message.fromModel === 'Employer'
+                                                                ? 'bg-blue-600 text-white'
                                                                     : unreadMessageIds.has(message._id)
                                                                         ? 'bg-yellow-100 text-gray-900 border-2 border-yellow-300'
-                                                                        : 'bg-gray-200 text-gray-900'
-                                                            }`}
-                                                        >
-                                                            <p className="text-sm">{message.content}</p>
-                                                            <p className={`text-xs mt-1 ${
-                                                                message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
-                                                            }`}>
-                                                                {formatTime(message.timestamp || message.createdAt)}
-                                                            </p>
-                                                        </div>
+                                                                : 'bg-gray-200 text-gray-900'
+                                                        }`}
+                                                    >
+                                                        <p className="text-sm">{message.content}</p>
+                                                        <p className={`text-xs mt-1 ${
+                                                            message.fromModel === 'Employer' ? 'text-blue-100' : 'text-gray-500'
+                                                        }`}>
+                                                            {formatTime(message.timestamp || message.createdAt)}
+                                                        </p>
                                                     </div>
                                                 </div>
+                                            </div>
                                             ))}
                                         </>
                                     )}

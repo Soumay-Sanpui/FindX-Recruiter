@@ -16,6 +16,8 @@ import EmployerDashboard from "./pages/EmployerDashboard.jsx";
 import JobPosting from "./pages/JobPosting.jsx";
 import MyJobs from "./pages/MyJobs.jsx";
 import JobDetails from "./pages/JobDetails.jsx";
+import JobDetailsUser from "./pages/JobDetailsUser.jsx";
+import MessagesUser from "./pages/MessagesUser.jsx";
 import Settings from "./pages/Settings.jsx";
 import Messages from "./pages/Messages.jsx";
 import SearchEmployee from "./pages/SearchEmployee.jsx";
@@ -119,8 +121,36 @@ const router = createBrowserRouter([
     element: <ErrorBoundary><JobDetails /></ErrorBoundary>,
   },
   {
+    path: "/job/:jobId",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <JobDetailsUser />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
+  },
+  {
     path: "/messages/:jobId",
     element: <ErrorBoundary><Messages /></ErrorBoundary>,
+  },
+  {
+    path: "/chat/:jobId",
+    element: (
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <MessagesUser />
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    ),
   },
   {
     path: "/settings",
