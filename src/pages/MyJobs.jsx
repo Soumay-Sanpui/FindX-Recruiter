@@ -167,6 +167,14 @@ const MyJobs = () => {
                                                 <Briefcase className="mr-1" size={16} /> 
                                                 View Details
                                             </button>
+
+                                            <button
+                                                // TODO: Implement boost functionality
+                                                onClick={()=> alert('Boosting feature coming soon!')}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+                                            >
+                                                Boost Job
+                                            </button>
                                             
                                             {job.applicants?.length > 0 && (
                                                 <button
