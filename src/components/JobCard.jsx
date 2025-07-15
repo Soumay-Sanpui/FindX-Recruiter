@@ -112,9 +112,14 @@ const JobCard = ({ job, onSave, onNotInterested, onChat, isSaved = false }) => {
 
         {/* Job Details */}
         <div className="mb-3">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">
-            {jobTitle}
-          </h3>
+          <div className="flex items-center mb-1">
+            <h3 className="text-lg font-bold text-gray-900 leading-tight">
+              {jobTitle}
+            </h3>
+            {immediateStart && (
+              <div className="w-2 h-2 bg-red-500 rounded-full ml-2"></div>
+            )}
+          </div>
           <p className="text-sm text-gray-600 mb-1">{companyName}</p>
           <div className="flex items-center text-xs text-gray-500 mb-2">
             <MapPin className="w-3 h-3 mr-1" />

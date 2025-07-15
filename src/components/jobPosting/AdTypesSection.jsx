@@ -3,11 +3,11 @@ import { BsCheckCircleFill, BsInfoCircle } from 'react-icons/bs';
 import { FaCheck } from 'react-icons/fa';
 import PricingSummary from './PricingSummary';
 
-const AdTypesSection = ({ handleStageChange }) => {
-    const [premiumSelected, setPremiumSelected] = useState(true);
-    const [immediateStartSelected, setImmediateStartSelected] = useState(false);
-    const [referencesSelected, setReferencesSelected] = useState(false);
-    const [notificationOption, setNotificationOption] = useState('both'); // 'app', 'email', 'both'
+const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
+    const [premiumSelected, setPremiumSelected] = useState(formData?.premiumListing ?? true);
+    const [immediateStartSelected, setImmediateStartSelected] = useState(formData?.immediateStart ?? false);
+    const [referencesSelected, setReferencesSelected] = useState(formData?.referencesRequired ?? false);
+    const [notificationOption, setNotificationOption] = useState(formData?.notificationOption ?? 'both');
 
     // Calculate total cost
     const premiumCost = 750;
@@ -15,6 +15,67 @@ const AdTypesSection = ({ handleStageChange }) => {
     const referencesCost = referencesSelected ? 75 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
     const totalCost = premiumCost + immediateCost + referencesCost + notificationCost;
+
+    // Handle premium selection
+    const handlePremiumToggle = () => {
+        const newValue = !premiumSelected;
+        setPremiumSelected(newValue);
+        if (handleChange) {
+            handleChange({
+                target: {
+                    name: 'premiumListing',
+                    value: newValue,
+                    type: 'checkbox',
+                    checked: newValue
+                }
+            });
+        }
+    };
+
+    // Handle immediate start selection
+    const handleImmediateStartToggle = () => {
+        const newValue = !immediateStartSelected;
+        setImmediateStartSelected(newValue);
+        if (handleChange) {
+            handleChange({
+                target: {
+                    name: 'immediateStart',
+                    value: newValue,
+                    type: 'checkbox',
+                    checked: newValue
+                }
+            });
+        }
+    };
+
+    // Handle references selection
+    const handleReferencesToggle = () => {
+        const newValue = !referencesSelected;
+        setReferencesSelected(newValue);
+        if (handleChange) {
+            handleChange({
+                target: {
+                    name: 'referencesRequired',
+                    value: newValue,
+                    type: 'checkbox',
+                    checked: newValue
+                }
+            });
+        }
+    };
+
+    // Handle notification option change
+    const handleNotificationChange = (option) => {
+        setNotificationOption(option);
+        if (handleChange) {
+            handleChange({
+                target: {
+                    name: 'notificationOption',
+                    value: option
+                }
+            });
+        }
+    };
 
     return (
         <div className="flex flex-col lg:flex-row bg-white shadow-lg border-2 border-blue-800">
@@ -63,9 +124,9 @@ const AdTypesSection = ({ handleStageChange }) => {
                             
                             <div className="mb-5 flex justify-center">
                                 <button 
-                                    onClick={() => setPremiumSelected(true)}
-                                    className="w-full py-2 bg-blue-600 text-white rounded font-medium">
-                                    Selected
+                                    onClick={handlePremiumToggle}
+                                    className={`w-full py-2 rounded font-medium ${premiumSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                                    {premiumSelected ? 'Selected' : 'Select Premium'}
                                 </button>
                             </div>
 
@@ -128,9 +189,8 @@ const AdTypesSection = ({ handleStageChange }) => {
                             </div>
                         </div>
                         <div className="px-5 pb-5">
-                            {/* TODO: Link it to backend */}
                             <button 
-                                onClick={() => setImmediateStartSelected(!immediateStartSelected)}
+                                onClick={handleImmediateStartToggle}
                                 className={`py-2 px-6 rounded font-medium ${immediateStartSelected ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
                                 {immediateStartSelected ? "— Remove" : "+ Add"}
                             </button>
@@ -161,7 +221,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                         </div>
                         <div className="px-5 pb-5">
                             <button 
-                                onClick={() => setReferencesSelected(!referencesSelected)}
+                                onClick={handleReferencesToggle}
                                 className={`py-2 px-6 rounded font-medium ${referencesSelected ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
                                 {referencesSelected ? "— Remove" : "+ Add"}
                             </button>
@@ -176,7 +236,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                         <p className="text-gray-600 text-sm mb-2">Notify 100 candidates via app notifications.</p>
                         <p className="font-bold mb-3">$49</p>
                         <button 
-                            onClick={() => setNotificationOption('app')}
+                            onClick={() => handleNotificationChange('app')}
                             className={`w-full py-2 rounded text-sm font-medium ${
                                 notificationOption === 'app' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'
                             }`}>
@@ -189,7 +249,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                         <p className="text-gray-600 text-sm mb-2">Notify 100 candidates via email.</p>
                         <p className="font-bold mb-3">$49</p>
                         <button 
-                            onClick={() => setNotificationOption('email')}
+                            onClick={() => handleNotificationChange('email')}
                             className={`w-full py-2 rounded text-sm font-medium ${
                                 notificationOption === 'email' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'
                             }`}>
@@ -205,7 +265,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                             <p className="text-green-600 text-sm">Save $29</p>
                         </div>
                         <button 
-                            onClick={() => setNotificationOption('both')}
+                            onClick={() => handleNotificationChange('both')}
                             className={`w-full py-2 rounded text-sm font-medium ${
                                 notificationOption === 'both' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'
                             }`}>

@@ -346,6 +346,8 @@ const JobPosting = () => {
             case 'Ad Types':
                 return (
                     <AdTypesSection 
+                        formData={formData}
+                        handleChange={handleChange}
                         handleStageChange={handleStageChange}
                     />
                 );
