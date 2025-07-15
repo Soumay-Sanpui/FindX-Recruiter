@@ -128,6 +128,7 @@ const AdTypesSection = ({ handleStageChange }) => {
                             </div>
                         </div>
                         <div className="px-5 pb-5">
+                            {/* TODO: Link it to backend */}
                             <button 
                                 onClick={() => setImmediateStartSelected(!immediateStartSelected)}
                                 className={`py-2 px-6 rounded font-medium ${immediateStartSelected ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
