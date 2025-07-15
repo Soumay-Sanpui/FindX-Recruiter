@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, MapPin, Clock, Building, DollarSign, Calendar, Users, Briefcase, MessageCircle, Bookmark, X } from 'lucide-react';
-import { getJobById, submitJobApplication } from '../services/api';
+import {jobAPI} from '../services/api';
 
 const JobDetailsUser = () => {
   const { jobId } = useParams();
@@ -13,7 +13,7 @@ const JobDetailsUser = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const jobData = await getJobById(jobId);
+        const jobData = await jobAPI.getJobDetails(jobId);
         setJob(jobData);
       } catch (error) {
         console.error('Error fetching job:', error);
