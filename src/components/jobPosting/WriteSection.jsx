@@ -11,7 +11,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const {employer} = useEmployerStore();
     
     // pricing elements
-    const [premiumSelected, setPremiumSelected] = useState(formData.premiumListing || true);
+    const [premiumSelected, setPremiumSelected] = useState(formData.premiumListing || false);
     const [immediateStartSelected, setImmediateStartSelected] = useState(formData.immediateStart || false);
     const [referencesSelected, setReferencesSelected] = useState(formData.referencesRequired || false);
     const [notificationOption, setNotificationOption] = useState(formData.notificationOption || 'both');

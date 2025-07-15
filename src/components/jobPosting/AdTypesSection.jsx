@@ -4,13 +4,13 @@ import { FaCheck } from 'react-icons/fa';
 import PricingSummary from './PricingSummary';
 
 const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
-    const [premiumSelected, setPremiumSelected] = useState(formData?.premiumListing ?? true);
+    const [premiumSelected, setPremiumSelected] = useState(formData?.premiumListing ?? false);
     const [immediateStartSelected, setImmediateStartSelected] = useState(formData?.immediateStart ?? false);
     const [referencesSelected, setReferencesSelected] = useState(formData?.referencesRequired ?? false);
     const [notificationOption, setNotificationOption] = useState(formData?.notificationOption ?? 'both');
 
     // Calculate total cost
-    const premiumCost = 750;
+    const premiumCost = premiumSelected ? 750 : 0;
     const immediateCost = immediateStartSelected ? 85 : 0;
     const referencesCost = referencesSelected ? 75 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);

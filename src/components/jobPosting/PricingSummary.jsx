@@ -1,17 +1,20 @@
 import React from 'react';
 
 const PricingSummary = ({ 
-    premiumSelected = true, 
+    premiumSelected = false, 
     immediateStartSelected = false, 
     referencesSelected = false, 
     notificationOption = 'both',
     totalCost = 0
 }) => {
     // Calculate individual costs
-    const premiumCost = 750;
+    const premiumCost = premiumSelected ? 750 : 0;
     const immediateCost = immediateStartSelected ? 85 : 0;
     const referencesCost = referencesSelected ? 75 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
+    
+    // Calculate total cost including premium
+    const calculatedTotalCost = premiumCost + immediateCost + referencesCost + notificationCost;
 
     return (
         <div className="hidden lg:block lg:w-1/4 bg-gray-50 border-l border-gray-300">
@@ -20,29 +23,52 @@ const PricingSummary = ({
                     Your Job Ad Summary
                 </div>
                 <div className="p-4">
-                    <div className="flex justify-between mb-2">
-                        <span className="font-semibold">Standard Job Ad Package:</span>
-                        <span className="font-bold text-xl">$199</span>
-                    </div>
-
-                    <div className="text-sm space-y-1 mb-4">
-                        <p className="font-medium">Includes:</p>
-                        <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                            <li>30-day job listing</li>
-                            <li>Unlimited applicants</li>
-                            <li>Dashboard & management tools</li>
-                            <li>Free access to candidates profiles</li>
-                            <li>Send & Receive messages with candidates</li>
-                            <li>Complete branding</li>
-                        </ul>
-                        <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
-                        <p className="text-gray-600">LinkedIn, Career profile access (if provided by candidate)</p>
-                    </div>
+                    {premiumSelected ? (
+                        <>
+                            <div className="flex justify-between mb-2">
+                                <span className="font-semibold">Premium Job Ad Package:</span>
+                                <span className="font-bold text-xl">$750</span>
+                            </div>
+                            <div className="text-sm space-y-1 mb-4">
+                                <p className="font-medium">Includes:</p>
+                                <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                                    <li>Priority AI-driven visibility</li>
+                                    <li>80 high-fit candidate invitations</li>
+                                    <li>Featured on similar ads</li>
+                                    <li>Exclusive candidate targeting</li>
+                                    <li>Complete branding & company showcase</li>
+                                    <li>30-day job listing</li>
+                                    <li>Unlimited applicants</li>
+                                    <li>Dashboard & management tools</li>
+                                </ul>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-between mb-2">
+                                <span className="font-semibold">Standard Job Ad Package:</span>
+                                <span className="font-bold text-xl">$199</span>
+                            </div>
+                            <div className="text-sm space-y-1 mb-4">
+                                <p className="font-medium">Includes:</p>
+                                <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                                    <li>30-day job listing</li>
+                                    <li>Unlimited applicants</li>
+                                    <li>Dashboard & management tools</li>
+                                    <li>Free access to candidates profiles</li>
+                                    <li>Send & Receive messages with candidates</li>
+                                    <li>Complete branding</li>
+                                </ul>
+                                <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
+                                <p className="text-gray-600">LinkedIn, Career profile access (if provided by candidate)</p>
+                            </div>
+                        </>
+                    )}
 
                     {immediateStartSelected && (
                         <div className="flex justify-between mt-4 mb-2">
                             <span>Immediate Start Badge:</span>
-                            <span className="font-semibold">$19</span>
+                            <span className="font-semibold">$85</span>
                         </div>
                     )}
 
@@ -53,7 +79,7 @@ const PricingSummary = ({
                     {referencesSelected && (
                         <div className="flex justify-between mt-4 mb-2">
                             <span>Reference Check Access:</span>
-                            <span className="font-semibold">$19</span>
+                            <span className="font-semibold">$75</span>
                         </div>
                     )}
 
@@ -83,7 +109,7 @@ const PricingSummary = ({
 
                     <div className="flex justify-between mt-6 text-xl font-bold border-t pt-4">
                         <span>Total Cost:</span>
-                        <span>${totalCost}</span>
+                        <span>${calculatedTotalCost}</span>
                     </div>
                 </div>
             </div>
