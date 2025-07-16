@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
 import { useMyPostedJobs } from '../hooks/useJobs';
@@ -80,125 +79,256 @@ const MyJobs = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
                         {jobs.map(job => (
-                            <div key={job._id} className="bg-white p-6 shadow-lg border border-gray-200 hover:border-blue-500 transition-all">
-                                <div className="flex flex-col md:flex-row justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-start gap-4 mb-3">
-                                            {/* Company Logo */}
-                                            {(job.companyLogo || employer?.companyLogo) && (
-                                                <div className="flex-shrink-0">
-                                                    <img 
-                                                        src={job.companyLogo || employer?.companyLogo} 
-                                                        alt={employer?.companyName || 'Company Logo'}
-                                                        className="w-12 h-12 object-cover rounded-lg border border-gray-200 shadow-sm"
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-                                            
-                                            {/* Job Title */}
+                            <div key={job._id} className={`relative transition-all ${
+                                job.immediateStart 
+                                    ? 'p-[2px] bg-gradient-to-br from-red-500 to-crimson-500 shadow-lg hover:from-red-600 hover:to-crimson-600' 
+                                    : 'bg-white border border-gray-200 hover:border-blue-500 p-6 shadow-lg'
+                            }`}>
+                                {job.immediateStart && (
+                                    <div className="bg-white p-6">
+                                        <div className="flex flex-col md:flex-row justify-between">
                                             <div className="flex-1">
-                                                <h2 className="text-xl font-bold text-gray-800">{job.jobTitle}</h2>
-                                                {employer?.companyName && (
-                                                    <p className="text-sm text-gray-600 mt-1">{employer.companyName}</p>
+                                                <div className="flex items-start gap-4 mb-3">
+                                                    {/* Company Logo */}
+                                                    {(job.companyLogo || employer?.companyLogo) && (
+                                                        <div className="flex-shrink-0">
+                                                            <img 
+                                                                src={job.companyLogo || employer?.companyLogo} 
+                                                                alt={employer?.companyName || 'Company Logo'}
+                                                                className="w-12 h-12 object-cover rounded-lg border border-gray-200 shadow-sm"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Job Title */}
+                                                    <div className="flex-1">
+                                                        <h2 className="text-xl font-bold text-gray-800">{job.jobTitle} 
+                                                            <span className="text-sm font-regular text-red-600 ml-2 bg-red-200 px-2 py-1 rounded-full">Immediate Start</span>
+                                                        </h2>
+                                                        {employer?.companyName && (
+                                                            <p className="text-sm text-gray-600 mt-1">{employer.companyName}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                                    <div className="flex items-center text-gray-600">
+                                                        <MapPin size={16} className="mr-2 text-blue-600" />
+                                                        <span className="text-sm">{job.jobLocation}</span>
+                                                    </div>
+                                                    <div className="flex items-center text-gray-600">
+                                                        <Briefcase size={16} className="mr-2 text-blue-600" />
+                                                        <span className="text-sm">{job.workType}</span>
+                                                    </div>
+                                                    <div className="flex items-center text-gray-600">
+                                                        <DollarSign size={16} className="mr-2 text-blue-600" />
+                                                        <span className="text-sm">
+                                                            {job.currency} {formatCurrency(job.from)} - {formatCurrency(job.to)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center text-gray-600">
+                                                        <Users size={16} className="mr-2 text-blue-600" />
+                                                        <span className="text-sm">
+                                                            {job.applicants?.length || 0} Applicant{job.applicants?.length !== 1 ? 's' : ''}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-center text-gray-500 text-sm mb-3">
+                                                    <Clock size={14} className="mr-2" />
+                                                    <span>Posted on {formatDate(job.createdAt)}</span>
+                                                </div>
+                                                
+                                                {/* Show few skills as tags */}
+                                                {job.jobSkills && job.jobSkills.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mb-3">
+                                                        {job.jobSkills.slice(0, 3).map((skill, index) => (
+                                                            <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                                                            {skill}
+                                                        </span>
+                                                    ))}
+                                                        {job.jobSkills.length > 3 && (
+                                                            <span className="text-xs text-gray-500 px-2 py-1">
+                                                                +{job.jobSkills.length - 3} more
+                                                            </span>
+                                                        )}
+                                                </div>
                                                 )}
                                             </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                                            <div className="flex items-center text-gray-600">
-                                                <MapPin size={16} className="mr-2 text-blue-600" />
-                                                <span className="text-sm">{job.jobLocation}</span>
-                                            </div>
-                                            <div className="flex items-center text-gray-600">
-                                                <Briefcase size={16} className="mr-2 text-blue-600" />
-                                                <span className="text-sm">{job.workType}</span>
-                                            </div>
-                                            <div className="flex items-center text-gray-600">
-                                                <DollarSign size={16} className="mr-2 text-blue-600" />
-                                                <span className="text-sm">
-                                                    {job.currency} {formatCurrency(job.from)} - {formatCurrency(job.to)}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center text-gray-600">
-                                                <Users size={16} className="mr-2 text-blue-600" />
-                                                <span className="text-sm">
-                                                    {job.applicants?.length || 0} Applicant{job.applicants?.length !== 1 ? 's' : ''}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex items-center text-gray-500 text-sm mb-3">
-                                            <Clock size={14} className="mr-2" />
-                                            <span>Posted on {formatDate(job.createdAt)}</span>
-                                        </div>
-                                        
-                                        {/* Show few skills as tags */}
-                                        {job.jobSkills && job.jobSkills.length > 0 && (
-                                            <div className="flex flex-wrap gap-1 mb-3">
-                                                {job.jobSkills.slice(0, 3).map((skill, index) => (
-                                                    <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                                                    {skill}
-                                                </span>
-                                            ))}
-                                                {job.jobSkills.length > 3 && (
-                                                    <span className="text-xs text-gray-500 px-2 py-1">
-                                                        +{job.jobSkills.length - 3} more
-                                                    </span>
-                                                )}
-                                        </div>
-                                        )}
-                                    </div>
-                                    
-                                    <div className="md:ml-8 flex flex-col md:items-end justify-between pt-4 md:pt-0">
-                                        <div className="flex flex-col items-start md:items-end mb-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium mb-2 
-                                                ${job.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {job.status}
-                                            </span>
-                                        </div>
-                                        
-                                        <div className="flex flex-wrap gap-2">
-                                            <button
-                                                onClick={() => navigate(`/job-details/${job._id}`)}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
-                                            >
-                                                <Briefcase className="mr-1" size={16} /> 
-                                                View Details
-                                            </button>
-
-                                            <button
-                                                // TODO: Implement boost functionality
-                                                onClick={()=> alert('Boosting feature coming soon!')}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
-                                            >
-                                                Boost Job
-                                            </button>
                                             
-                                            {job.applicants?.length > 0 && (
+                                            <div className="md:ml-8 flex flex-col md:items-end justify-between pt-4 md:pt-0">
+                                                <div className="flex flex-col items-start md:items-end mb-4">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium mb-2 
+                                                        ${job.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                        {job.status}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="flex flex-wrap gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/job-details/${job._id}`)}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+                                                    >
+                                                        <Briefcase className="mr-1" size={16} /> 
+                                                        View Details
+                                                    </button>
+
+                                                    <button
+                                                        // TODO: Implement boost functionality
+                                                        onClick={()=> alert('Boosting feature coming soon!')}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+                                                    >
+                                                        Boost Job
+                                                    </button>
+                                                    
+                                                    {job.applicants?.length > 0 && (
+                                                        <button
+                                                            onClick={() => navigate(`/job-details/${job._id}`)}
+                                                            className="bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center"
+                                                        >
+                                                            <Users className="mr-1" size={16} /> 
+                                                            {job.applicants.length} Applicant{job.applicants.length !== 1 ? 's' : ''}
+                                                        </button>
+                                                    )}
+                                                    
+                                                    {/* View Messages button - show for all jobs with applicants */}
+                                                    {job.applicants?.length > 0 && (
+                                                        <button
+                                                            onClick={() => navigate(`/messages/${job._id}`)}
+                                                            className="bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
+                                                        >
+                                                            <MessageCircle className="mr-1" size={16} /> 
+                                                            Messages
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {!job.immediateStart && (
+                                    <div className="flex flex-col md:flex-row justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-start gap-4 mb-3">
+                                                {/* Company Logo */}
+                                                {(job.companyLogo || employer?.companyLogo) && (
+                                                    <div className="flex-shrink-0">
+                                                        <img 
+                                                            src={job.companyLogo || employer?.companyLogo} 
+                                                            alt={employer?.companyName || 'Company Logo'}
+                                                            className="w-12 h-12 object-cover rounded-lg border border-gray-200 shadow-sm"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Job Title */}
+                                                <div className="flex-1">
+                                                    <h2 className="text-xl font-bold text-gray-800">{job.jobTitle}</h2>
+                                                    {employer?.companyName && (
+                                                        <p className="text-sm text-gray-600 mt-1">{employer.companyName}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                                <div className="flex items-center text-gray-600">
+                                                    <MapPin size={16} className="mr-2 text-blue-600" />
+                                                    <span className="text-sm">{job.jobLocation}</span>
+                                                </div>
+                                                <div className="flex items-center text-gray-600">
+                                                    <Briefcase size={16} className="mr-2 text-blue-600" />
+                                                    <span className="text-sm">{job.workType}</span>
+                                                </div>
+                                                <div className="flex items-center text-gray-600">
+                                                    <DollarSign size={16} className="mr-2 text-blue-600" />
+                                                    <span className="text-sm">
+                                                        {job.currency} {formatCurrency(job.from)} - {formatCurrency(job.to)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center text-gray-600">
+                                                    <Users size={16} className="mr-2 text-blue-600" />
+                                                    <span className="text-sm">
+                                                        {job.applicants?.length || 0} Applicant{job.applicants?.length !== 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center text-gray-500 text-sm mb-3">
+                                                <Clock size={14} className="mr-2" />
+                                                <span>Posted on {formatDate(job.createdAt)}</span>
+                                            </div>
+                                            
+                                            {/* Show few skills as tags */}
+                                            {job.jobSkills && job.jobSkills.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mb-3">
+                                                    {job.jobSkills.slice(0, 3).map((skill, index) => (
+                                                        <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                                    {job.jobSkills.length > 3 && (
+                                                        <span className="text-xs text-gray-500 px-2 py-1">
+                                                            +{job.jobSkills.length - 3} more
+                                                        </span>
+                                                    )}
+                                            </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="md:ml-8 flex flex-col md:items-end justify-between pt-4 md:pt-0">
+                                            <div className="flex flex-col items-start md:items-end mb-4">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium mb-2 
+                                                    ${job.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {job.status}
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => navigate(`/job-details/${job._id}`)}
-                                                    className="bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center"
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
                                                 >
-                                                    <Users className="mr-1" size={16} /> 
-                                                    {job.applicants.length} Applicant{job.applicants.length !== 1 ? 's' : ''}
+                                                    <Briefcase className="mr-1" size={16} /> 
+                                                    View Details
                                                 </button>
-                                            )}
-                                            
-                                            {/* View Messages button - show for all jobs with applicants */}
-                                            {job.applicants?.length > 0 && (
+
                                                 <button
-                                                    onClick={() => navigate(`/messages/${job._id}`)}
-                                                    className="bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
+                                                    // TODO: Implement boost functionality
+                                                    onClick={()=> alert('Boosting feature coming soon!')}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
                                                 >
-                                                    <MessageCircle className="mr-1" size={16} /> 
-                                                    Messages
+                                                    Boost Job
                                                 </button>
-                                            )}
+                                                
+                                                {job.applicants?.length > 0 && (
+                                                    <button
+                                                        onClick={() => navigate(`/job-details/${job._id}`)}
+                                                        className="bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center"
+                                                    >
+                                                        <Users className="mr-1" size={16} /> 
+                                                        {job.applicants.length} Applicant{job.applicants.length !== 1 ? 's' : ''}
+                                                    </button>
+                                                )}
+                                                
+                                                {/* View Messages button - show for all jobs with applicants */}
+                                                {job.applicants?.length > 0 && (
+                                                    <button
+                                                        onClick={() => navigate(`/messages/${job._id}`)}
+                                                        className="bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
+                                                    >
+                                                        <MessageCircle className="mr-1" size={16} /> 
+                                                        Messages
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         ))}
                     </div>
