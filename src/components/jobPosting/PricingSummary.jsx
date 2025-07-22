@@ -3,18 +3,16 @@ import React from 'react';
 const PricingSummary = ({ 
     premiumSelected = false, 
     immediateStartSelected = false, 
-    referencesSelected = false, 
+    // referencesSelected = false,
     notificationOption = 'both',
-    totalCost = 0
 }) => {
     // Calculate individual costs
-    const premiumCost = premiumSelected ? 750 : 0;
-    const immediateCost = immediateStartSelected ? 85 : 0;
-    const referencesCost = referencesSelected ? 75 : 0;
+    const premiumCost = premiumSelected ? 99 : 0;
+    const immediateCost = immediateStartSelected ? 45 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
     
     // Calculate total cost including premium
-    const calculatedTotalCost = premiumCost + immediateCost + referencesCost + notificationCost;
+    const calculatedTotalCost = premiumCost + immediateCost + notificationCost;
 
     return (
         <div className="hidden lg:block lg:w-1/4 bg-gray-50 border-l border-gray-300">
@@ -68,14 +66,14 @@ const PricingSummary = ({
                     {immediateStartSelected && (
                         <div className="flex justify-between mt-4 mb-2">
                             <span>Immediate Start Badge:</span>
-                            <span className="font-semibold">$85</span>
+                            <span className="font-semibold">$45</span>
                         </div>
                     )}
 
                     {immediateStartSelected && (
                         <p className="text-xs text-gray-600 mb-4">Let candidates know you're hiring urgently</p>
                     )}
-
+{/*
                     {referencesSelected && (
                         <div className="flex justify-between mt-4 mb-2">
                             <span>Reference Check Access:</span>
@@ -85,7 +83,7 @@ const PricingSummary = ({
 
                     {referencesSelected && (
                         <p className="text-xs text-gray-600 mb-4">Request references from candidates instantly</p>
-                    )}
+                    )}*/}
 
                     {notificationOption !== 'none' && (
                         <>

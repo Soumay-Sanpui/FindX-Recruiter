@@ -6,15 +6,14 @@ import PricingSummary from './PricingSummary';
 const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
     const [premiumSelected, setPremiumSelected] = useState(formData?.premiumListing ?? false);
     const [immediateStartSelected, setImmediateStartSelected] = useState(formData?.immediateStart ?? false);
-    const [referencesSelected, setReferencesSelected] = useState(formData?.referencesRequired ?? false);
+    // const [referencesSelected, setReferencesSelected] = useState(formData?.referencesRequired ?? false);
     const [notificationOption, setNotificationOption] = useState(formData?.notificationOption ?? 'both');
 
     // Calculate total cost
-    const premiumCost = premiumSelected ? 750 : 0;
-    const immediateCost = immediateStartSelected ? 85 : 0;
-    const referencesCost = referencesSelected ? 75 : 0;
+    const premiumCost = premiumSelected ? 99 : 0;
+    const immediateCost = immediateStartSelected ? 45 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
-    const totalCost = premiumCost + immediateCost + referencesCost + notificationCost;
+    const totalCost = premiumCost + immediateCost + notificationCost;
 
     // Handle premium selection
     const handlePremiumToggle = () => {
@@ -49,7 +48,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
     };
 
     // Handle references selection
-    const handleReferencesToggle = () => {
+    /*const handleReferencesToggle = () => {
         const newValue = !referencesSelected;
         setReferencesSelected(newValue);
         if (handleChange) {
@@ -62,7 +61,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                 }
             });
         }
-    };
+    };*/
 
     // Handle notification option change
     const handleNotificationChange = (option) => {
@@ -97,7 +96,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                                 <h3 className="text-xl font-bold">Premium</h3>
                             </div>
                             <div className="text-right">
-                                <p className="text-2xl font-bold">$750</p>
+                                <p className="text-2xl font-bold">$99</p>
                                 <p className="text-sm">+GST</p>
                             </div>
                         </div>
@@ -177,7 +176,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                                 <div className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded mb-2">New</div>
                                 <h3 className="text-xl font-bold mb-1">Need to hire someone quickly?</h3>
                                 <p className="text-gray-600 mb-3">Include an 'Immediate start' badge on your job ad to attract job seekers who are ready to start.</p>
-                                <p className="font-bold text-xl">$85 <span className="text-sm text-gray-500 font-normal">+GST</span></p>
+                                <p className="font-bold text-xl">$45 <span className="text-sm text-gray-500 font-normal">+GST</span></p>
                             </div>
                             <div className="w-1/3 flex items-center justify-center">
                                 <div className="bg-blue-50 p-4 rounded-lg text-center">
@@ -199,35 +198,35 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                 </div>
 
                 {/* References Option */}
-                <div className="mb-8">
-                    <div className={`border-2 ${referencesSelected ? 'border-blue-600' : 'border-gray-200'} rounded-lg overflow-hidden transition-all shadow-md`}>
-                        <div className="p-5 flex">
-                            <div className="flex-1">
-                                <div className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded mb-2">New</div>
-                                <h3 className="text-xl font-bold mb-1">Get references quickly and confidently</h3>
-                                <p className="text-gray-600 mb-3">Request references in a few clicks for up to 3 applicants. Our automated system will contact 2 referees per applicant using our standard questions.</p>
-                                <p className="font-bold text-xl">$75 <span className="text-sm text-gray-500 font-normal">+GST</span></p>
+{/*                <div classname="mb-8">
+                    <div classname={`border-2 ${referencesselected ? 'border-blue-600' : 'border-gray-200'} rounded-lg overflow-hidden transition-all shadow-md`}>
+                        <div classname="p-5 flex">
+                            <div classname="flex-1">
+                                <div classname="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded mb-2">new</div>
+                                <h3 classname="text-xl font-bold mb-1">get references quickly and confidently</h3>
+                                <p classname="text-gray-600 mb-3">request references in a few clicks for up to 3 applicants. our automated system will contact 2 referees per applicant using our standard questions.</p>
+                                <p classname="font-bold text-xl">$75 <span classname="text-sm text-gray-500 font-normal">+gst</span></p>
                             </div>
-                            <div className="w-1/3 flex items-center justify-center">
-                                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                                    <div className="border border-blue-200 rounded p-2 mb-2">
-                                        <button className="bg-blue-600 text-white text-xs rounded px-3 py-1 flex items-center">
-                                            <FaCheck className="mr-1" /> Check references
+                            <div classname="w-1/3 flex items-center justify-center">
+                                <div classname="bg-blue-50 p-4 rounded-lg text-center">
+                                    <div classname="border border-blue-200 rounded p-2 mb-2">
+                                        <button classname="bg-blue-600 text-white text-xs rounded px-3 py-1 flex items-center">
+                                            <facheck classname="mr-1" /> check references
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gray-500">Example of checking references</p>
+                                    <p classname="text-xs text-gray-500">example of checking references</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="px-5 pb-5">
-                            <button 
-                                onClick={handleReferencesToggle}
-                                className={`py-2 px-6 rounded font-medium ${referencesSelected ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
-                                {referencesSelected ? "— Remove" : "+ Add"}
+                        <div classname="px-5 pb-5">
+                            <button
+                                onclick={handlereferencestoggle}
+                                classname={`py-2 px-6 rounded font-medium ${referencesselected ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
+                                {referencesselected ? "— remove" : "+ add"}
                             </button>
                         </div>
                     </div>
-                </div>
+               </div>  */}
 
                 {/* Notification Options */}
                 <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -278,15 +277,9 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
             <div className="flex justify-between gap-4 mt-10">
                 <button
                     onClick={() => handleStageChange('Classify')}
-                        className="flex items-center justify-center border border-gray-300 text-gray-700 font-medium py-3 px-8 transition hover:bg-gray-50"
-                    >
-                        &lt; BACK
-                    </button>
-                    
-                    <button
-                        className="flex items-center justify-center border border-gray-300 text-gray-700 font-medium py-3 px-8 transition hover:bg-gray-50"
-                    >
-                        Save draft
+                    className="flex items-center justify-center border border-gray-300 text-gray-700 font-medium py-3 px-8 transition hover:bg-gray-50"
+                >
+                    &lt; BACK
                 </button>
                     
                 <button
@@ -332,7 +325,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                         {immediateStartSelected && (
                             <p className="text-xs text-gray-600 mb-4">Let candidates know you're hiring urgently</p>
                         )}
-                        
+                       {/*
                         {referencesSelected && (
                             <div className="flex justify-between mt-4 mb-2">
                                 <span>Reference Check Access:</span>
@@ -342,7 +335,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                         
                         {referencesSelected && (
                             <p className="text-xs text-gray-600 mb-4">Request references from candidates instantly</p>
-                        )}
+                        )}*/}
                         
                         <div className="font-medium mt-6">
                             Just like this email and app package as well
@@ -360,7 +353,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
             <PricingSummary 
                 premiumSelected={premiumSelected}
                 immediateStartSelected={immediateStartSelected}
-                referencesSelected={referencesSelected}
+                // referencesSelected={referencesSelected}
                 notificationOption={notificationOption}
                 totalCost={totalCost}
             />
