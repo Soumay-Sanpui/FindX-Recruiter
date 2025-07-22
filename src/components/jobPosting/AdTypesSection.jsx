@@ -7,13 +7,14 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
     const [premiumSelected, setPremiumSelected] = useState(formData?.premiumListing ?? false);
     const [immediateStartSelected, setImmediateStartSelected] = useState(formData?.immediateStart ?? false);
     // const [referencesSelected, setReferencesSelected] = useState(formData?.referencesRequired ?? false);
-    const [notificationOption, setNotificationOption] = useState(formData?.notificationOption ?? 'both');
+    const [notificationOption, setNotificationOption] = useState(formData?.notificationOption ?? 'none');
 
     // Calculate total cost
     const premiumCost = premiumSelected ? 99 : 0;
     const immediateCost = immediateStartSelected ? 45 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
-    const totalCost = premiumCost + immediateCost + notificationCost;
+    const standardCost = 49;
+    const totalCost = premiumCost + immediateCost + notificationCost + standardCost;
 
     // Handle premium selection
     const handlePremiumToggle = () => {
@@ -298,7 +299,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                     <div className="p-4">
                         <div className="flex justify-between mb-2">
                             <span className="font-semibold">Standard Job Ad Package:</span>
-                            <span className="font-bold text-xl">$199</span>
+                            <span className="font-bold text-xl">${standardCost}</span>
                         </div>
                         
                         <div className="text-sm space-y-1 mb-4">

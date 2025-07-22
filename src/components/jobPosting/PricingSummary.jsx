@@ -10,9 +10,10 @@ const PricingSummary = ({
     const premiumCost = premiumSelected ? 99 : 0;
     const immediateCost = immediateStartSelected ? 45 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
+    const standardCost =  49;
     
     // Calculate total cost including premium
-    const calculatedTotalCost = premiumCost + immediateCost + notificationCost;
+    const calculatedTotalCost = premiumCost + immediateCost + notificationCost + standardCost;
 
     return (
         <div className="hidden lg:block lg:w-1/4 bg-gray-50 border-l border-gray-300">
@@ -45,7 +46,7 @@ const PricingSummary = ({
                         <>
                             <div className="flex justify-between mb-2">
                                 <span className="font-semibold">Standard Job Ad Package:</span>
-                                <span className="font-bold text-xl">$199</span>
+                                <span className="font-bold text-xl">${standardCost}</span>
                             </div>
                             <div className="text-sm space-y-1 mb-4">
                                 <p className="font-medium">Includes:</p>
