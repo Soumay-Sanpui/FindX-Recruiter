@@ -26,7 +26,7 @@ const PricingSummary = ({
                         <>
                             <div className="flex justify-between mb-2">
                                 <span className="font-semibold">Premium Job Ad Package:</span>
-                                <span className="font-bold text-xl">$750</span>
+                                <span className="font-bold text-xl">$99</span>
                             </div>
                             <div className="text-sm space-y-1 mb-4">
                                 <p className="font-medium">Includes:</p>
