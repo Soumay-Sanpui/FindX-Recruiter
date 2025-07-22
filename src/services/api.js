@@ -220,35 +220,7 @@ export const jobAPI = {
     }
 };
 
-// Broadcast API methods
-export const broadcastAPI = {
-    sendEmail: async (broadcastData) => {
-        try {
-            const response = await api.post('/broadcast/email', broadcastData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-    
-    getStats: async () => {
-        try {
-            const response = await api.get('/broadcast/stats');
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-    
-    testConfig: async () => {
-        try {
-            const response = await api.get('/broadcast/test-config');
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-};
+
 
 // Contact API methods
 export const contactAPI = {

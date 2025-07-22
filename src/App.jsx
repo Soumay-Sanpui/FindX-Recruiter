@@ -21,8 +21,7 @@ import MessagesUser from "./pages/MessagesUser.jsx";
 import Settings from "./pages/Settings.jsx";
 import Messages from "./pages/Messages.jsx";
 import SearchEmployee from "./pages/SearchEmployee.jsx";
-import Broadcast from "./pages/Broadcast.jsx";
-import BroadcastNav from "./components/BroadcastNav.jsx";
+
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import InterviewManagement from './pages/InterviewManagement';
 import PaymentSuccess from './pages/PaymentSuccess';
@@ -104,7 +103,6 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <EmployerDashboard />
-        <BroadcastNav />
       </ErrorBoundary>
     ),
   },
@@ -156,10 +154,7 @@ const router = createBrowserRouter([
     path: "/settings",
     element: <ErrorBoundary><Settings /></ErrorBoundary>,
   },
-  {
-    path: "/broadcast",
-    element: <ErrorBoundary><Broadcast /></ErrorBoundary>,
-  },
+
   {
     path: "/search-employee",
     element: (
