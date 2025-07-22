@@ -1505,43 +1505,43 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                     <div className="p-4">
                         {premiumSelected ? (
                             <>
-                                <div className="flex justify-between mb-2">
+                        <div className="flex justify-between mb-2">
                                     <span className="font-semibold">Premium Job Ad Package:</span>
                                     <span className="font-bold text-xl">$99</span>
-                                </div>
-                                <div className="text-sm space-y-1 mb-4">
-                                    <p className="font-medium">Includes:</p>
-                                    <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                        </div>
+                        <div className="text-sm space-y-1 mb-4">
+                            <p className="font-medium">Includes:</p>
+                            <ul className="list-disc ml-4 text-gray-600 space-y-1">
                                         <li>Priority AI-driven visibility</li>
                                         <li>80 high-fit candidate invitations</li>
                                         <li>Featured on similar ads</li>
                                         <li>Exclusive candidate targeting</li>
                                         <li>Complete branding & company showcase</li>
-                                        <li>30-day job listing</li>
-                                        <li>Unlimited applicants</li>
-                                        <li>Dashboard & management tools</li>
-                                    </ul>
-                                </div>
+                                <li>30-day job listing</li>
+                                <li>Unlimited applicants</li>
+                                <li>Dashboard & management tools</li>
+                            </ul>
+                        </div>
                             </>
                         ) : (
                             <>
-                                <div className="flex justify-between mb-2">
+                        <div className="flex justify-between mb-2">
                                     <span className="font-semibold">Standard Job Ad Package:</span>
                                     <span className="font-bold text-xl">${standardCost}</span>
-                                </div>
-                                <div className="text-sm space-y-1 mb-4">
-                                    <p className="font-medium">Includes:</p>
-                                    <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                                        <li>30-day job listing</li>
-                                        <li>Unlimited applicants</li>
-                                        <li>Dashboard & management tools</li>
-                                        <li>Free access to candidates profiles</li>
-                                        <li>Send & Receive messages with candidates</li>
-                                        <li>Complete branding</li>
-                                    </ul>
-                                    <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
-                                    <p className="text-gray-600">LinkedIn, Career profile access (if provided by candidate)</p>
-                                </div>
+                        </div>
+                        <div className="text-sm space-y-1 mb-4">
+                            <p className="font-medium">Includes:</p>
+                            <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                                <li>30-day job listing</li>
+                                <li>Unlimited applicants</li>
+                                <li>Dashboard & management tools</li>
+                                <li>Free access to candidates profiles</li>
+                                <li>Send & Receive messages with candidates</li>
+                                <li>Complete branding</li>
+                            </ul>
+                            <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
+                            <p className="text-gray-600">LinkedIn, Career profile access (if provided by candidate)</p>
+                        </div>
                             </>
                         )}
                         
@@ -1561,7 +1561,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                 <div className="flex justify-between mt-4 mb-2">
                                     <span>Notification Package:</span>
                                     <span className="font-semibold">${notificationCost}</span>
-                                </div>
+                            </div>
                                 <p className="text-xs text-gray-600 mb-4">
                                     {notificationOption === 'both' 
                                         ? 'Email and app notifications to candidates' 
@@ -1580,8 +1580,8 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                             <span>Total Cost:</span>
                             <span>${totalCost}</span>
                         </div>
-                    </div>
-                </div>
+                        </div>
+                        </div>
         </div>
     );
 };

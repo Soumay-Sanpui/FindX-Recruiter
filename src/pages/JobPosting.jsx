@@ -230,78 +230,16 @@ const JobPosting = () => {
         toast.info('Payment cancelled. You can try again when ready.');
     };
 
-    // Create job after successful payment
+    // Job is automatically created by payment controller - no need to create again
     const createJobAfterPayment = async () => {
         try {
-            // Convert jobQuestions to applicationQuestions format
-            const applicationQuestions = formData.jobQuestions?.map(question => {
-                // Use selected options from the form, or fall back to default options
-                const selectedQuestionOptions = formData.selectedOptions?.[question];
+            // Job is automatically created by the payment controller
+            // We just need to wait a moment for the backend to process
+            toast.success('Payment successful! Job is being created...');
             
-                // Define default options for questions that don't have selected options
-                const defaultOptionsMap = {
-                    "Which of the following statements best describes your right to work in Australia?": [
-                        "I am an Australian citizen",
-                        "I am a permanent resident",
-                        "I have a valid work visa",
-                        "I am not authorized to work in Australia"
-                    ],
-                    "How many years experience do you have in similar roles?": [
-                        "Less than 1 year",
-                        "1-2 years",
-                        "3-5 years",
-                        "5-10 years",
-                        "More than 10 years"
-                    ],
-                    "Do you have driver license?": [
-                        "Yes, I have a valid driver's license",
-                        "No, I don't have a driver's license",
-                        "I have a learner's permit"
-                    ],
-                    "What's your expected annual base salary?": [
-                        "Under $40,000",
-                        "$40,000 - $60,000",
-                        "$60,000 - $80,000",
-                        "$80,000 - $100,000",
-                        "$100,000 - $120,000",
-                        "Over $120,000"
-                    ]
-                };
-
-                // Use selected options if available, otherwise use default options, otherwise use basic Yes/No
-                const questionOptions = selectedQuestionOptions && selectedQuestionOptions.length > 0 
-                    ? selectedQuestionOptions 
-                    : (defaultOptionsMap[question] || ["Yes", "No", "Maybe"]);
-
-                return {
-                    question: question,
-                    options: questionOptions,
-                    required: formData.mandatoryQuestions?.includes(question) || false
-                };
-            }) || [];
-
-            const jobData = {
-                ...formData,
-                from: Number(formData.from),
-                to: Number(formData.to),
-                jobSkills: formData.jobSkills.split(',').map(skill => skill.trim()),
-                jobKeywords: Array.isArray(formData.jobKeywords) 
-                    ? formData.jobKeywords 
-                    : (formData.jobKeywords || '').split(',').map(keyword => keyword.trim()).filter(keyword => keyword !== ''),
-                applicationQuestions: applicationQuestions,
-                postedBy: employer._id,
-                isPaid: true, // Mark as paid since payment was successful
-                status: 'Open', // Set status to open since it's paid
-                // Process short description - only include if showShortDescription is true and shortDescription has content
-                shortDescription: formData.showShortDescription && formData.shortDescription ? 
-                    formData.shortDescription.split(',').map(point => point.trim()).filter(point => point !== '') : 
-                    null
-            };
+            // Wait a moment for backend processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // Remove the old jobQuestions field
-            delete jobData.jobQuestions;
-            
-            await createJobMutation.mutateAsync(jobData);
             toast.success('Job posted successfully! Redirecting to My Jobs...');
             
             // Redirect to my jobs page after successful job creation
@@ -310,7 +248,7 @@ const JobPosting = () => {
             }, 1500);
             
         } catch (error) {
-            console.error('Error posting job:', error);
+            console.error('Error in job creation flow:', error);
             throw error;
         }
     };
