@@ -26,6 +26,7 @@ import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import InterviewManagement from './pages/InterviewManagement';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentHistory from './pages/PaymentHistory';
+import BoostJobComingSoon from './pages/BoostJobComingSoon.jsx';
 
 const router = createBrowserRouter([
   {
@@ -250,6 +251,10 @@ const router = createBrowserRouter([
   {
     path: "/payment-history",
     element: <ErrorBoundary><PaymentHistory /></ErrorBoundary>,
+  },
+  {
+    path: "/boost-job-coming-soon",
+    element: <ErrorBoundary><BoostJobComingSoon /></ErrorBoundary>,
   },
 ]);
 
