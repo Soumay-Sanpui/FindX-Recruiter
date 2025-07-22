@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import PricingSummary from './PricingSummary';
+import PricingSummary from './PricingSummary';
 import { getAdvanceQuestionSections } from '../../store/jobCategory.store.js';
 import CONFIG from '../../../config/config.js';
 import {Sparkles} from 'lucide-react';
@@ -10,11 +10,10 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const {employer} = useEmployerStore();
     
-    // pricing elements
-    const [premiumSelected, setPremiumSelected] = useState(formData.premiumListing || false);
-    const [immediateStartSelected, setImmediateStartSelected] = useState(formData.immediateStart || false);
-    const [referencesSelected, setReferencesSelected] = useState(formData.referencesRequired || false);
-    const [notificationOption, setNotificationOption] = useState(formData.notificationOption || 'both');
+    // pricing elements - 
+    const [premiumSelected, setPremiumSelected] = useState(formData?.premiumListing ?? false);
+    const [immediateStartSelected, setImmediateStartSelected] = useState(formData?.immediateStart ?? false);
+    const [notificationOption, setNotificationOption] = useState(formData?.notificationOption ?? 'none');
     
     // dropdown sections
     const [showBasicQuestions, setShowBasicQuestions] = useState(false);
@@ -40,12 +39,12 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [selectedOptions, setSelectedOptions] = useState(formData.selectedOptions || {});
     const [filteredAdvancedQuestions, setFilteredAdvancedQuestions] = useState({});
     
-    // Calculate total cost
-    const premiumCost = 750;
-    const immediateCost = immediateStartSelected ? 85 : 0;
-    const referencesCost = referencesSelected ? 75 : 0;
+    // Calculate total cost - 
+    const premiumCost = premiumSelected ? 99 : 0;
+    const immediateCost = immediateStartSelected ? 45 : 0;
     const notificationCost = notificationOption === 'both' ? 69 : (notificationOption === 'none' ? 0 : 49);
-    const totalCost = premiumCost + immediateCost + referencesCost + notificationCost;
+    const standardCost = 49;
+    const totalCost = premiumCost + immediateCost + notificationCost + standardCost;
 
     const basicQuestionsWithOptions = [
         {
@@ -481,17 +480,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 handleChange({ 
                     target: { 
                         name: 'immediateStart', 
-                        value, 
-                        type: 'checkbox', 
-                        checked: value 
-                    } 
-                });
-                break;
-            case 'references':
-                setReferencesSelected(value);
-                handleChange({ 
-                    target: { 
-                        name: 'referencesRequired', 
                         value, 
                         type: 'checkbox', 
                         checked: value 
@@ -1501,131 +1489,13 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 </div>
             </div>
             
-            {/* Pricing Summary Sidebar */}
-            <div className="lg:w-1/4 bg-gray-50 p-6 border-l border-gray-200 hidden lg:block">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Your Job Ad Summary</h3>
-                
-                <div className="bg-white border border-gray-200 rounded-md overflow-hidden mb-6">
-                    <div className="bg-blue-600 text-white p-3 font-bold">
-                        Premium Job Ad
-                    </div>
-                    <div className="p-4">
-                        <div className="flex justify-between mb-2">
-                            <span className="font-semibold">Premium Job Ad:</span>
-                            <span className="font-bold text-lg">${premiumCost}</span>
-                        </div>
-                        
-                        <div className="text-sm space-y-1 mb-4">
-                            <p className="font-medium">Includes:</p>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                                <li>30-day job listing</li>
-                                <li>Unlimited applicants</li>
-                                <li>Dashboard & management tools</li>
-                                <li>Free access to candidates profiles</li>
-                                <li>Complete branding</li>
-                                <li>Priority placement in search results</li>
-                                <li>Featured job badge</li>
-                            </ul>
-                        </div>
-                        
-                        <div className="mt-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        id="immediate-start" 
-                                        className="mr-2 h-4 w-4"
-                                        checked={immediateStartSelected}
-                                        onChange={(e) => handlePricingChange('immediate', e.target.checked)}
-                                    />
-                                    <label htmlFor="immediate-start" className="text-sm font-medium">Immediate Start Badge</label>
-                                </div>
-                                <span className="text-sm font-semibold">${immediateCost}</span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        id="references" 
-                                        className="mr-2 h-4 w-4"
-                                        checked={referencesSelected}
-                                        onChange={(e) => handlePricingChange('references', e.target.checked)}
-                                    />
-                                    <label htmlFor="references" className="text-sm font-medium">References Required</label>
-                                </div>
-                                <span className="text-sm font-semibold">${referencesCost}</span>
-                            </div>
-                            
-                            <div className="border-t border-gray-200 pt-3 mt-3">
-                                <p className="text-sm font-medium mb-2">Notification Options:</p>
-                                <div className="space-y-2">
-                                    <div className="flex items-center">
-                                        <input 
-                                            type="radio" 
-                                            id="notify-both" 
-                                            name="notification" 
-                                            className="mr-2 h-4 w-4"
-                                            checked={notificationOption === 'both'}
-                                            onChange={() => handlePricingChange('notification', 'both')}
-                                        />
-                                        <label htmlFor="notify-both" className="text-sm">
-                                            Email & SMS ($69)
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                        <input 
-                                            type="radio" 
-                                            id="notify-email" 
-                                            name="notification" 
-                                            className="mr-2 h-4 w-4"
-                                            checked={notificationOption === 'email'}
-                                            onChange={() => handlePricingChange('notification', 'email')}
-                                        />
-                                        <label htmlFor="notify-email" className="text-sm">
-                                            Email only ($49)
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                        <input 
-                                            type="radio" 
-                                            id="notify-sms" 
-                                            name="notification" 
-                                            className="mr-2 h-4 w-4"
-                                            checked={notificationOption === 'sms'}
-                                            onChange={() => handlePricingChange('notification', 'sms')}
-                                        />
-                                        <label htmlFor="notify-sms" className="text-sm">
-                                            SMS only ($49)
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                        <input 
-                                            type="radio" 
-                                            id="notify-none" 
-                                            name="notification" 
-                                            className="mr-2 h-4 w-4"
-                                            checked={notificationOption === 'none'}
-                                            onChange={() => handlePricingChange('notification', 'none')}
-                                        />
-                                        <label htmlFor="notify-none" className="text-sm">
-                                            No notifications
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="bg-gray-50 p-4 border-t border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <span className="font-bold">Total:</span>
-                            <span className="font-bold text-xl text-blue-600">${totalCost}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">Plus applicable taxes</p>
-                    </div>
-                </div>
-                </div>
+            {/* Job Ad Summary - Right Side */}
+            <PricingSummary 
+                premiumSelected={premiumSelected}
+                immediateStartSelected={immediateStartSelected}
+                notificationOption={notificationOption}
+                totalCost={totalCost}
+            />
                 
                 {/* Mobile Job Ad Summary - Only visible on mobile devices */}
                 <div className="block lg:hidden mt-10 border border-gray-300 shadow-md rounded-md bg-white">
@@ -1633,29 +1503,52 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         Your Job Ad Summary
                     </div>
                     <div className="p-4">
-                        <div className="flex justify-between mb-2">
-                        <span className="font-semibold">Premium Job Ad Package:</span>
-                        <span className="font-bold text-xl">${premiumCost}</span>
-                        </div>
-                        
-                        <div className="text-sm space-y-1 mb-4">
-                            <p className="font-medium">Includes:</p>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                                <li>30-day job listing</li>
-                                <li>Unlimited applicants</li>
-                                <li>Dashboard & management tools</li>
-                                <li>Free access to candidates profiles</li>
-                                <li>Send & Receive messages with candidates</li>
-                                <li>Complete branding</li>
-                            </ul>
-                            <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
-                            <p className="text-gray-600">LinkedIn, Career profile access (if provided by candidate)</p>
-                        </div>
+                        {premiumSelected ? (
+                            <>
+                                <div className="flex justify-between mb-2">
+                                    <span className="font-semibold">Premium Job Ad Package:</span>
+                                    <span className="font-bold text-xl">$99</span>
+                                </div>
+                                <div className="text-sm space-y-1 mb-4">
+                                    <p className="font-medium">Includes:</p>
+                                    <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                                        <li>Priority AI-driven visibility</li>
+                                        <li>80 high-fit candidate invitations</li>
+                                        <li>Featured on similar ads</li>
+                                        <li>Exclusive candidate targeting</li>
+                                        <li>Complete branding & company showcase</li>
+                                        <li>30-day job listing</li>
+                                        <li>Unlimited applicants</li>
+                                        <li>Dashboard & management tools</li>
+                                    </ul>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex justify-between mb-2">
+                                    <span className="font-semibold">Standard Job Ad Package:</span>
+                                    <span className="font-bold text-xl">${standardCost}</span>
+                                </div>
+                                <div className="text-sm space-y-1 mb-4">
+                                    <p className="font-medium">Includes:</p>
+                                    <ul className="list-disc ml-4 text-gray-600 space-y-1">
+                                        <li>30-day job listing</li>
+                                        <li>Unlimited applicants</li>
+                                        <li>Dashboard & management tools</li>
+                                        <li>Free access to candidates profiles</li>
+                                        <li>Send & Receive messages with candidates</li>
+                                        <li>Complete branding</li>
+                                    </ul>
+                                    <p className="mt-2 text-gray-600">Add your logo, cover photo, embedded video to stand out</p>
+                                    <p className="text-gray-600">LinkedIn, Career profile access (if provided by candidate)</p>
+                                </div>
+                            </>
+                        )}
                         
                         {immediateStartSelected && (
                             <div className="flex justify-between mt-4 mb-2">
                                 <span>Immediate Start Badge:</span>
-                            <span className="font-semibold">${immediateCost}</span>
+                                <span className="font-semibold">$45</span>
                             </div>
                         )}
                         
@@ -1663,12 +1556,32 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                             <p className="text-xs text-gray-600 mb-4">Let candidates know you're hiring urgently</p>
                         )}
                         
-                    <div className="flex justify-between mt-4 font-bold">
-                        <span>Total:</span>
-                        <span className="text-blue-600 text-xl">${totalCost}</span>
-                            </div>
+                        {notificationOption !== 'none' && (
+                            <>
+                                <div className="flex justify-between mt-4 mb-2">
+                                    <span>Notification Package:</span>
+                                    <span className="font-semibold">${notificationCost}</span>
+                                </div>
+                                <p className="text-xs text-gray-600 mb-4">
+                                    {notificationOption === 'both' 
+                                        ? 'Email and app notifications to candidates' 
+                                        : notificationOption === 'email' 
+                                            ? 'Email notifications to candidates' 
+                                            : 'App notifications to candidates'}
+                                </p>
+                            </>
+                        )}
+                        
+                        <div className="font-medium mt-6">
+                            Just like this email and app package as well
                         </div>
+                        
+                        <div className="flex justify-between mt-6 text-xl font-bold border-t pt-4">
+                            <span>Total Cost:</span>
+                            <span>${totalCost}</span>
                         </div>
+                    </div>
+                </div>
         </div>
     );
 };
