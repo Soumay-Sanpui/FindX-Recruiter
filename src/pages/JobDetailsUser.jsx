@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, MapPin, Clock, Building, DollarSign, Calendar, Users, Briefcase, MessageCircle, Bookmark, X } from 'lucide-react';
-import {jobAPI} from '../services/api';
+import { jobAPI } from '../services/api';
+import ApplicationModal from '../components/ApplicationModal';
+import { toast } from 'react-toastify';
 
 const JobDetailsUser = () => {
   const { jobId } = useParams();
@@ -9,6 +11,8 @@ const JobDetailsUser = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -43,8 +47,37 @@ const JobDetailsUser = () => {
   };
 
   const handleApply = () => {
-    // Navigate to application page or show application modal
-    navigate(`/apply/${jobId}`);
+    // Check if job has application questions
+    if (job.applicationQuestions && job.applicationQuestions.length > 0) {
+      setShowApplicationModal(true);
+    } else {
+      // Apply directly without questions
+      handleSubmitApplication();
+    }
+  };
+
+  const handleSubmitApplication = async (questionResponses = []) => {
+    try {
+      setApplying(true);
+      const result = await jobAPI.applyForJob(jobId, questionResponses);
+      
+      if (result.success) {
+        toast.success('Application submitted successfully!');
+        // Update job to show applied status
+        setJob(prev => ({
+          ...prev,
+          applicants: [...(prev.applicants || []), { user: 'current-user', status: 'Pending' }]
+        }));
+      } else {
+        toast.error(result.message || 'Failed to submit application');
+      }
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      toast.error(error.message || 'Failed to submit application');
+    } finally {
+      setApplying(false);
+      setShowApplicationModal(false);
+    }
   };
 
   if (loading) {
@@ -242,15 +275,26 @@ const JobDetailsUser = () => {
                 </button>
                 <button
                   onClick={handleApply}
-                  className="flex-1 bg-gray-900 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                  disabled={applying}
+                  className="flex-1 bg-gray-900 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Apply Now
+                  {applying ? 'Applying...' : 'Apply Now'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Application Modal */}
+      <ApplicationModal
+        isOpen={showApplicationModal}
+        onClose={() => setShowApplicationModal(false)}
+        onSubmit={handleSubmitApplication}
+        questions={job?.applicationQuestions || []}
+        jobTitle={job?.jobTitle || ''}
+        isLoading={applying}
+      />
     </div>
   );
 };

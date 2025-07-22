@@ -196,6 +196,15 @@ export const jobAPI = {
         }
     },
     
+    applyForJob: async (jobId, questionResponses = []) => {
+        try {
+            const response = await api.post(`/jobs/${jobId}/apply`, { questionResponses });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
     updateApplicationStatus: async (jobId, applicationId, status, additionalData = {}) => {
         try {
             const requestData = { 
@@ -213,6 +222,24 @@ export const jobAPI = {
     updateJobStatus: async (jobId, status) => {
         try {
             const response = await api.put(`/jobs/${jobId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getApplicationResponses: async (jobId) => {
+        try {
+            const response = await api.get(`/jobs/${jobId}/responses`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getUserApplicationResponse: async (jobId) => {
+        try {
+            const response = await api.get(`/jobs/${jobId}/my-response`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
