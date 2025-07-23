@@ -17,7 +17,6 @@ const JobDetails = () => {
     const updateApplicationStatusMutation = useUpdateApplicationStatus();
     const updateJobStatusMutation = useUpdateJobStatus();
     
-    const [showApplicants, setShowApplicants] = useState(false);
     const [showInterviewModal, setShowInterviewModal] = useState(false);
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [showBlockModal, setShowBlockModal] = useState(false);
@@ -380,6 +379,14 @@ const JobDetails = () => {
                         <p className="text-gray-700 whitespace-pre-line">{job.jobDescription}</p>
                     </div>
                 </div>
+
+                {/* Job Summary */}
+               <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">
+                   <h3 className="text-xl font-bold text-gray-800 mb-4">Job Summary</h3>
+                   <div className="prose max-w-none">
+                       <p className="text-gray-700 whitespace-pre-line">{job.jobSummary}</p>
+                   </div>
+               </div>
 
                 {/* Job Keywords */}
                 {job.jobKeywords && job.jobKeywords.length > 0 && (

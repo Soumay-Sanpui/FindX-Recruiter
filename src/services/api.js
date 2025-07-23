@@ -127,11 +127,7 @@ export const messageAPI = {
     
     // Legacy method for backward compatibility
     getMessagesBetweenUsers: async (employerId, userId, jobId) => {
-        try {
             return await messageAPI.getConversationHistory(employerId, userId, jobId);
-        } catch (error) {
-            throw error;
-        }
     }
 };
 
@@ -240,6 +236,69 @@ export const jobAPI = {
     getUserApplicationResponse: async (jobId) => {
         try {
             const response = await api.get(`/jobs/${jobId}/my-response`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getJobRecommendations: async () => {
+        try {
+            const response = await api.get('/jobs/recommendations');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getJobCategories: async () => {
+        try {
+            const response = await api.get('/jobs/categories');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getJobSubcategories: async (category) => {
+        try {
+            const response = await api.get(`/jobs/categories/${encodeURIComponent(category)}/subcategories`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getJobStatistics: async () => {
+        try {
+            const response = await api.get('/jobs/statistics');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getSavedJobs: async () => {
+        try {
+            const response = await api.get('/jobs/saved');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    getMyApplications: async () => {
+        try {
+            const response = await api.get('/jobs/my/applications');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    saveJob: async (jobId, action) => {
+        try {
+            const response = await api.put(`/jobs/${jobId}/save`, { action });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

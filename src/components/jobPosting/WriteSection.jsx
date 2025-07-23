@@ -694,13 +694,16 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 <div className="mb-6">
                     <label htmlFor="jobDescription" className="block text-gray-700 font-medium mb-2">Job description</label>
                     <textarea 
-                        className="w-full border border-gray-300 p-3 h-32 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        className={`w-full border p-3 h-32 focus:outline-none focus:ring-2 focus:ring-blue-500 ${formData.formErrors?.jobDescription ? 'border-red-500' : 'border-gray-300'}`}
                         placeholder="Enter detailed job description here"
                         name="jobDescription"
                         value={formData.jobDescription || ''}
                         onChange={handleInputChange}
                         id="jobDescription"
                     />
+                    {formData.formErrors?.jobDescription && (
+                        <p className="text-red-500 text-xs mt-1">{formData.formErrors.jobDescription}</p>
+                    )}
                 </div>
                 
                 {/* Job Summary Section */}
@@ -747,7 +750,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         className="w-full border border-gray-300 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         placeholder="Enter job short description here (e.g., Flexible hours, Remote work, Competitive salary)"
                         name="shortDescription"
-                        value={formData.shortDescription || ''}
+                        value={Array.isArray(formData.shortDescription) ? formData.shortDescription.join(', ') : (formData.shortDescription || '')}
                         onChange={handleInputChange}
                     />
                 </div>
@@ -757,12 +760,20 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                     <div className="mb-6">
                         <label htmlFor="shortDescriptionPreview" className="block text-gray-700 font-medium mb-2">Job short description preview</label>
                         <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                            {formData.shortDescription.split(',').map((point, index) => (
-                                <div key={index} className="flex items-start mb-2 last:mb-0">
-                                    <span className="text-blue-600 mr-2 mt-1">•</span>
-                                    <span className="text-gray-700 text-sm">{point.trim()}</span>
-                                </div>
-                            ))}
+                            {Array.isArray(formData.shortDescription) ? 
+                                formData.shortDescription.map((point, index) => (
+                                    <div key={index} className="flex items-start mb-2 last:mb-0">
+                                        <span className="text-blue-600 mr-2 mt-1">•</span>
+                                        <span className="text-gray-700 text-sm">{point}</span>
+                                    </div>
+                                )) :
+                                formData.shortDescription.split(',').map((point, index) => (
+                                    <div key={index} className="flex items-start mb-2 last:mb-0">
+                                        <span className="text-blue-600 mr-2 mt-1">•</span>
+                                        <span className="text-gray-700 text-sm">{point.trim()}</span>
+                                    </div>
+                                ))
+                            }
                         </div>
                     </div>
                 )}
@@ -925,6 +936,32 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                                     >
                                         ×
                                     </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                {/* Job Skills Section */}
+                <div className="mb-6">
+                    <label className="block text-gray-700 font-medium mb-2">Job Skills <span className="text-gray-500">(optional)</span></label>
+                    <p className="text-gray-500 text-sm mb-2">Enter the key skills required for this position. Separate multiple skills with commas.</p>
+                    <input 
+                        type="text" 
+                        className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="e.g. JavaScript, React, Node.js, MongoDB"
+                        name="jobSkills"
+                        value={Array.isArray(formData.jobSkills) ? formData.jobSkills.join(', ') : (formData.jobSkills || '')}
+                        onChange={handleInputChange}
+                    />
+                    {Array.isArray(formData.jobSkills) && formData.jobSkills.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {formData.jobSkills.map((skill, index) => (
+                                <span 
+                                    key={index}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                >
+                                    {skill}
                                 </span>
                             ))}
                         </div>

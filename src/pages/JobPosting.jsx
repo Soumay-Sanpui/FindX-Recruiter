@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router';
 import { useEmployerStore } from '../store/employer.store';
-import { useCreateJob } from '../hooks/useJobs';
 import DHeader from '../components/dashboard/DHeader';
 import Timeline from '../components/jobPosting/Timeline';
 import ClassifySection from '../components/jobPosting/ClassifySection';
@@ -10,11 +9,13 @@ import WriteSection from '../components/jobPosting/WriteSection';
 import ManageSection from '../components/jobPosting/ManageSection';
 import PaymentCheckout from '../components/PaymentCheckout';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
+import { jobKeys } from '../hooks/useJobs';
 
 const JobPosting = () => {
     const { employer } = useEmployerStore();
     const navigate = useNavigate();
-    const createJobMutation = useCreateJob();
+    const queryClient = useQueryClient();
     const [currentStage, setCurrentStage] = useState('Classify');
     const [formErrors, setFormErrors] = useState({});
     const [showPayment, setShowPayment] = useState(false);
@@ -33,7 +34,7 @@ const JobPosting = () => {
         to: '',
         showSalaryOnAd: true,
         // Keeping other fields for later stages
-        jobSkills: '',
+        jobSkills: [],
         jobKeywords: [],
         jobDescription: '',
         jobBanner: '',
@@ -50,7 +51,7 @@ const JobPosting = () => {
         immediateStart: false,
         referencesRequired: false,
         notificationOption: 'both',
-        shortDescription: '',
+        shortDescription: [],
         showShortDescription: false,
         mandatoryQuestions: [],
         selectedOptions: {},
@@ -74,15 +75,59 @@ const JobPosting = () => {
         };
         totalAmount += notificationPricing[formData.notificationOption] || 0;
         
+        // Prepare job data with proper formatting
+        const jobData = {
+            // Basic job information
+            jobTitle: formData.jobTitle,
+            jobDescription: formData.jobDescription,
+            jobSummary: formData.jobSummary,
+            jobLocation: formData.jobLocation,
+            workspaceOption: formData.workspaceOption,
+            category: formData.category,
+            subcategory: formData.subcategory,
+            workType: formData.workType,
+            payType: formData.payType,
+            currency: formData.currency,
+            from: Number(formData.from),
+            to: Number(formData.to),
+            showSalaryOnAd: formData.showSalaryOnAd,
+            jobSalaryType: formData.jobSalaryType,
+            
+            // Skills and keywords (ensure they are arrays)
+            jobSkills: Array.isArray(formData.jobSkills) ? formData.jobSkills : [],
+            jobKeywords: Array.isArray(formData.jobKeywords) ? formData.jobKeywords : [],
+            sellingPoints: Array.isArray(formData.sellingPoints) ? formData.sellingPoints : [],
+            
+            // Media and branding
+            jobBanner: formData.jobBanner,
+            companyLogo: formData.companyLogo,
+            videoLink: formData.videoLink,
+            
+            // Short description (ensure it's an array)
+            shortDescription: Array.isArray(formData.shortDescription) ? formData.shortDescription : [],
+            showShortDescription: formData.showShortDescription,
+            
+            // Premium features
+            premiumListing: formData.premiumListing,
+            immediateStart: formData.immediateStart,
+            referencesRequired: formData.referencesRequired,
+            notificationOption: formData.notificationOption,
+            
+            // Questions and references
+            jobQuestions: Array.isArray(formData.jobQuestions) ? formData.jobQuestions : [],
+            mandatoryQuestions: Array.isArray(formData.mandatoryQuestions) ? formData.mandatoryQuestions : [],
+            selectedOptions: formData.selectedOptions || {},
+            internalReference: formData.internalReference,
+            
+            // Employer information
+            postedBy: formData.postedBy
+        };
+        
         return {
             planId: 'Standard',
             amount: totalAmount,
             currency: 'usd',
-            jobData: {
-                title: formData.jobTitle,
-                location: formData.jobLocation,
-                category: formData.category
-            },
+            jobData: jobData,
             addOns: [
                 ...(formData.immediateStart ? [{ id: 'immediateStart', name: 'Immediate Start Badge', price: 1900 }] : []),
                 ...(formData.referencesRequired ? [{ id: 'referenceCheck', name: 'Reference Check Access', price: 1900 }] : []),
@@ -110,9 +155,25 @@ const JobPosting = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        
+        // Handle array fields that need comma-separated string to array conversion
+        let processedValue = type === 'checkbox' ? checked : value;
+        
+        // Convert comma-separated strings to arrays for specific fields
+        if (name === 'shortDescription' && typeof value === 'string' && value.trim()) {
+            // Convert comma-separated string to array
+            processedValue = value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+        } else if (name === 'jobSkills' && typeof value === 'string' && value.trim()) {
+            // Convert comma-separated string to array
+            processedValue = value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+        } else if (name === 'from' || name === 'to') {
+            // Convert to number for salary fields
+            processedValue = value === '' ? '' : Number(value);
+        }
+        
         setFormData(prevState => ({
             ...prevState,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: processedValue
         }));
         
         // Clear error for this field when user makes a change
@@ -123,14 +184,6 @@ const JobPosting = () => {
             }));
         }
     };
-
-    // const handleBannerChange = (e) => {
-    //     const { value } = e.target;
-    //     setFormData(prevState => ({
-    //         ...prevState,
-    //         jobBanner: value
-    //     }));
-    // };
 
     const validateClassifySection = () => {
         const errors = {};
@@ -143,8 +196,15 @@ const JobPosting = () => {
         if (!formData.workType) errors.workType = 'Work type is required';
         if (!formData.payType) errors.payType = 'Pay type is required';
         if (!formData.currency) errors.currency = 'Currency is required';
-        if (!formData.from) errors.from = 'From amount is required';
-        if (!formData.to) errors.to = 'To amount is required';
+        
+        // Validate numeric fields
+        if (!formData.from || formData.from === '') errors.from = 'From amount is required';
+        if (!formData.to || formData.to === '') errors.to = 'To amount is required';
+        
+        // Validate that 'to' is greater than 'from'
+        if (formData.from && formData.to && Number(formData.from) >= Number(formData.to)) {
+            errors.to = 'To amount must be greater than From amount';
+        }
         
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -173,7 +233,7 @@ const JobPosting = () => {
             from: '',
             to: '',
             showSalaryOnAd: true,
-            jobSkills: '',
+            jobSkills: [],
             jobKeywords: [],
             jobDescription: '',
             jobBanner: '',
@@ -190,7 +250,7 @@ const JobPosting = () => {
             immediateStart: false,
             referencesRequired: false,
             notificationOption: 'both',
-            shortDescription: '',
+            shortDescription: [],
             showShortDescription: false,
             mandatoryQuestions: [],
             selectedOptions: {},
@@ -208,6 +268,10 @@ const JobPosting = () => {
         setIsSubmittingJob(true);
         
         try {
+            // Invalidate and refetch job queries to show the new job
+            await queryClient.invalidateQueries({ queryKey: jobKeys.all });
+            await queryClient.invalidateQueries({ queryKey: jobKeys.myJobs() });
+            
             await createJobAfterPayment();
         } catch (error) {
             console.error('Error creating job after payment:', error);
@@ -220,7 +284,23 @@ const JobPosting = () => {
     // Handle payment error
     const handlePaymentError = (error) => {
         console.error('Payment failed:', error);
-        toast.error('Payment failed. Please try again.');
+        
+        // Provide more specific error messages based on error type
+        let errorMessage = 'Payment failed. Please try again.';
+        
+        if (error?.type === 'card_error') {
+            errorMessage = 'Card payment failed. Please check your card details and try again.';
+        } else if (error?.type === 'validation_error') {
+            errorMessage = 'Please check your payment information and try again.';
+        } else if (error?.type === 'rate_limit_error') {
+            errorMessage = 'Too many payment attempts. Please wait a moment and try again.';
+        } else if (error?.code === 'insufficient_funds') {
+            errorMessage = 'Insufficient funds. Please use a different payment method.';
+        } else if (error?.code === 'expired_card') {
+            errorMessage = 'Card has expired. Please use a different payment method.';
+        }
+        
+        toast.error(errorMessage);
         setShowPayment(false);
     };
 
@@ -233,16 +313,9 @@ const JobPosting = () => {
     // Job is automatically created by payment controller - no need to create again
     const createJobAfterPayment = async () => {
         try {
-            // Job is automatically created by the payment controller
-            // We just need to wait a moment for the backend to process
             toast.success('Payment successful! Job is being created...');
-            
-            // Wait a moment for backend processing
             await new Promise(resolve => setTimeout(resolve, 2000));
-            
             toast.success('Job posted successfully! Redirecting to My Jobs...');
-            
-            // Redirect to my jobs page after successful job creation
             setTimeout(() => {
                 navigate('/my-jobs');
             }, 1500);
@@ -254,8 +327,27 @@ const JobPosting = () => {
     };
 
     const handleSubmit = async () => {
+        // Validate all required sections
+        const errors = {};
+        
+        // Validate Classify section
         if (!validateClassifySection()) {
             setCurrentStage('Classify');
+            return;
+        }
+        
+        // Validate Write section (required fields)
+        if (!formData.jobDescription?.trim()) {
+            errors.jobDescription = 'Job description is required';
+        }
+        
+        // Check if there are any validation errors
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            // Navigate to Write section if there are errors there
+            if (errors.jobDescription) {
+                setCurrentStage('Write');
+            }
             return;
         }
         
@@ -264,7 +356,6 @@ const JobPosting = () => {
             return;
         }
         
-        // Show payment modal instead of directly creating job
         setShowPayment(true);
     };
 
@@ -292,7 +383,7 @@ const JobPosting = () => {
             case 'Write':
                 return (
                     <WriteSection 
-                        formData={formData}
+                        formData={{...formData, formErrors}}
                         handleChange={handleChange}
                         handleStageChange={handleStageChange}
                     />
@@ -303,7 +394,7 @@ const JobPosting = () => {
                         formData={formData}
                         handleStageChange={handleStageChange}
                         handleSubmit={handleSubmit}
-                        isSubmitting={isSubmittingJob || createJobMutation.isPending}
+                        isSubmitting={isSubmittingJob}
                     />
                 );
             default:
