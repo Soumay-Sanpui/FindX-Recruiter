@@ -8,6 +8,8 @@ import {useEmployerStore} from "../../store/employer.store.js";
 const WriteSection = ({ formData, handleChange, handleStageChange }) => {
     const [logoFile, setLogoFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [shortDescriptionInput, setShortDescriptionInput] = useState('');
+    const [jobSkillsInput, setJobSkillsInput] = useState('');
     const {employer} = useEmployerStore();
     
     // pricing elements - 
@@ -438,25 +440,6 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         }));
     };
 
-    // const handleLogoUpload = (e) => {
-    //     if (e.target.files && e.target.files[0]) {
-    //         setLogoFile(e.target.files[0]);
-            
-    //         // Update the formData with the logo file
-    //         const reader = new FileReader();
-    //         reader.onload = (event) => {
-    //             handleChange({
-    //                 target: {
-    //                     name: 'companyLogo',
-    //                     value: event.target.result
-    //                 }
-    //             });
-    //         };
-    //         reader.readAsDataURL(e.target.files[0]);
-    //     }
-    // };
-    
-    // Helper function to handle textarea and input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         handleChange({ target: { name, value } });
@@ -729,30 +712,122 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                         </div>
                         <button
                             type="button"
-                            className={`relative inline-flex items-center h-6 rounded-full w-11 ${formData.showShortDescription ? 'bg-blue-600' : 'bg-gray-200'}`}
-                            onClick={() => handleChange({
-                                target: {
-                                    name: 'showShortDescription',
-                                    value: !formData.showShortDescription,
-                                    type: 'checkbox',
-                                    checked: !formData.showShortDescription
+                            className={`relative inline-flex items-center h-6 border border-blue-500 bg-gray-50 rounded-full w-11`}
+                            onClick={() => {
+                                // If there's text in the input, add it first
+                                if (shortDescriptionInput.trim()) {
+                                    // Check if input contains commas
+                                    if (shortDescriptionInput.includes(',')) {
+                                        // Split by comma and add multiple items
+                                        const newItems = shortDescriptionInput
+                                            .split(',')
+                                            .map(item => item.trim())
+                                            .filter(item => item !== '');
+                                        const updatedItems = [...(formData.shortDescription || []), ...newItems];
+                                        handleChange({
+                                            target: {
+                                                name: 'shortDescription',
+                                                value: updatedItems
+                                            }
+                                        });
+                                    } else {
+                                        // Add single item
+                                        const updatedItems = [...(formData.shortDescription || []), shortDescriptionInput.trim()];
+                                        handleChange({
+                                            target: {
+                                                name: 'shortDescription',
+                                                value: updatedItems
+                                            }
+                                        });
+                                    }
+                                    setShortDescriptionInput('');
                                 }
-                            })}
+                                
+                                // Then toggle the show/hide functionality
+                                handleChange({
+                                    target: {
+                                        name: 'showShortDescription',
+                                        value: !formData.showShortDescription,
+                                        type: 'checkbox',
+                                        checked: !formData.showShortDescription
+                                    }
+                                });
+                            }}
                         >
                             <span className="sr-only">{formData.showShortDescription ? 'Hide' : 'Show'}</span>
                             <span
-                                className={`inline-block w-4 h-4 transform transition-transform bg-white rounded-full ${formData.showShortDescription ? 'translate-x-6' : 'translate-x-1'}`}
+                                className={`inline-block w-4 h-4 transform transition-transform bg-blue-500 rounded-full ${formData.showShortDescription ? 'translate-x-6' : 'translate-x-1'}`}
                             />
                         </button>
                     </div>
-                    <textarea 
-                        id="shortDescription"
-                        className="w-full border border-gray-300 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                        placeholder="Enter job short description here (e.g., Flexible hours, Remote work, Competitive salary)"
-                        name="shortDescription"
-                        value={Array.isArray(formData.shortDescription) ? formData.shortDescription.join(', ') : (formData.shortDescription || '')}
-                        onChange={handleInputChange}
-                    />
+                    <div className="flex gap-2 mb-2">
+                        <textarea 
+                            id="shortDescription"
+                            className="w-full border border-gray-300 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            placeholder="Enter job short description here (e.g., Flexible hours, Remote work, Competitive salary)"
+                            value={shortDescriptionInput}
+                            onChange={(e) => setShortDescriptionInput(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (shortDescriptionInput.trim()) {
+                                        // Check if input contains commas
+                                        if (shortDescriptionInput.includes(',')) {
+                                            // Split by comma and add multiple items
+                                            const newItems = shortDescriptionInput
+                                                .split(',')
+                                                .map(item => item.trim())
+                                                .filter(item => item !== '');
+                                            const updatedItems = [...(formData.shortDescription || []), ...newItems];
+                                            handleChange({
+                                                target: {
+                                                    name: 'shortDescription',
+                                                    value: updatedItems
+                                                }
+                                            });
+                                        } else {
+                                            // Add single item
+                                            const updatedItems = [...(formData.shortDescription || []), shortDescriptionInput.trim()];
+                                            handleChange({
+                                                target: {
+                                                    name: 'shortDescription',
+                                                    value: updatedItems
+                                                }
+                                            });
+                                        }
+                                        setShortDescriptionInput('');
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                    {Array.isArray(formData.shortDescription) && formData.shortDescription.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {formData.shortDescription.map((item, index) => (
+                                <span 
+                                    key={index}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                >
+                                    {item}
+                                    <button
+                                        type="button"
+                                        className="ml-2 text-blue-600 hover:text-blue-800"
+                                        onClick={() => {
+                                            const updatedItems = formData.shortDescription.filter((_, i) => i !== index);
+                                            handleChange({
+                                                target: {
+                                                    name: 'shortDescription',
+                                                    value: updatedItems
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Job Short Description Preview */}
@@ -907,7 +982,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                             }}
                             disabled={!formData.category || !CONFIG.categoryKeywords[formData.category]}
                             className="flex items-center justify-center gap-4 px-4 py-2 bg-gradient-to-br from-blue-600 to-blue-300 hover:scale-110 ml-4 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={!formData.category ? "Select a category first" : !CONFIG.categoryKeywords[formData.category] ? "No suggested keywords for this category" : "Generate keywords based on category"}
+                            title={!formData.category ? "Select a category first" : !CONFIG.categoryKeywords[formData.category] ? "No suggested keywords for this category" : "Generate keywords based on category from config file"}
                         >
                             <Sparkles />
                             Auto Generate
@@ -946,22 +1021,105 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
                 <div className="mb-6">
                     <label className="block text-gray-700 font-medium mb-2">Job Skills <span className="text-gray-500">(optional)</span></label>
                     <p className="text-gray-500 text-sm mb-2">Enter the key skills required for this position. Separate multiple skills with commas.</p>
-                    <input 
-                        type="text" 
-                        className="w-full border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                        placeholder="e.g. JavaScript, React, Node.js, MongoDB"
-                        name="jobSkills"
-                        value={Array.isArray(formData.jobSkills) ? formData.jobSkills.join(', ') : (formData.jobSkills || '')}
-                        onChange={handleInputChange}
-                    />
+                    <div className="flex gap-2 mb-2">
+                        <input 
+                            type="text" 
+                            className="w-2/3 border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            placeholder="e.g. JavaScript, React, Node.js, MongoDB"
+                            value={jobSkillsInput}
+                            onChange={(e) => setJobSkillsInput(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (jobSkillsInput.trim()) {
+                                        // Check if input contains commas
+                                        if (jobSkillsInput.includes(',')) {
+                                            // Split by comma and add multiple skills
+                                            const newSkills = jobSkillsInput
+                                                .split(',')
+                                                .map(skill => skill.trim())
+                                                .filter(skill => skill !== '');
+                                            const updatedSkills = [...(formData.jobSkills || []), ...newSkills];
+                                            handleChange({
+                                                target: {
+                                                    name: 'jobSkills',
+                                                    value: updatedSkills
+                                                }
+                                            });
+                                        } else {
+                                            // Add single skill
+                                            const updatedSkills = [...(formData.jobSkills || []), jobSkillsInput.trim()];
+                                            handleChange({
+                                                target: {
+                                                    name: 'jobSkills',
+                                                    value: updatedSkills
+                                                }
+                                            });
+                                        }
+                                        setJobSkillsInput('');
+                                    }
+                                }
+                            }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (jobSkillsInput.trim()) {
+                                    // Check if input contains commas
+                                    if (jobSkillsInput.includes(',')) {
+                                        // Split by comma and add multiple skills
+                                        const newSkills = jobSkillsInput
+                                            .split(',')
+                                            .map(skill => skill.trim())
+                                            .filter(skill => skill !== '');
+                                        const updatedSkills = [...(formData.jobSkills || []), ...newSkills];
+                                        handleChange({
+                                            target: {
+                                                name: 'jobSkills',
+                                                value: updatedSkills
+                                            }
+                                        });
+                                    } else {
+                                        // Add single skill
+                                        const updatedSkills = [...(formData.jobSkills || []), jobSkillsInput.trim()];
+                                        handleChange({
+                                            target: {
+                                                name: 'jobSkills',
+                                                value: updatedSkills
+                                            }
+                                        });
+                                    }
+                                    setJobSkillsInput('');
+                                }
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                            Add
+                        </button>
+                    </div>
                     {Array.isArray(formData.jobSkills) && formData.jobSkills.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                             {formData.jobSkills.map((skill, index) => (
                                 <span 
                                     key={index}
                                     className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
                                 >
                                     {skill}
+                                    <button
+                                        type="button"
+                                        className="ml-2 text-blue-600 hover:text-blue-800"
+                                        onClick={() => {
+                                            const updatedSkills = formData.jobSkills.filter((_, i) => i !== index);
+                                            handleChange({
+                                                target: {
+                                                    name: 'jobSkills',
+                                                    value: updatedSkills
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        ×
+                                    </button>
                                 </span>
                             ))}
                         </div>

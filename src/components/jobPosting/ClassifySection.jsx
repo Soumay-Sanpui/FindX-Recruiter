@@ -3,7 +3,7 @@ import { Eraser, X } from 'lucide-react';
 import { useJobCategories, useJobSubcategories } from '../../hooks/useJobs';
 
 const ClassifySection = ({ formData, formErrors, handleChange, handleClear, handleStageChange, navigate }) => {
-    // Use optimized query functions for categories and subcategories
+    // Use optimized query functions for categories and subcategories from config file
     const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useJobCategories();
     const { data: subcategories = [], isLoading: subcategoriesLoading } = useJobSubcategories(formData.category);
 
@@ -23,9 +23,7 @@ const ClassifySection = ({ formData, formErrors, handleChange, handleClear, hand
         { value: 'Annual plus commission', label: 'Annual plus commission' }
     ];
 
-    // Categories are now fetched from the API via useJobCategories hook
-
-
+    // Categories are now fetched from the config file via useJobCategories hook
 
     // Update subcategory when main category changes
     useEffect(() => {

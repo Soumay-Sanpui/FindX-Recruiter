@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import CONFIG from '../../config/config.js';
 
 // Query keys for consistent cache management
 export const jobKeys = {
@@ -89,40 +90,39 @@ export const useJobRecommendations = () => {
   });
 };
 
-// Get job categories (for job posting form)
+// Get job categories (for job posting form) - now using config file
 export const useJobCategories = () => {
   return useQuery({
     queryKey: jobKeys.categories(),
-    queryFn: () => jobAPI.getJobCategories(),
-    select: (data) => data?.success ? data.categories : [],
-    staleTime: 10 * 60 * 1000, // 10 minutes for categories (rarely change)
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      // Don't retry on 401/403 errors (authentication issues)
-      if (error?.status === 401 || error?.status === 403) {
-        return false;
-      }
-      return failureCount < 2;
+    queryFn: () => {
+      return Promise.resolve({
+        success: true,
+        categories: Object.keys(CONFIG.jobAdIndustries)
+      });
     },
+    select: (data) => data?.success ? data.categories : [],
+    staleTime: Infinity, // Categories from config never change during runtime
+    refetchOnWindowFocus: false,
+    retry: false, // No retry needed for static data
   });
 };
 
-// Get job subcategories based on category
+// Get job subcategories based on category - now using config file
 export const useJobSubcategories = (category) => {
   return useQuery({
     queryKey: jobKeys.subcategories(category),
-    queryFn: () => jobAPI.getJobSubcategories(category),
+    queryFn: () => {
+      const subcategories = CONFIG.jobAdIndustries[category] || [];
+      return Promise.resolve({
+        success: true,
+        subcategories
+      });
+    },
     select: (data) => data?.success ? data.subcategories : [],
     enabled: !!category,
-    staleTime: 10 * 60 * 1000, // 10 minutes for subcategories
+    staleTime: Infinity, // Subcategories from config never change during runtime
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      // Don't retry on 401/403 errors (authentication issues)
-      if (error?.status === 401 || error?.status === 403) {
-        return false;
-      }
-      return failureCount < 2;
-    },
+    retry: false, // No retry needed for static data
   });
 };
 

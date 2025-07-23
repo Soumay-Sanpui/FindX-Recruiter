@@ -388,6 +388,20 @@ const JobDetails = () => {
                    </div>
                </div>
 
+                {/* Job Selling Points */}
+                {
+                    job.sellingPoints.length > 0 && (
+                        <div className={"bg-white p-8 shadow-lg border border-gray-200 mb-6"}>
+                            <h3 className="text-xl font-bold text-gray-800 mb-4">Why Work Here?</h3>
+                            <ul className="list-disc list-inside space-y-2 mb-6">
+                                {job.sellingPoints.map((point, index) => (
+                                    <li key={index} className="text-gray-700">{point}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
+                }
+
                 {/* Job Keywords */}
                 {job.jobKeywords && job.jobKeywords.length > 0 && (
                     <div className="bg-white p-8 shadow-lg border border-gray-200 mb-6">

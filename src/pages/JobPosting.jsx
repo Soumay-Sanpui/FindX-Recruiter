@@ -160,13 +160,7 @@ const JobPosting = () => {
         let processedValue = type === 'checkbox' ? checked : value;
         
         // Convert comma-separated strings to arrays for specific fields
-        if (name === 'shortDescription' && typeof value === 'string' && value.trim()) {
-            // Convert comma-separated string to array
-            processedValue = value.split(',').map(item => item.trim()).filter(item => item.length > 0);
-        } else if (name === 'jobSkills' && typeof value === 'string' && value.trim()) {
-            // Convert comma-separated string to array
-            processedValue = value.split(',').map(item => item.trim()).filter(item => item.length > 0);
-        } else if (name === 'from' || name === 'to') {
+        if (name === 'from' || name === 'to') {
             // Convert to number for salary fields
             processedValue = value === '' ? '' : Number(value);
         }
