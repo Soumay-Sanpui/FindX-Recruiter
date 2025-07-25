@@ -63,7 +63,7 @@ class PaymentService {
             const response = await api.post('/payments/create-job-posting-payment', {
                 planId: paymentData.planId,
                 amount: paymentData.amount,
-                currency: paymentData.currency || 'usd',
+                currency: paymentData.currency || 'aud',
                 employerId: paymentData.employerId,
                 jobData: paymentData.jobData,
                 addOns: paymentData.addOns || []
@@ -118,8 +118,8 @@ export const PaymentUtils = {
         return PRICING_CONFIG.NOTIFICATION_PACKAGES[planId] || null;
     },
     
-    formatCurrency: (amount, currency = 'USD') => {
-        return new Intl.NumberFormat('en-US', {
+    formatCurrency: (amount, currency = 'AUD') => {
+        return new Intl.NumberFormat('en-AU', {
             style: 'currency',
             currency: currency
         }).format(amount / 100);

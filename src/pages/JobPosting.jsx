@@ -126,7 +126,7 @@ const JobPosting = () => {
         return {
             planId: 'Standard',
             amount: totalAmount,
-            currency: 'usd',
+            currency: 'aud',
             jobData: jobData,
             addOns: [
                 ...(formData.immediateStart ? [{ id: 'immediateStart', name: 'Immediate Start Badge', price: 1900 }] : []),
