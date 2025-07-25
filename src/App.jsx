@@ -27,6 +27,7 @@ import InterviewManagement from './pages/InterviewManagement';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentHistory from './pages/PaymentHistory';
 import BoostJobComingSoon from './pages/BoostJobComingSoon.jsx';
+import BoostJob from './pages/BoostJob.jsx';
 
 const router = createBrowserRouter([
   {
@@ -255,6 +256,10 @@ const router = createBrowserRouter([
   {
     path: "/boost-job-coming-soon",
     element: <ErrorBoundary><BoostJobComingSoon /></ErrorBoundary>,
+  },
+  {
+    path: "/boost-job/:jobId",
+    element: <ErrorBoundary><BoostJob /></ErrorBoundary>,
   },
 ]);
 
