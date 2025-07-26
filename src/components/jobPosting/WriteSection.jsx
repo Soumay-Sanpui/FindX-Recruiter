@@ -628,7 +628,7 @@ const WriteSection = ({formData, handleChange, handleStageChange}) => {
                                 handleChange({target: {name: 'showShortDescription', value: !formData.showShortDescription, type: 'checkbox', checked: !formData.showShortDescription}});
                             }}
                         >
-                            {formData.showShortDescription ? 'Hide' : 'Show'}
+                            Add
                         </button>
                     </div>
                     <div className="flex gap-2 mb-2">
