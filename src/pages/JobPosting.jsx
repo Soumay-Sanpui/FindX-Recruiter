@@ -119,6 +119,29 @@ const JobPosting = () => {
             selectedOptions: formData.selectedOptions || {},
             internalReference: formData.internalReference,
             
+            // Create applicationQuestions directly from the form data
+            applicationQuestions: (() => {
+                const questions = Array.isArray(formData.jobQuestions) ? formData.jobQuestions : [];
+                const mandatory = Array.isArray(formData.mandatoryQuestions) ? formData.mandatoryQuestions : [];
+                const options = formData.selectedOptions || {};
+                
+                if (questions.length === 0) return [];
+                
+                return questions.map(question => {
+                    const questionOptions = options[question] || [];
+                    const isRequired = mandatory.includes(question);
+                    
+                    // Ensure we have at least some options
+                    const finalOptions = questionOptions.length > 0 ? questionOptions : ['Yes', 'No'];
+                    
+                    return {
+                        question: question,
+                        options: finalOptions,
+                        required: isRequired
+                    };
+                });
+            })(),
+            
             // Employer information
             postedBy: formData.postedBy
         };

@@ -142,22 +142,29 @@ const ApplicationModal = ({
                                         </div>
 
                                         <div className="ml-6 space-y-2">
-                                            {question.options.map((option, optionIndex) => (
-                                                <label
-                                                    key={optionIndex}
-                                                    className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        name={`question-${index}`}
-                                                        value={option}
-                                                        checked={response.selectedOption === option}
-                                                        onChange={() => handleOptionSelect(index, option)}
-                                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{option}</span>
-                                                </label>
-                                            ))}
+                                            {(() => {
+                                                // Ensure we have options, fallback to default if none provided
+                                                const displayOptions = question.options && question.options.length > 0 
+                                                    ? question.options 
+                                                    : ['Yes', 'No'];
+                                                
+                                                return displayOptions.map((option, optionIndex) => (
+                                                    <label
+                                                        key={optionIndex}
+                                                        className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${index}`}
+                                                            value={option}
+                                                            checked={response.selectedOption === option}
+                                                            onChange={() => handleOptionSelect(index, option)}
+                                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                                        />
+                                                        <span className="text-sm text-gray-700">{option}</span>
+                                                    </label>
+                                                ));
+                                            })()}
                                         </div>
                                     </div>
                                 );
