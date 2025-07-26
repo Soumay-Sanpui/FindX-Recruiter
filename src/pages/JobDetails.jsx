@@ -856,12 +856,12 @@ const JobDetails = () => {
                                                         </button>
                                                     )}
                                                     
-                                                    <button
+                                                    {/*<button
                                                         onClick={() => handleOpenBlockModal(applicant)}
                                                         className="bg-gray-800 hover:bg-gray-900 text-white px-3 py-1 text-sm rounded flex items-center"
                                                     >
                                                         <Ban size={14} className="mr-1" /> Block
-                                                    </button>
+                                                    </button>*/}
                                                 </div>
                                             )}
                                         </div>
