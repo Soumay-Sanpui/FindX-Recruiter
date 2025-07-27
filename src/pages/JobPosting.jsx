@@ -55,6 +55,7 @@ const JobPosting = () => {
         showShortDescription: false,
         mandatoryQuestions: [],
         selectedOptions: {},
+        maxUsers: 500, // Default max users to notify
     });
 
     // Payment data configuration
@@ -143,7 +144,10 @@ const JobPosting = () => {
             })(),
             
             // Employer information
-            postedBy: formData.postedBy
+            postedBy: formData.postedBy,
+            
+            // Notification settings
+            maxUsers: formData.maxUsers || 500
         };
         
         return {

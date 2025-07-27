@@ -156,9 +156,15 @@ export const employerAPI = {
 };
 
 export const jobAPI = {
-    createJob: async (jobData) => {
+    createJob: async (jobData, maxUsers = 500) => {
         try {
-            const response = await api.post('/jobs', jobData);
+            // Add maxUsers to jobData if not already present
+            const jobDataWithMaxUsers = {
+                ...jobData,
+                maxUsers: maxUsers
+            };
+            
+            const response = await api.post('/jobs', jobDataWithMaxUsers);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
