@@ -666,7 +666,7 @@ const JobDetails = () => {
                                                     {applicant.selectedResume && (
                                                         <div className="mb-2">
                                                             <p className="text-sm text-green-800">
-                                                                <span className="font-medium">Resume:</span> {applicant.selectedResume.resumeName || 'Selected Resume'}
+                                                                <span className="font-medium">Resume:</span> {applicant.selectedResume.resumeName || applicant.selectedResume.name || 'Selected Resume'}
                                                             </p>
                                                             {applicant.selectedResume.resumeUrl && (
                                                                 <a 
@@ -683,7 +683,7 @@ const JobDetails = () => {
                                                     {applicant.selectedCoverLetter && (
                                                         <div>
                                                             <p className="text-sm text-green-800">
-                                                                <span className="font-medium">Cover Letter:</span> Included
+                                                                <span className="font-medium">Cover Letter:</span> {applicant.selectedCoverLetter.length > 50 ? applicant.selectedCoverLetter.substring(0, 50) + '...' : applicant.selectedCoverLetter}
                                                             </p>
                                                             <button
                                                                 onClick={() => {
@@ -692,7 +692,7 @@ const JobDetails = () => {
                                                                 }}
                                                                 className="text-blue-600 hover:text-blue-800 text-xs underline"
                                                             >
-                                                                View Cover Letter
+                                                                View Full Cover Letter
                                                             </button>
                                                         </div>
                                                     )}

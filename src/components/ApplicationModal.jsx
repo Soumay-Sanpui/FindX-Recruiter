@@ -117,14 +117,14 @@ const ApplicationModal = ({
                             {selectedResume && (
                                 <div className="mb-3">
                                     <p className="text-sm text-blue-800">
-                                        <span className="font-medium">Resume:</span> {selectedResume.resumeName || 'Selected Resume'}
+                                        <span className="font-medium">Resume:</span> {selectedResume.resumeName || selectedResume.name || 'Selected Resume'}
                                     </p>
                                 </div>
                             )}
                             {selectedCoverLetter && (
                                 <div>
                                     <p className="text-sm text-blue-800">
-                                        <span className="font-medium">Cover Letter:</span> Included
+                                        <span className="font-medium">Cover Letter:</span> {selectedCoverLetter.length > 50 ? selectedCoverLetter.substring(0, 50) + '...' : selectedCoverLetter}
                                     </p>
                                 </div>
                             )}

@@ -56,16 +56,23 @@ const JobDetailsUser = () => {
     }
   };
 
+  // Get user's primary resume and cover letter from localStorage or user context
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const primaryResume = user?.resumes?.find(r => r.isPrimary) || user?.resumes?.[0];
+  const coverLetter = user?.cover_letter || '';
+  
+  // Format resume data for backend
+  const formattedResume = primaryResume ? {
+    resumeId: primaryResume._id,
+    resumeName: primaryResume.name,
+    resumeUrl: primaryResume.url
+  } : null;
+
   const handleSubmitApplication = async (questionResponses = []) => {
     try {
       setApplying(true);
       
-      // Get user's primary resume and cover letter from localStorage or user context
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const primaryResume = user?.resumes?.find(r => r.isPrimary) || user?.resumes?.[0];
-      const coverLetter = user?.cover_letter || '';
-      
-      const result = await jobAPI.applyForJob(jobId, questionResponses, primaryResume, coverLetter);
+      const result = await jobAPI.applyForJob(jobId, questionResponses, formattedResume, coverLetter);
       
       if (result.success) {
         toast.success('Application submitted successfully!');
@@ -300,7 +307,7 @@ const JobDetailsUser = () => {
         questions={job?.applicationQuestions || []}
         jobTitle={job?.jobTitle || ''}
         isLoading={applying}
-        selectedResume={user?.resumes?.find(r => r.isPrimary) || user?.resumes?.[0]}
+        selectedResume={formattedResume}
         selectedCoverLetter={user?.cover_letter}
       />
     </div>
