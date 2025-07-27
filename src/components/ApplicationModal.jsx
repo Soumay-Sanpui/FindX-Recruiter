@@ -65,6 +65,8 @@ const ApplicationModal = ({
     };
 
     const handleSubmit = async () => {
+        console.log('Website ApplicationModal submitting responses:', responses);
+        
         if (!validateResponses()) {
             return;
         }

@@ -69,6 +69,14 @@ const JobDetailsUser = () => {
   } : null;
 
   const handleSubmitApplication = async (questionResponses = []) => {
+    console.log('Website handleSubmitApplication called with:', {
+      jobId,
+      questionResponses,
+      questionResponsesLength: questionResponses?.length || 0,
+      formattedResume,
+      coverLetter
+    });
+    
     try {
       setApplying(true);
       

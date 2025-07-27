@@ -205,6 +205,12 @@ export const jobAPI = {
                 requestBody.selectedCoverLetter = selectedCoverLetter;
             }
             
+            console.log('Website API applyForJob sending:', {
+                jobId,
+                requestBody,
+                questionResponsesLength: questionResponses?.length || 0
+            });
+            
             const response = await api.post(`/jobs/${jobId}/apply`, requestBody);
             return response.data;
         } catch (error) {
