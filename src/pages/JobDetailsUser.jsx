@@ -59,7 +59,13 @@ const JobDetailsUser = () => {
   const handleSubmitApplication = async (questionResponses = []) => {
     try {
       setApplying(true);
-      const result = await jobAPI.applyForJob(jobId, questionResponses);
+      
+      // Get user's primary resume and cover letter from localStorage or user context
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const primaryResume = user?.resumes?.find(r => r.isPrimary) || user?.resumes?.[0];
+      const coverLetter = user?.cover_letter || '';
+      
+      const result = await jobAPI.applyForJob(jobId, questionResponses, primaryResume, coverLetter);
       
       if (result.success) {
         toast.success('Application submitted successfully!');
@@ -294,6 +300,8 @@ const JobDetailsUser = () => {
         questions={job?.applicationQuestions || []}
         jobTitle={job?.jobTitle || ''}
         isLoading={applying}
+        selectedResume={user?.resumes?.find(r => r.isPrimary) || user?.resumes?.[0]}
+        selectedCoverLetter={user?.cover_letter}
       />
     </div>
   );

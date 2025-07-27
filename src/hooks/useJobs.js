@@ -308,8 +308,8 @@ export const useApplyForJob = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ jobId, questionResponses = [] }) => 
-      jobAPI.applyForJob(jobId, questionResponses),
+    mutationFn: ({ jobId, questionResponses = [], selectedResume = null, selectedCoverLetter = null }) => 
+      jobAPI.applyForJob(jobId, questionResponses, selectedResume, selectedCoverLetter),
     onMutate: async ({ jobId }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: jobKeys.detail(jobId) });

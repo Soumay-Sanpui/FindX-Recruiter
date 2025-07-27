@@ -7,7 +7,9 @@ const ApplicationModal = ({
     onSubmit, 
     questions = [], 
     jobTitle = '',
-    isLoading = false 
+    isLoading = false,
+    selectedResume = null,
+    selectedCoverLetter = null
 }) => {
     const [responses, setResponses] = useState([]);
     const [errors, setErrors] = useState({});
@@ -108,6 +110,27 @@ const ApplicationModal = ({
 
                 {/* Content */}
                 <div className="p-6 overflow-y-auto max-h-[60vh]">
+                    {/* Resume and Cover Letter Information */}
+                    {(selectedResume || selectedCoverLetter) && (
+                        <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h3 className="text-sm font-semibold text-blue-900 mb-3">Application Documents</h3>
+                            {selectedResume && (
+                                <div className="mb-3">
+                                    <p className="text-sm text-blue-800">
+                                        <span className="font-medium">Resume:</span> {selectedResume.resumeName || 'Selected Resume'}
+                                    </p>
+                                </div>
+                            )}
+                            {selectedCoverLetter && (
+                                <div>
+                                    <p className="text-sm text-blue-800">
+                                        <span className="font-medium">Cover Letter:</span> Included
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
                     {questions.length === 0 ? (
                         <div className="text-center py-8">
                             <p className="text-gray-600">No application questions for this job.</p>

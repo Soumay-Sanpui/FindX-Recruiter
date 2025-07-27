@@ -192,9 +192,20 @@ export const jobAPI = {
         }
     },
     
-    applyForJob: async (jobId, questionResponses = []) => {
+    applyForJob: async (jobId, questionResponses = [], selectedResume = null, selectedCoverLetter = null) => {
         try {
-            const response = await api.post(`/jobs/${jobId}/apply`, { questionResponses });
+            const requestBody = { questionResponses };
+            
+            // Add resume and cover letter information if provided
+            if (selectedResume) {
+                requestBody.selectedResume = selectedResume;
+            }
+            
+            if (selectedCoverLetter) {
+                requestBody.selectedCoverLetter = selectedCoverLetter;
+            }
+            
+            const response = await api.post(`/jobs/${jobId}/apply`, requestBody);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

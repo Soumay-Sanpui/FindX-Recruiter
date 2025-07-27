@@ -659,6 +659,46 @@ const JobDetails = () => {
                                                 Applied on: {formatDate(applicant.appliedOn || applicant.appliedAt)}
                                             </p>
                                             
+                                            {/* Resume and Cover Letter Information */}
+                                            {(applicant.selectedResume || applicant.selectedCoverLetter) && (
+                                                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                                                    <h5 className="font-medium text-green-700 text-sm mb-2">Application Documents</h5>
+                                                    {applicant.selectedResume && (
+                                                        <div className="mb-2">
+                                                            <p className="text-sm text-green-800">
+                                                                <span className="font-medium">Resume:</span> {applicant.selectedResume.resumeName || 'Selected Resume'}
+                                                            </p>
+                                                            {applicant.selectedResume.resumeUrl && (
+                                                                <a 
+                                                                    href={applicant.selectedResume.resumeUrl} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-600 hover:text-blue-800 text-xs underline"
+                                                                >
+                                                                    View Resume
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {applicant.selectedCoverLetter && (
+                                                        <div>
+                                                            <p className="text-sm text-green-800">
+                                                                <span className="font-medium">Cover Letter:</span> Included
+                                                            </p>
+                                                            <button
+                                                                onClick={() => {
+                                                                    // Show cover letter in a modal or expandable section
+                                                                    alert(applicant.selectedCoverLetter);
+                                                                }}
+                                                                className="text-blue-600 hover:text-blue-800 text-xs underline"
+                                                            >
+                                                                View Cover Letter
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            
                                             {/* Status-specific details */}
                                             {applicant.status === 'Interview' && applicant.interviewDetails && (
                                                 <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded">
