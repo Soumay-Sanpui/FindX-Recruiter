@@ -197,6 +197,7 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 text-sm">Job Posting Package</span>
                                         <span className="font-medium text-gray-800">
+                                            {/* ToDo: Amount not same in stripe, might be due to aud converstion but not right logic */}
                                             {PaymentUtils.formatCurrency(calculateJobPostingAmount())}
                                         </span>
                                     </div>
