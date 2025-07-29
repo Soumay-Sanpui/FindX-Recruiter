@@ -117,7 +117,9 @@ const PricingSummary = ({
           {notificationOption !== "none" && (
             <>
               <div className="flex justify-between mt-4 mb-2">
-                <span>Notification Package ({notificationCount} candidates):</span>
+                <span>
+                  Notification Package ({notificationCount} candidates):
+                </span>
                 <span className="font-semibold">${notificationCost}</span>
               </div>
               <p className="text-xs text-gray-600 mb-4">
