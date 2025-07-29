@@ -156,9 +156,9 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100">
                 {/* Header */}
-                <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-8 rounded-t-3xl text-white">
+                <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-8 rounded-t-xl text-white">
                     <button
                         onClick={onCancel}
                         className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
@@ -171,9 +171,9 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-white/15 rounded-2xl mb-4 backdrop-blur-sm">
                             <CreditCard size={28} className="text-white" />
                         </div>
-                        <h2 className="text-2xl font-bold mb-2">Secure Payment</h2>
-                        <p className="text-blue-100 text-sm">
-                            Complete your job posting payment
+                        <h2 className="text-lg font-bold mb-2">Job Ad Payment</h2>
+                        <p className="text-blue-100 text-[1vw]">
+                            Complete your job posting payment to post job ad
                         </p>
                     </div>
                 </div>
@@ -270,17 +270,6 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
                                         </div>
                                     </div>
                                 )}
-
-                                {/* Security Notice */}
-                                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                                    <div className="flex items-center text-sm">
-                                        <Shield size={18} className="text-green-600 mr-3 flex-shrink-0" />
-                                        <div>
-                                            <p className="font-medium text-green-800">Your payment is secure</p>
-                                            <p className="text-green-700 mt-1">Protected by 256-bit SSL encryption</p>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 {/* Action Buttons */}
                                 <div className="flex gap-3 pt-2">
