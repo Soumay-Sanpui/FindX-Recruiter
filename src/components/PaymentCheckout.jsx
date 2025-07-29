@@ -132,7 +132,7 @@ const CheckoutForm = ({ paymentData, onSuccess, onError, onCancel }) => {
             onError?.(error);
         } else {
             // Payment succeeded
-            console.log('Payment succeeded:', paymentIntent);
+            // console.log('Payment succeeded:', paymentIntent);
             
             // Confirm success with backend
             try {

@@ -19,7 +19,6 @@ const JobPosting = () => {
   const [currentStage, setCurrentStage] = useState("Classify");
   const [formErrors, setFormErrors] = useState({});
   const [showPayment, setShowPayment] = useState(false);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [isSubmittingJob, setIsSubmittingJob] = useState(false);
   const [formData, setFormData] = useState({
     jobTitle: "",
@@ -56,6 +55,7 @@ const JobPosting = () => {
     mandatoryQuestions: [],
     selectedOptions: {},
     maxUsers: 500, // Default max users to notify
+    notificationCount: 100, // Default notification count
   });
 
   // Payment data configuration
@@ -69,13 +69,25 @@ const JobPosting = () => {
     if (formData.referencesRequired) totalAmount += 1900; // $19.00
 
     // Notification pricing
-    const notificationPricing = {
-      app: 4900,
-      email: 4900,
-      both: 6900,
-      none: 0,
+    const getNotificationPricing = (option, count) => {
+      if (option === "none") return 0;
+
+      const pricing = {
+        100: { app: 4900, email: 4900, both: 6900 },
+        250: { app: 9900, email: 9900, both: 12900 },
+        500: { app: 14900, email: 14900, both: 18900 },
+        750: { app: 19900, email: 19900, both: 24900 },
+        1000: { app: 24900, email: 24900, both: 29900 },
+      };
+
+      return pricing[count]?.[option] || pricing[100][option];
     };
-    totalAmount += notificationPricing[formData.notificationOption] || 0;
+
+    const notificationPrice = getNotificationPricing(
+      formData.notificationOption,
+      formData.notificationCount
+    );
+    totalAmount += notificationPrice;
 
     // Prepare job data with proper formatting
     const jobData = {
@@ -164,7 +176,17 @@ const JobPosting = () => {
 
       // Notification settings
       maxUsers: formData.maxUsers || 500,
+      notificationCount: formData.notificationCount || 100,
+      maxNumberForNotifications: formData.notificationOption === "app" || formData.notificationOption === "both" ? formData.notificationCount : 0,
+      maxNumberForEmails: formData.notificationOption === "email" || formData.notificationOption === "both" ? formData.notificationCount : 0,
     };
+
+    // console.log("📊 ===== FRONTEND NOTIFICATION CONFIG =====");
+    // console.log(`🔔 Notification Option: ${formData.notificationOption}`);
+    // console.log(`📋 Notification Count: ${formData.notificationCount}`);
+    // console.log(`📊 Max Notifications: ${jobData.maxNumberForNotifications}`);
+    // console.log(`📧 Max Emails: ${jobData.maxNumberForEmails}`);
+    // console.log("✅ ===== FRONTEND CONFIG COMPLETE =====");
 
     return {
       planId: "Standard",
@@ -195,7 +217,7 @@ const JobPosting = () => {
               {
                 id: `notification_${formData.notificationOption}`,
                 name: `Notification Package - ${formData.notificationOption}`,
-                price: notificationPricing[formData.notificationOption],
+                price: notificationPrice,
               },
             ]
           : []),
@@ -324,13 +346,11 @@ const JobPosting = () => {
     });
     setFormErrors({});
     setShowPayment(false);
-    setPaymentCompleted(false);
   };
 
   // Handle payment success and create job
   const handlePaymentSuccess = async (paymentIntent) => {
     console.log("Payment successful:", paymentIntent);
-    setPaymentCompleted(true);
     setShowPayment(false);
     setIsSubmittingJob(true);
 

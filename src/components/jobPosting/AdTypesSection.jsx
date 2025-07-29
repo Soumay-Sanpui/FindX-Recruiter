@@ -14,12 +14,33 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
   const [notificationOption, setNotificationOption] = useState(
     formData?.notificationOption ?? "none"
   );
+  const [notificationCount, setNotificationCount] = useState(
+    formData?.notificationCount ?? 100
+  );
 
   // Calculate total cost
   const premiumCost = premiumSelected ? 99 : 0;
   const immediateCost = immediateStartSelected ? 45 : 0;
-  const notificationCost =
-    notificationOption === "both" ? 69 : notificationOption === "none" ? 0 : 49;
+
+  // Dynamic notification pricing based on count
+  const getNotificationCost = (option, count) => {
+    if (option === "none") return 0;
+
+    const pricing = {
+      100: { app: 49, email: 49, both: 69 },
+      250: { app: 99, email: 99, both: 129 },
+      500: { app: 149, email: 149, both: 189 },
+      750: { app: 199, email: 199, both: 249 },
+      1000: { app: 249, email: 249, both: 299 },
+    };
+
+    return pricing[count]?.[option] || pricing[100][option];
+  };
+
+  const notificationCost = getNotificationCost(
+    notificationOption,
+    notificationCount
+  );
   const standardCost = 49;
   // Calculate total cost - if premium is selected, replace standard cost
   const totalCost = premiumSelected
@@ -293,80 +314,115 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                </div>  */}
 
         {/* Notification Options */}
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div
-            className={`border rounded-lg p-4 ${
-              notificationOption === "app"
-                ? "border-blue-600"
-                : "border-gray-200"
-            }`}
-          >
-            <h3 className="font-semibold mb-1">App Only</h3>
-            <p className="text-gray-600 text-sm mb-2">
-              Notify 100 candidates via app notifications.
-            </p>
-            <p className="font-bold mb-3">$49</p>
-            <button
-              onClick={() => handleNotificationChange("app")}
-              className={`w-full py-2 rounded text-sm font-medium ${
-                notificationOption === "app"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              Select Plan
-            </button>
-          </div>
-
-          <div
-            className={`border rounded-lg p-4 ${
-              notificationOption === "email"
-                ? "border-blue-600"
-                : "border-gray-200"
-            }`}
-          >
-            <h3 className="font-semibold mb-1">Email Only</h3>
-            <p className="text-gray-600 text-sm mb-2">
-              Notify 100 candidates via email.
-            </p>
-            <p className="font-bold mb-3">$49</p>
-            <button
-              onClick={() => handleNotificationChange("email")}
-              className={`w-full py-2 rounded text-sm font-medium ${
-                notificationOption === "email"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              Select Plan
-            </button>
-          </div>
-
-          <div
-            className={`border rounded-lg p-4 ${
-              notificationOption === "both"
-                ? "border-blue-600"
-                : "border-gray-200"
-            }`}
-          >
-            <h3 className="font-semibold mb-1">Both Channels</h3>
-            <p className="text-gray-600 text-sm mb-2">
-              Notify 100 candidates via both app and email.
-            </p>
-            <div className="flex justify-between mb-3">
-              <p className="font-bold">$69</p>
-              <p className="text-green-600 text-sm">Save $29</p>
+        <div className="mb-8">
+          {/* Notification Count Selection */}
+          <div className="mb-6">
+            <h3 className="font-semibold mb-3">Select Number of Candidates to Notify:</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {[100, 250, 500, 750, 1000].map((count) => (
+                <button
+                  key={count}
+                  onClick={() => {
+                    setNotificationCount(count);
+                    if (handleChange) {
+                      handleChange({
+                        target: {
+                          name: "notificationCount",
+                          value: count,
+                        },
+                      });
+                    }
+                  }}
+                  className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                    notificationCount === count
+                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  {count} Candidates
+                </button>
+              ))}
             </div>
-            <button
-              onClick={() => handleNotificationChange("both")}
-              className={`w-full py-2 rounded text-sm font-medium ${
-                notificationOption === "both"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-800"
+          </div>
+
+          {/* Notification Channel Options */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div
+              className={`border rounded-lg p-4 ${
+                notificationOption === "app"
+                  ? "border-blue-600"
+                  : "border-gray-200"
               }`}
             >
-              Best Value
-            </button>
+              <h3 className="font-semibold mb-1">App Only</h3>
+              <p className="text-gray-600 text-sm mb-2">
+                Notify {notificationCount} candidates via app notifications.
+              </p>
+              <p className="font-bold mb-3">${getNotificationCost("app", notificationCount)}</p>
+              <button
+                onClick={() => handleNotificationChange("app")}
+                className={`w-full py-2 rounded text-sm font-medium ${
+                  notificationOption === "app"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                Select Plan
+              </button>
+            </div>
+
+            <div
+              className={`border rounded-lg p-4 ${
+                notificationOption === "email"
+                  ? "border-blue-600"
+                  : "border-gray-200"
+              }`}
+            >
+              <h3 className="font-semibold mb-1">Email Only</h3>
+              <p className="text-gray-600 text-sm mb-2">
+                Notify {notificationCount} candidates via email.
+              </p>
+              <p className="font-bold mb-3">${getNotificationCost("email", notificationCount)}</p>
+              <button
+                onClick={() => handleNotificationChange("email")}
+                className={`w-full py-2 rounded text-sm font-medium ${
+                  notificationOption === "email"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                Select Plan
+              </button>
+            </div>
+
+            <div
+              className={`border rounded-lg p-4 ${
+                notificationOption === "both"
+                  ? "border-blue-600"
+                  : "border-gray-200"
+              }`}
+            >
+              <h3 className="font-semibold mb-1">Both Channels</h3>
+              <p className="text-gray-600 text-sm mb-2">
+                Notify {notificationCount} candidates via both app and email.
+              </p>
+              <div className="flex justify-between mb-3">
+                <p className="font-bold">${getNotificationCost("both", notificationCount)}</p>
+                <p className="text-green-600 text-sm">
+                  Save ${getNotificationCost("app", notificationCount) + getNotificationCost("email", notificationCount) - getNotificationCost("both", notificationCount)}
+                </p>
+              </div>
+              <button
+                onClick={() => handleNotificationChange("both")}
+                className={`w-full py-2 rounded text-sm font-medium ${
+                  notificationOption === "both"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                Best Value
+              </button>
+            </div>
           </div>
         </div>
 
@@ -456,9 +512,8 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
       <PricingSummary
         premiumSelected={premiumSelected}
         immediateStartSelected={immediateStartSelected}
-        // referencesSelected={referencesSelected}
         notificationOption={notificationOption}
-        totalCost={totalCost}
+        notificationCount={notificationCount}
       />
     </div>
   );

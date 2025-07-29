@@ -1,16 +1,35 @@
 import React from 'react';
 
-const PricingSummary = ({ 
-    premiumSelected = false, 
-    immediateStartSelected = false, 
-    // referencesSelected = false,
-    notificationOption = 'both',
+const PricingSummary = ({
+  premiumSelected = false,
+  immediateStartSelected = false,
+  // referencesSelected = false,
+  notificationOption = "both",
+  notificationCount = 100,
 }) => {
   // Calculate individual costs (in dollars, matching Stripe amounts)
   const premiumCost = premiumSelected ? 99 : 0;
   const immediateCost = immediateStartSelected ? 45 : 0; // Show $45 in UI
-  const notificationCost =
-    notificationOption === "both" ? 69 : notificationOption === "none" ? 0 : 49;
+
+  // Dynamic notification pricing based on count
+  const getNotificationCost = (option, count) => {
+    if (option === "none") return 0;
+
+    const pricing = {
+      100: { app: 49, email: 49, both: 69 },
+      250: { app: 99, email: 99, both: 129 },
+      500: { app: 149, email: 149, both: 189 },
+      750: { app: 199, email: 199, both: 249 },
+      1000: { app: 249, email: 249, both: 299 },
+    };
+
+    return pricing[count]?.[option] || pricing[100][option];
+  };
+
+  const notificationCost = getNotificationCost(
+    notificationOption,
+    notificationCount
+  );
   const standardCost = 49;
 
   // Calculate total cost - if premium is selected, replace standard cost
@@ -98,15 +117,15 @@ const PricingSummary = ({
           {notificationOption !== "none" && (
             <>
               <div className="flex justify-between mt-4 mb-2">
-                <span>Notification Package:</span>
+                <span>Notification Package ({notificationCount} candidates):</span>
                 <span className="font-semibold">${notificationCost}</span>
               </div>
               <p className="text-xs text-gray-600 mb-4">
                 {notificationOption === "both"
-                  ? "Email and app notifications to candidates"
+                  ? `Email and app notifications to ${notificationCount} candidates`
                   : notificationOption === "email"
-                  ? "Email notifications to candidates"
-                  : "App notifications to candidates"}
+                  ? `Email notifications to ${notificationCount} candidates`
+                  : `App notifications to ${notificationCount} candidates`}
               </p>
             </>
           )}

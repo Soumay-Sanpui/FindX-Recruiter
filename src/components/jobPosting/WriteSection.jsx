@@ -2013,7 +2013,7 @@ const WriteSection = ({ formData, handleChange, handleStageChange }) => {
         premiumSelected={premiumSelected}
         immediateStartSelected={immediateStartSelected}
         notificationOption={notificationOption}
-        totalCost={totalCost}
+        notificationCount={formData.notificationCount || 100}
       />
 
       {/* Mobile Job Ad Summary - Only visible on mobile devices */}
