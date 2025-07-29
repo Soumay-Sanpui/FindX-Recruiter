@@ -9,7 +9,7 @@ import {
 import { useEmployerStore } from '../store/employer.store';
 import paymentService, { PaymentUtils } from '../services/paymentService';
 import { toast } from 'react-toastify';
-import { CreditCard, Lock, Shield, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { CreditCard, Lock, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import CONFIG from '../../config/config';
 
 // Load Stripe with error handling

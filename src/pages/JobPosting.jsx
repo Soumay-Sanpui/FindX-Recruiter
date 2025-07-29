@@ -65,7 +65,7 @@ const JobPosting = () => {
     let totalAmount = basePrice;
 
     // Add-on pricing
-    if (formData.immediateStart) totalAmount += 1900; // $19.00 (Stripe amount)
+    if (formData.immediateStart) totalAmount += 4500; // $45.00 (Stripe amount)
     if (formData.referencesRequired) totalAmount += 1900; // $19.00
 
     // Notification pricing
@@ -177,8 +177,16 @@ const JobPosting = () => {
       // Notification settings
       maxUsers: formData.maxUsers || 500,
       notificationCount: formData.notificationCount || 100,
-      maxNumberForNotifications: formData.notificationOption === "app" || formData.notificationOption === "both" ? formData.notificationCount : 0,
-      maxNumberForEmails: formData.notificationOption === "email" || formData.notificationOption === "both" ? formData.notificationCount : 0,
+      maxNumberForNotifications:
+        formData.notificationOption === "app" ||
+        formData.notificationOption === "both"
+          ? formData.notificationCount
+          : 0,
+      maxNumberForEmails:
+        formData.notificationOption === "email" ||
+        formData.notificationOption === "both"
+          ? formData.notificationCount
+          : 0,
     };
 
     // console.log("📊 ===== FRONTEND NOTIFICATION CONFIG =====");
