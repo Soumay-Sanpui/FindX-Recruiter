@@ -53,14 +53,17 @@ const PricingSummary = ({
               <div className="text-sm space-y-1 mb-4">
                 <p className="font-medium">Includes:</p>
                 <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                  <li>Priority AI-driven visibility</li>
-                  <li>80 high-fit candidate invitations</li>
-                  <li>Featured on similar ads</li>
-                  <li>Exclusive candidate targeting</li>
-                  <li>Complete branding & company showcase</li>
-                  <li>30-day job listing</li>
-                  <li>Unlimited applicants</li>
-                  <li>Dashboard & management tools</li>
+                  {[
+                    "Premium listing Badge on Job Ad",
+                    "Your ad featured on top",
+                    "Email invite to high-fit candidates to apply",
+                    "Other ads don't appear on yours",
+                    "Your company's logo, cover image and key selling points"
+                  ].map((feature, index) => (
+                      <div key={index} className="flex items-start text-gray-700">
+                        <span>{feature}</span>
+                      </div>
+                  ))}
                 </ul>
               </div>
             </>
@@ -73,19 +76,18 @@ const PricingSummary = ({
               <div className="text-sm space-y-1 mb-4">
                 <p className="font-medium">Includes:</p>
                 <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                  <li>30-day job listing</li>
-                  <li>Unlimited applicants</li>
-                  <li>Dashboard & management tools</li>
-                  <li>Free access to candidates profiles</li>
-                  <li>Send & Receive messages with candidates</li>
-                  <li>Complete branding</li>
+                  {
+                    ["Normal Job Ad",
+                      "Domain Matching",
+                      "Candidate Profile Access",
+                      "Messaging System",
+                      "Job Promotion",
+                      "Add your logo, cover photo, embedded video to stand out",
+                      "LinkedIn, Career profile access (if provided by candidate)"
+                    ].map((feature, index) => (
+                        <li key={index}>{feature}</li>
+                    ))}
                 </ul>
-                <p className="mt-2 text-gray-600">
-                  Add your logo, cover photo, embedded video to stand out
-                </p>
-                <p className="text-gray-600">
-                  LinkedIn, Career profile access (if provided by candidate)
-                </p>
               </div>
             </>
           )}
@@ -102,23 +104,12 @@ const PricingSummary = ({
               Let candidates know you're hiring urgently
             </p>
           )}
-          {/*
-                    {referencesSelected && (
-                        <div className="flex justify-between mt-4 mb-2">
-                            <span>Reference Check Access:</span>
-                            <span className="font-semibold">$75</span>
-                        </div>
-                    )}
-
-                    {referencesSelected && (
-                        <p className="text-xs text-gray-600 mb-4">Request references from candidates instantly</p>
-                    )}*/}
 
           {notificationOption !== "none" && (
             <>
               <div className="flex justify-between mt-4 mb-2">
                 <span>
-                  Notification Package ({notificationCount} candidates):
+                  Notification Package ({notificationCount}+ candidates):
                 </span>
                 <span className="font-semibold">${notificationCost}</span>
               </div>
@@ -131,10 +122,6 @@ const PricingSummary = ({
               </p>
             </>
           )}
-
-          <div className="font-medium mt-6">
-            Just like this email and app package as well
-          </div>
 
           <div className="flex justify-between mt-6 text-xl font-bold border-t pt-4">
             <span>Total Cost:</span>
