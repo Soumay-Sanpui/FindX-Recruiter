@@ -79,22 +79,6 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
         }
     };
 
-    // Handle references selection
-    /*const handleReferencesToggle = () => {
-        const newValue = !referencesSelected;
-        setReferencesSelected(newValue);
-        if (handleChange) {
-            handleChange({
-                target: {
-                    name: 'referencesRequired',
-                    value: newValue,
-                    type: 'checkbox',
-                    checked: newValue
-                }
-            });
-        }
-    };*/
-
     // Handle notification option change
     const handleNotificationChange = (option) => {
         setNotificationOption(option);
@@ -122,7 +106,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
           </div>
 
           <div className="text-lg font-semibold mb-3">
-            Included in Your 30 day advertisement
+            Included in Your Job Ad
           </div>
 
           {/* Premium Option */}
@@ -154,15 +138,15 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                   <div className="space-y-2">
                     <div className="flex items-center text-gray-700">
                       <BsCheckCircleFill className="text-blue-600 mr-2 flex-shrink-0" />
-                      <span>598 total applications</span>
+                      <span>100+ total applications</span>
                     </div>
                     <div className="flex items-center text-gray-700">
                       <BsCheckCircleFill className="text-blue-600 mr-2 flex-shrink-0" />
-                      <span>273 high-fit applications</span>
+                      <span>50+ high-fit applications</span>
                     </div>
                     <div className="flex items-center text-gray-700">
                       <BsCheckCircleFill className="text-blue-600 mr-2 flex-shrink-0" />
-                      <span>2.5k views</span>
+                      <span>1k+ views</span>
                     </div>
                   </div>
                 </div>
@@ -181,47 +165,20 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                 </div>
 
                 <div className="border-t pt-4">
-                  <p className="font-medium mb-3">Included in your 30 day ad</p>
+                  <p className="font-medium mb-3">Included in your job ad</p>
                   <div className="space-y-3">
-                    <div className="flex items-start text-gray-700">
-                      <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                      <span>
-                        Priority AI-driven visibility in search and candidate
-                        recommendations
-                      </span>
-                      <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
-                    </div>
-                    <div className="flex items-start text-gray-700">
-                      <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                      <span>
-                        Personally invite 80 high-fit candidates to apply
-                      </span>
-                      <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
-                    </div>
-                    <div className="flex items-start text-gray-700">
-                      <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                      <span>Your ad featured on similar ads</span>
-                      <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
-                    </div>
-                    <div className="flex items-start text-gray-700">
-                      <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                      <span>Other ads don't appear on yours</span>
-                      <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
-                    </div>
-                    <div className="flex items-start text-gray-700">
-                      <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                      <span>
-                        FindX exclusively sends your ad to high-fit candidates
-                      </span>
-                      <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
-                    </div>
-                    <div className="flex items-start text-gray-700">
-                      <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0" />
-                      <span>
-                        Your company's logo, cover image and key selling points
-                      </span>
-                      <BsInfoCircle className="text-gray-400 ml-2 flex-shrink-0" />
-                    </div>
+                    {[
+                      "Premium listing Badge on Job Ad",
+                      "Your ad featured on top",
+                      "Email invite to high-fit candidates to apply",
+                      "Other ads don't appear on yours",
+                      "Your company's logo, cover image and key selling points"
+                    ].map((feature, index) => (
+                          <div key={index} className="flex items-start text-gray-700">
+                            <FaCheck className="text-green-600 mr-2 mt-1 flex-shrink-0"/>
+                        <span>{feature}</span>
+                          </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -255,16 +212,9 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                   </p>
                 </div>
                 <div className="w-1/3 flex items-center justify-center">
-                  <div className="bg-blue-50 p-4 rounded-lg text-center">
-                    <div className="border border-blue-200 rounded p-2 mb-2 inline-block">
-                      <span className="text-blue-600 text-sm font-medium">
-                        Immediate start
-                      </span>
+                    <div className={"bg-red-200 rounded-full p-2 px-5"}>
+                      <p className={"text-red-600 font-semibold"}>Immediate Start</p>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Example ad with immediate start badge
-                    </p>
-                  </div>
                 </div>
               </div>
               <div className="px-5 pb-5">
@@ -281,37 +231,6 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
               </div>
             </div>
           </div>
-
-          {/* References Option */}
-          {/*                <div classname="mb-8">
-                    <div classname={`border-2 ${referencesselected ? 'border-blue-600' : 'border-gray-200'} rounded-lg overflow-hidden transition-all shadow-md`}>
-                        <div classname="p-5 flex">
-                            <div classname="flex-1">
-                                <div classname="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded mb-2">new</div>
-                                <h3 classname="text-xl font-bold mb-1">get references quickly and confidently</h3>
-                                <p classname="text-gray-600 mb-3">request references in a few clicks for up to 3 applicants. our automated system will contact 2 referees per applicant using our standard questions.</p>
-                                <p classname="font-bold text-xl">$75 <span classname="text-sm text-gray-500 font-normal">+gst</span></p>
-                            </div>
-                            <div classname="w-1/3 flex items-center justify-center">
-                                <div classname="bg-blue-50 p-4 rounded-lg text-center">
-                                    <div classname="border border-blue-200 rounded p-2 mb-2">
-                                        <button classname="bg-blue-600 text-white text-xs rounded px-3 py-1 flex items-center">
-                                            <facheck classname="mr-1" /> check references
-                                        </button>
-                                    </div>
-                                    <p classname="text-xs text-gray-500">example of checking references</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div classname="px-5 pb-5">
-                            <button
-                                onclick={handlereferencestoggle}
-                                classname={`py-2 px-6 rounded font-medium ${referencesselected ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
-                                {referencesselected ? "— remove" : "+ add"}
-                            </button>
-                        </div>
-                    </div>
-               </div>  */}
 
           {/* Notification Options */}
           <div className="mb-8">
@@ -341,7 +260,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                         : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                     }`}
                   >
-                    {count} Candidates
+                    {count}+ Candidates
                   </button>
                 ))}
               </div>
@@ -358,7 +277,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
               >
                 <h3 className="font-semibold mb-1">App Only</h3>
                 <p className="text-gray-600 text-sm mb-2">
-                  Notify {notificationCount} candidates via app notifications.
+                  Notify {notificationCount}+ candidates via app notifications.
                 </p>
                 <p className="font-bold mb-3">
                   ${getNotificationCost("app", notificationCount)}
@@ -384,7 +303,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
               >
                 <h3 className="font-semibold mb-1">Email Only</h3>
                 <p className="text-gray-600 text-sm mb-2">
-                  Notify {notificationCount} candidates via email.
+                  Notify {notificationCount}+ candidates via email.
                 </p>
                 <p className="font-bold mb-3">
                   ${getNotificationCost("email", notificationCount)}
@@ -410,7 +329,7 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
               >
                 <h3 className="font-semibold mb-1">Both Channels</h3>
                 <p className="text-gray-600 text-sm mb-2">
-                  Notify {notificationCount} candidates via both app and email.
+                  Notify {notificationCount}+ candidates via both app and email.
                 </p>
                 <div className="flex justify-between mb-3">
                   <p className="font-bold">
@@ -468,19 +387,18 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
               <div className="text-sm space-y-1 mb-4">
                 <p className="font-medium">Includes:</p>
                 <ul className="list-disc ml-4 text-gray-600 space-y-1">
-                  <li>30-day job listing</li>
-                  <li>Unlimited applicants</li>
-                  <li>Dashboard & management tools</li>
-                  <li>Free access to candidates profiles</li>
-                  <li>Send & Receive messages with candidates</li>
-                  <li>Complete branding</li>
+                  {
+                    ["Normal Job Ad",
+                      "Domain Matching",
+                      "Candidate Profile Access",
+                      "Messaging System",
+                      "Job Promotion",
+                      "Add your logo, cover photo, embedded video to stand out",
+                      "LinkedIn, Career profile access (if provided by candidate)"
+                    ].map((feature, index) => (
+                        <li key={index}>{feature}</li>
+                    ))}
                 </ul>
-                <p className="mt-2 text-gray-600">
-                  Add your logo, cover photo, embedded video to stand out
-                </p>
-                <p className="text-gray-600">
-                  LinkedIn, Career profile access (if provided by candidate)
-                </p>
               </div>
 
               {immediateStartSelected && (
@@ -495,21 +413,6 @@ const AdTypesSection = ({ formData, handleChange, handleStageChange }) => {
                   Let candidates know you're hiring urgently
                 </p>
               )}
-              {/*
-                        {referencesSelected && (
-                            <div className="flex justify-between mt-4 mb-2">
-                                <span>Reference Check Access:</span>
-                                <span className="font-semibold">$19</span>
-                            </div>
-                        )}
-                        
-                        {referencesSelected && (
-                            <p className="text-xs text-gray-600 mb-4">Request references from candidates instantly</p>
-                        )}*/}
-
-              <div className="font-medium mt-6">
-                Just like this email and app package as well
-              </div>
 
               <div className="flex justify-between mt-6 text-xl font-bold border-t pt-4">
                 <span>Total Cost:</span>
