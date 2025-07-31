@@ -9,26 +9,26 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(
-    (config) => {
-      const token = localStorage.getItem("employerToken");
+  (config) => {
+    const token = localStorage.getItem("employerToken");
+    console.log(
+      `🔍 API Request: ${config.method?.toUpperCase()} ${config.url}`
+    );
+    console.log(`🔍 Token available: ${!!token}`);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
       console.log(
-        `🔍 API Request: ${config.method?.toUpperCase()} ${config.url}`
+        `🔍 Authorization header set: Bearer ${token.substring(0, 20)}...`
       );
-      console.log(`🔍 Token available: ${!!token}`);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        console.log(
-          `🔍 Authorization header set: Bearer ${token.substring(0, 20)}...`
-        );
-      } else {
-        console.log(`❌ No token found in localStorage`);
-      }
-      return config;
-    },
-      (error) => {
-        console.error(`❌ Request interceptor error:`, error);
-        return Promise.reject(error);
-      };
+    } else {
+      console.log(`❌ No token found in localStorage`);
+    }
+    return config;
+  },
+  (error) => {
+    console.error(`❌ Request interceptor error:`, error);
+    return Promise.reject(error);
+  }
 );
 
 // Handle unauthorized responses
